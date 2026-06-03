@@ -401,7 +401,24 @@ function renderOrdersTable() {
       </td>
       <td>
         <div style="font-size:13.5px;font-weight:500;">${o.customer}</div>
-        ${o.phone ? `<div style="font-size:12px;color:var(--text-muted);">${o.phone}</div>` : ""}
+        ${o.phone ? `<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">📞 ${o.phone}</div>` : ""}
+        ${(() => {
+          // Parse address from notes field: "... | Address: ..."
+          const notesStr = o.notes || "";
+          const addrMatch = notesStr.match(/Address:\s*(.+?)(?:\s*\||$)/i);
+          const address = addrMatch ? addrMatch[1].trim() : (o.address || "");
+          // Parse UTR if present
+          const utrMatch = notesStr.match(/UTR:\s*([^\|]+)/i);
+          const utr = utrMatch ? utrMatch[1].trim() : "";
+          // Parse shipping from notes
+          const shipMatch = notesStr.match(/Shipping Charge:\s*₹?(\d+)/i);
+          const shipping = shipMatch ? shipMatch[1] : "";
+          let html = "";
+          if (address) html += `<div style="font-size:11.5px;color:#555;margin-top:4px;line-height:1.4;max-width:200px;">📍 ${address}</div>`;
+          if (utr) html += `<div style="font-size:11px;color:#888;margin-top:2px;">🔖 UTR: ${utr}</div>`;
+          if (shipping) html += `<div style="font-size:11px;color:#888;">🚚 Shipping: ₹${shipping}</div>`;
+          return html;
+        })()}
       </td>
       <td style="font-size:15px;font-weight:700;">₹${(o.price * o.qty).toLocaleString("en-IN")}</td>
       <td>
