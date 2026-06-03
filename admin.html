@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel — Rajendra Showroom</title>
+  <link rel="stylesheet" href="css/style.css?v=1.3">
+  <style>
+    /* ━━━ Base overrides ━━━ */
+    body { background: #F0EDE8; }
+
+    /* ━━━ Shake animation ━━━ */
+    @keyframes shake {
+      0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)}
+    }
+    .shake { animation: shake 0.45s ease; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       LOGIN SCREEN
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(145deg, #1C1C1A 0%, #2A2720 50%, #1C1C1A 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .login-screen::before {
+      content: "";
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(191,160,106,0.12) 0%, transparent 70%);
+      top: -100px; right: -100px;
+      border-radius: 50%;
+    }
+    .login-box {
+      background: #fff;
+      border-radius: 24px;
+      padding: 52px 48px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+    .login-logo { height: 64px; margin: 0 auto 22px; }
+    .login-box h2 {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    .login-box p { font-size: 13.5px; color: var(--text-muted); margin-bottom: 30px; }
+    .login-field {
+      width: 100%;
+      padding: 13px 18px;
+      border: 1.5px solid var(--border-dark);
+      border-radius: 10px;
+      font-size: 14.5px;
+      margin-bottom: 14px;
+      outline: none;
+      transition: var(--transition);
+      background: var(--bg);
+    }
+    .login-field:focus { border-color: var(--gold); background: #fff; }
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: var(--bg-dark);
+      color: #fff;
+      border-radius: 10px;
+      font-size: 14.5px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: var(--transition);
+    }
+    .btn-login:hover { background: var(--gold-dark); }
+    .login-error {
+      color: #C0392B;
+      font-size: 13px;
+      margin-bottom: 12px;
+      padding: 9px 14px;
+      background: rgba(192,57,43,0.08);
+      border-radius: 8px;
+      display: none;
+    }
+    .login-hint {
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ADMIN LAYOUT
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .admin-header {
+      background: var(--bg-dark);
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 58px;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .admin-header-left { display: flex; align-items: center; gap: 14px; }
+    .admin-logo { height: 36px; object-fit: contain; }
+    .admin-store-name {
+      font-family: var(--font-serif);
+      font-size: 17px;
+      color: var(--gold-light);
+      letter-spacing: 0.5px;
+    }
+    .admin-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin-left: 4px;
+    }
+    .admin-header-right { display: flex; align-items: center; gap: 10px; }
+    .btn-view-store {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border: 1.5px solid rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.7);
+      border-radius: 8px;
+      font-size: 12.5px;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+    .btn-view-store:hover { border-color: var(--gold); color: var(--gold-light); }
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      background: rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.6);
+      border-radius: 8px;
+      font-size: 12.5px;
+      transition: var(--transition);
+    }
+    .btn-logout:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+    /* Tabs */
+    .admin-tabs {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .admin-tab {
+      padding: 15px 22px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2.5px solid transparent;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+    }
+    .admin-tab:hover { color: var(--text); }
+    .admin-tab.active { color: var(--text); border-bottom-color: var(--gold); font-weight: 600; }
+
+    /* Content */
+    .admin-content { max-width: 1200px; margin: 28px auto; padding: 0 28px 80px; }
+    .tab-panel { display: none; animation: fadeIn 0.25s ease; }
+    .tab-panel.active { display: block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       DASHBOARD
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .dash-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 22px 20px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .stat-card::after {
+      content: "";
+      position: absolute;
+      top: 0; right: 0;
+      width: 80px; height: 80px;
+      background: var(--bg-warm);
+      border-radius: 0 0 0 80px;
+      opacity: 0.5;
+    }
+    .stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .stat-icon-wrap {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .si-gold  { background: rgba(191,160,106,0.15); }
+    .si-blue  { background: rgba(52,152,219,0.12);  }
+    .si-green { background: rgba(46,204,113,0.12);  }
+    .si-red   { background: rgba(192,57,43,0.10);   }
+    .stat-value {
+      font-family: var(--font-serif);
+      font-size: 36px;
+      font-weight: 600;
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+    .stat-label {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    /* Dashboard grid */
+    .dash-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; margin-bottom: 20px; }
+    .dash-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 26px;
+      box-shadow: var(--shadow-sm);
+    }
+    .dash-card-title {
+      font-family: var(--font-serif);
+      font-size: 17px;
+      font-weight: 500;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .dash-card-sub { font-size: 12px; color: var(--text-muted); font-family: var(--font-sans); }
+
+    /* Bar chart */
+    .chart-wrap {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      height: 160px;
+    }
+    .chart-bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      height: 100%;
+    }
+    .chart-bar-val { font-size: 10px; color: var(--text-muted); }
+    .chart-bar-wrap {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: flex-end;
+      background: var(--bg-warm);
+      border-radius: 6px 6px 0 0;
+      overflow: hidden;
+    }
+    .chart-bar {
+      width: 100%;
+      background: linear-gradient(to top, var(--gold-dark), var(--gold-light));
+      border-radius: 6px 6px 0 0;
+      min-height: 4px;
+      transition: height 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .chart-bar-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+
+    /* Top Products */
+    .top-prod-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .top-prod-row:last-child { border-bottom: none; }
+    .top-prod-rank {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--bg-warm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gold-dark);
+      flex-shrink: 0;
+    }
+    .top-prod-img {
+      width: 42px; height: 42px;
+      border-radius: 8px;
+      background: var(--bg-warm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .top-prod-img img { width:100%;height:100%;object-fit:cover; }
+    .top-prod-info { flex: 1; min-width: 0; }
+    .top-prod-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .top-prod-cat  { font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
+    .top-prod-bar-wrap { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .top-prod-bar { height: 100%; background: var(--gold); border-radius: 4px; }
+    .top-prod-views { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+    .cat-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .cat-bar-label { font-size: 12.5px; width: 120px; flex-shrink: 0; color: var(--text-light); }
+    .cat-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .cat-bar-fill  { height: 100%; background: linear-gradient(90deg, var(--gold-dark), var(--gold-light)); border-radius: 4px; }
+    .cat-bar-count { font-size: 12px; font-weight: 600; color: var(--text); width: 70px; text-align: right; flex-shrink: 0; }
+
+    /* Price list */
+    .price-list-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .price-list-row:last-child { border-bottom: none; }
+    .pl-img { width: 42px; height: 42px; border-radius: 8px; background: var(--bg-warm); display: flex; align-items: center; justify-content: center; font-size: 18px; overflow: hidden; flex-shrink: 0; }
+    .pl-img img { width:100%;height:100%;object-fit:cover; }
+    .pl-info { flex: 1; min-width: 0; }
+    .pl-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pl-cat  { font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
+    .pl-bar-wrap { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .pl-bar  { height: 100%; background: var(--gold); border-radius: 4px; }
+    .pl-price { text-align: right; flex-shrink: 0; }
+    .pl-selling  { font-size: 14px; font-weight: 700; }
+    .pl-discount { font-size: 11px; color: #27AE60; font-weight: 600; }
+
+    /* Store summary */
+    .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+    .summary-row:last-child { border-bottom: none; }
+    .sum-key { color: var(--text-light); }
+    .sum-val { font-weight: 600; color: var(--text); }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       PRODUCTS TABLE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .table-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .admin-search {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px 16px 10px 38px;
+      border: 1.5px solid var(--border-dark);
+      border-radius: 10px;
+      font-size: 13.5px;
+      outline: none;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center;
+      transition: var(--transition);
+    }
+    .admin-search:focus { border-color: var(--gold); }
+    .btn-add-product {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      background: var(--bg-dark);
+      color: #fff;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+    .btn-add-product:hover { background: var(--gold-dark); }
+    .products-table-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--bg-warm); }
+    th {
+      padding: 13px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 14px 16px;
+      vertical-align: middle;
+      border-bottom: 1px solid var(--border);
+      font-size: 13.5px;
+    }
+    tr:last-child td { border-bottom: none; }
+    .product-row { transition: background 0.2s; }
+    .product-row:hover td { background: #FDFCF9; }
+
+    .table-img {
+      width: 54px; height: 54px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--bg-warm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+    .table-img img { width:100%;height:100%;object-fit:cover; }
+    .table-img-placeholder { opacity: 0.35; }
+    .table-product-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+    .table-product-id   { font-size: 11.5px; color: var(--text-muted); }
+    .table-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: var(--bg-warm);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+    .table-price      { font-size: 15px; font-weight: 700; }
+    .table-orig-price { font-size: 11.5px; color: var(--text-muted); text-decoration: line-through; }
+    .table-discount   { font-size: 11px; color: #27AE60; font-weight: 600; margin-top: 1px; }
+    .table-actions    { display: flex; gap: 8px; }
+    .btn-edit-row {
+      padding: 7px 14px;
+      border: 1.5px solid var(--border-dark);
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 500;
+      transition: var(--transition);
+      background: var(--bg-warm);
+    }
+    .btn-edit-row:hover { background: var(--bg-dark); color: #fff; border-color: var(--bg-dark); }
+    .btn-delete-row {
+      padding: 7px 14px;
+      border: 1.5px solid rgba(192,57,43,0.25);
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #C0392B;
+      background: rgba(192,57,43,0.06);
+      transition: var(--transition);
+    }
+    .btn-delete-row:hover { background: #C0392B; color: #fff; border-color: #C0392B; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ADD / EDIT FORM
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .form-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 34px 38px;
+      box-shadow: var(--shadow-sm);
+    }
+    .form-card-title {
+      font-family: var(--font-serif);
+      font-size: 24px;
+      font-weight: 500;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-group { display: flex; flex-direction: column; gap: 7px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .req { color: var(--gold-dark); }
+    .form-input, .form-select, .form-textarea {
+      padding: 11px 14px;
+      border: 1.5px solid var(--border-dark);
+      border-radius: 10px;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      transition: var(--transition);
+      font-family: var(--font-sans);
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--gold);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(191,160,106,0.12);
+    }
+    .form-textarea { resize: vertical; min-height: 96px; }
+    .form-hint { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Admin Image Gallery */
+    .images-gallery-container {
+      width: 100%;
+    }
+    .images-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .image-thumb-card {
+      position: relative;
+      width: 100%;
+      padding-top: 100%;
+      border-radius: 12px;
+      background: var(--bg-warm);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+    .image-thumb-card img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .image-thumb-card.is-cover {
+      border: 2px solid var(--gold);
+    }
+    .image-thumb-badge {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: rgba(28, 28, 26, 0.75);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      z-index: 4;
+    }
+    .image-thumb-card.is-cover .image-thumb-badge {
+      background: var(--gold);
+    }
+    .btn-delete-thumb {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(192, 57, 43, 0.85);
+      color: #fff;
+      border: none;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      z-index: 5;
+    }
+    .btn-delete-thumb:hover {
+      background: #C0392B;
+      transform: scale(1.1);
+    }
+    .btn-set-cover {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      right: 6px;
+      background: rgba(28, 28, 26, 0.85);
+      color: #fff;
+      border: none;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 0;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center;
+      transition: var(--transition);
+      opacity: 0;
+      z-index: 4;
+    }
+    .image-thumb-card:hover .btn-set-cover {
+      opacity: 1;
+    }
+    .btn-set-cover:hover {
+      background: var(--gold);
+    }
+    .add-image-card {
+      border: 2px dashed var(--border-dark);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      min-height: 110px;
+      background: var(--bg-warm);
+      transition: var(--transition);
+      text-align: center;
+      padding: 10px;
+    }
+    .add-image-card:hover {
+      border-color: var(--gold);
+      background: #F9F5EE;
+    }
+    .add-image-icon {
+      font-size: 24px;
+      margin-bottom: 4px;
+      opacity: 0.5;
+    }
+    .add-image-text {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-light);
+    }
+
+    /* Featured toggle */
+    .toggle-section {
+      background: var(--bg-warm);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .toggle-info .toggle-label { font-size: 14px; font-weight: 600; }
+    .toggle-info .toggle-desc  { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; }
+    .toggle-switch {
+      width: 46px; height: 26px;
+      border-radius: 50px;
+      background: var(--border-dark);
+      position: relative;
+      cursor: pointer;
+      transition: var(--transition);
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+      flex-shrink: 0;
+    }
+    .toggle-switch::after {
+      content: "";
+      position: absolute;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      top: 3px; left: 3px;
+      transition: var(--transition);
+      box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+    }
+    .toggle-switch:checked { background: var(--gold); }
+    .toggle-switch:checked::after { left: calc(100% - 23px); }
+
+    /* Form actions */
+    .form-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 30px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    .btn-save-product {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 32px;
+      background: var(--bg-dark);
+      color: #fff;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      transition: var(--transition);
+    }
+    .btn-save-product:hover { background: var(--gold-dark); }
+    .btn-clear-form, .btn-back {
+      padding: 12px 22px;
+      border: 1.5px solid var(--border-dark);
+      border-radius: 10px;
+      font-size: 13.5px;
+      color: var(--text-light);
+      transition: var(--transition);
+    }
+    .btn-clear-form:hover, .btn-back:hover { border-color: var(--text); color: var(--text); }
+    .btn-back { margin-left: auto; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       SETTINGS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .settings-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 26px 28px;
+      box-shadow: var(--shadow-sm);
+    }
+    .settings-card h4 {
+      font-family: var(--font-serif);
+      font-size: 19px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    .settings-card p {
+      font-size: 13px;
+      color: var(--text-light);
+      line-height: 1.65;
+      margin-bottom: 18px;
+    }
+    .settings-fields { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+    .btn-settings {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: var(--transition);
+      margin-bottom: 8px;
+    }
+    .btn-settings-dark { background: var(--bg-dark); color: #fff; }
+    .btn-settings-dark:hover { background: var(--gold-dark); }
+    .btn-settings-outline {
+      background: var(--bg-warm);
+      border: 1.5px solid var(--border-dark);
+      color: var(--text);
+    }
+    .btn-settings-outline:hover { border-color: var(--gold); }
+    .btn-settings-danger { background: rgba(192,57,43,0.08); color: #C0392B; border: 1.5px solid rgba(192,57,43,0.2); }
+    .btn-settings-danger:hover { background: #C0392B; color: #fff; border-color: #C0392B; }
+    .store-info-row { display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; }
+    .store-info-row div { display: flex; gap: 8px; }
+    .si-key { font-weight: 600; color: var(--text); min-width: 80px; }
+    .si-val { color: var(--text-light); }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ADMIN TOAST
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .admin-toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      padding: 14px 22px 14px 18px;
+      background: var(--bg-dark);
+      color: #fff;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 9999;
+      max-width: 360px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .admin-toast.show    { transform: translateY(0); opacity: 1; }
+    .admin-toast.success { border-left: 4px solid #2ECC71; }
+    .admin-toast.error   { border-left: 4px solid #C0392B; }
+    .admin-toast.info    { border-left: 4px solid var(--gold); }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       RESPONSIVE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    @media (max-width: 1024px) {
+      .dash-stats { grid-template-columns: repeat(2, 1fr); }
+      .dash-grid  { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .admin-content { padding: 0 16px 60px; }
+      .form-grid     { grid-template-columns: 1fr; }
+      .settings-grid { grid-template-columns: 1fr; }
+      .form-card     { padding: 22px 18px; }
+      .dash-stats    { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .dash-stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════
+       LOGIN SCREEN
+  ════════════════════════════════════ -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-box">
+      <img src="images/logo.png" alt="Rajendra Showroom" class="login-logo">
+      <h2>Welcome Back</h2>
+      <p>Sign in to manage your store</p>
+      <div class="login-error" id="loginError"></div>
+      <input type="password" id="loginPass" class="login-field"
+             placeholder="Enter admin password"
+             onkeydown="if(event.key==='Enter') doLogin()">
+      <button class="btn-login" onclick="doLogin()">Sign In →</button>
+      <p class="login-hint">Default password: <strong>rajendra@123</strong><br>Change it under Settings after login.</p>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       ADMIN PANEL
+  ════════════════════════════════════ -->
+  <div id="adminPanel" style="display:none;">
+
+    <!-- Header -->
+    <div class="admin-header">
+      <div class="admin-header-left">
+        <img src="images/logo.png" alt="logo" class="admin-logo">
+        <div>
+          <span class="admin-store-name">Rajendra Showroom</span>
+          <span class="admin-label">Admin</span>
+          <span id="dbConnectionStatus" class="db-status-badge offline">Checking connection...</span>
+        </div>
+      </div>
+      <div class="admin-header-right">
+        <a href="index.html" target="_blank" class="btn-view-store">🛍 View Store</a>
+        <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="admin-tabs">
+      <div class="admin-tab" id="tab-dashboard" onclick="switchTab('dashboard')">📊 Dashboard</div>
+      <div class="admin-tab" id="tab-orders"    onclick="switchTab('orders')">📋 Orders Log</div>
+      <div class="admin-tab" id="tab-products"  onclick="switchTab('products')">📦 All Products</div>
+      <div class="admin-tab" id="tab-add"        onclick="switchTab('add')">➕ Add Product</div>
+      <div class="admin-tab" id="tab-settings"   onclick="switchTab('settings')">⚙ Settings</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-content">
+
+      <!-- ──────────────────────────────────
+           TAB: DASHBOARD
+      ────────────────────────────────── -->
+      <div class="tab-panel" id="panel-dashboard">
+
+        <!-- Stat cards — all real sales data -->
+        <div class="dash-stats">
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-wrap si-green">₹</div>
+            </div>
+            <div class="stat-value" id="d-revenue">₹0</div>
+            <div class="stat-label">Total Revenue</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-wrap si-blue">📦</div>
+            </div>
+            <div class="stat-value" id="d-orders">0</div>
+            <div class="stat-label">Total Orders</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-wrap si-gold">⏳</div>
+            </div>
+            <div class="stat-value" id="d-pending">0</div>
+            <div class="stat-label">Pending Orders</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-wrap si-red">📈</div>
+            </div>
+            <div class="stat-value" id="d-avg">₹0</div>
+            <div class="stat-label">Avg Order Value</div>
+          </div>
+        </div>
+
+        <!-- Row 1: Revenue Chart + Top Selling -->
+        <div class="dash-grid">
+          <div class="dash-card">
+            <div class="dash-card-title">
+              Monthly Revenue
+              <span class="dash-card-sub">Last 6 Months Trend</span>
+            </div>
+            <div id="revenueChart" class="revenue-chart-container" style="height: 280px; display: flex; align-items: flex-end; gap: 20px; padding: 20px 10px 10px; box-sizing: border-box;">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <div class="dash-card">
+            <div class="dash-card-title">
+              Top Selling Products
+              <span class="dash-card-sub">By Revenue</span>
+            </div>
+            <div id="topSellingList">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: Recent Orders + Quick Actions & Store Summary -->
+        <div class="dash-grid">
+          <div class="dash-card" style="grid-column: span 1;">
+            <div class="dash-card-title">
+              Recent Sales
+              <span class="dash-card-sub">Latest 5 logged orders</span>
+            </div>
+            <div id="recentOrdersList">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="dash-card">
+              <div class="dash-card-title">Quick Actions</div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <button onclick="resetForm();switchTab('add')"
+                  style="padding:12px 16px;background:var(--bg-dark);color:#fff;border-radius:10px;font-size:13.5px;font-weight:500;text-align:left;display:flex;align-items:center;gap:10px;transition:var(--transition);width:100%;"
+                  onmouseover="this.style.background='#BFA06A'" onmouseout="this.style.background='var(--bg-dark)'">
+                  ➕ &nbsp;Add New Product
+                </button>
+                <button onclick="switchTab('products')"
+                  style="padding:12px 16px;background:var(--bg-warm);border:1.5px solid var(--border-dark);border-radius:10px;font-size:13.5px;font-weight:500;color:var(--text);text-align:left;display:flex;align-items:center;gap:10px;transition:var(--transition);width:100%;">
+                  📦 &nbsp;Manage Products
+                </button>
+                <a href="https://wa.me/916369142027" target="_blank"
+                  style="padding:12px 16px;background:#25D366;color:#fff;border-radius:10px;font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:10px;text-decoration:none;">
+                  💬 &nbsp;Open WhatsApp
+                </a>
+                <a href="index.html" target="_blank"
+                  style="padding:12px 16px;background:var(--bg-warm);border:1.5px solid var(--border-dark);border-radius:10px;font-size:13.5px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:10px;text-decoration:none;">
+                  🛍 &nbsp;Preview Store
+                </a>
+                <button onclick="switchTab('settings')"
+                  style="padding:12px 16px;background:var(--bg-warm);border:1.5px solid var(--border-dark);border-radius:10px;font-size:13.5px;font-weight:500;color:var(--text);text-align:left;display:flex;align-items:center;gap:10px;transition:var(--transition);width:100%;">
+                  ⚙ &nbsp;Settings
+                </button>
+              </div>
+            </div>
+
+            <div class="dash-card">
+              <div class="dash-card-title">Store Summary</div>
+              <div id="storeSummaryDash">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────────────────────────────────
+           TAB: ORDERS LOG
+      ────────────────────────────────── -->
+      <div class="tab-panel" id="panel-orders">
+        <div class="table-toolbar">
+          <input type="text" class="admin-search" id="ordersSearch"
+                 placeholder="Search by customer name, phone, or product..."
+                 oninput="renderOrdersTable()">
+          <select class="form-select" id="ordersFilter" onchange="renderOrdersTable()" style="padding: 10px 16px; border-radius: 10px; font-size: 13.5px; border: 1.5px solid var(--border-dark); background: #fff; width: 180px;">
+            <option value="all">All Orders</option>
+            <option value="pending">⏳ Pending</option>
+            <option value="completed">✔ Completed</option>
+            <option value="cancelled">✕ Cancelled</option>
+          </select>
+          <button class="btn-add-product" onclick="resetOrderForm(); switchTab('add-order')">
+            ➕ Log Offline Order
+          </button>
+          <div style="margin-left: auto; font-size: 13.5px; font-weight: 600;" id="ordersSummaryBar">
+            0 orders · Total: ₹0
+          </div>
+        </div>
+        <div class="products-table-card">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:120px;">Date</th>
+                <th>Product / Qty</th>
+                <th>Customer Info</th>
+                <th>Total Price</th>
+                <th style="width:160px;">Status</th>
+                <th style="width:180px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+              <tr><td colspan="6" style="text-align:center;padding:50px;color:#bbb;">Loading orders...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ──────────────────────────────────
+           TAB: ADD / LOG ORDER
+      ────────────────────────────────── -->
+      <div class="tab-panel" id="panel-add-order">
+        <div class="form-card">
+          <div class="form-card-title">
+            <span>➕ &nbsp;Log Walk-in / Offline Sale</span>
+            <button onclick="switchTab('orders')"
+              style="font-size:13px;color:var(--text-muted);padding:6px 14px;border:1.5px solid var(--border-dark);border-radius:8px;transition:var(--transition);"
+              onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">
+              ← Back to Orders
+            </button>
+          </div>
+
+          <form id="orderForm" onsubmit="event.preventDefault(); logOrder();">
+            <div class="form-grid">
+
+              <!-- Product Select -->
+              <div class="form-group">
+                <label class="form-label">Product <span class="req">*</span></label>
+                <select id="orderProduct" class="form-select" onchange="onOrderProductChange()">
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+
+              <!-- Customer Name -->
+              <div class="form-group">
+                <label class="form-label">Customer Name</label>
+                <input type="text" id="orderCustomer" class="form-input" placeholder="e.g. Walk-in / Customer Name">
+              </div>
+
+              <!-- Price -->
+              <div class="form-group">
+                <label class="form-label">Price Per Unit (₹) <span class="req">*</span></label>
+                <input type="number" id="orderPrice" class="form-input" placeholder="e.g. 1500" min="1" step="1" oninput="calcOrderTotal()">
+              </div>
+
+              <!-- Quantity -->
+              <div class="form-group">
+                <label class="form-label">Quantity <span class="req">*</span></label>
+                <input type="number" id="orderQty" class="form-input" value="1" min="1" step="1" oninput="calcOrderTotal()">
+              </div>
+
+              <!-- Date -->
+              <div class="form-group">
+                <label class="form-label">Order Date</label>
+                <input type="date" id="orderDate" class="form-input">
+              </div>
+
+              <!-- Phone -->
+              <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" id="orderPhone" class="form-input" placeholder="e.g. 9876543210">
+              </div>
+
+              <!-- Order Status -->
+              <div class="form-group">
+                <label class="form-label">Status</label>
+                <select id="orderStatus" class="form-select">
+                  <option value="pending">⏳ Pending</option>
+                  <option value="completed">✔ Completed</option>
+                </select>
+              </div>
+
+              <!-- Order Total Display -->
+              <div class="form-group" style="justify-content: center; background: var(--bg-warm); padding: 12px 18px; border-radius: 10px;">
+                <span class="form-label" style="margin-bottom: 2px;">Total Amount</span>
+                <span id="orderTotal" style="font-size: 24px; font-weight: 700; color: var(--gold-dark);">—</span>
+              </div>
+
+              <!-- Notes -->
+              <div class="form-group full">
+                <label class="form-label">Notes / Remarks</label>
+                <textarea id="orderNotes" class="form-textarea" placeholder="e.g. Gift wrapped, paid via cash..."></textarea>
+              </div>
+
+            </div><!-- /form-grid -->
+
+            <div class="form-actions">
+              <button type="submit" class="btn-save-product">
+                ✔ &nbsp;Log Order
+              </button>
+              <button type="button" class="btn-clear-form" onclick="resetOrderForm()">Clear Form</button>
+              <button type="button" class="btn-back" onclick="switchTab('orders')">← Back to Orders</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+      <!-- ──────────────────────────────────
+           TAB: ALL PRODUCTS
+      ────────────────────────────────── -->
+      <div class="tab-panel" id="panel-products">
+        <div class="table-toolbar">
+          <input type="text" class="admin-search" id="adminSearch"
+                 placeholder="Search by product name or category..."
+                 oninput="renderProductTable()">
+          <button class="btn-add-product" onclick="resetForm(); switchTab('add')">
+            ➕ Add New Product
+          </button>
+        </div>
+        <div class="products-table-card">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:68px;">Photo</th>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th style="width:180px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="productTableBody">
+              <tr><td colspan="5" style="text-align:center;padding:50px;color:#bbb;">Loading products...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ──────────────────────────────────
+           TAB: ADD / EDIT PRODUCT
+      ────────────────────────────────── -->
+      <div class="tab-panel" id="panel-add">
+        <div class="form-card">
+          <div class="form-card-title">
+            <span id="formTitle">➕ &nbsp;Add New Product</span>
+            <button onclick="switchTab('products')"
+              style="font-size:13px;color:var(--text-muted);padding:6px 14px;border:1.5px solid var(--border-dark);border-radius:8px;transition:var(--transition);"
+              onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">
+              ← Back to Products
+            </button>
+          </div>
+
+          <form id="productForm" onsubmit="event.preventDefault();">
+            <div class="form-grid">
+
+              <!-- Product Name -->
+              <div class="form-group">
+                <label class="form-label">Product Name <span class="req">*</span></label>
+                <input type="text" id="productName" class="form-input"
+                       placeholder="e.g., Royal Dinner Set (12 pcs)">
+              </div>
+
+              <!-- Category -->
+              <div class="form-group">
+                <label class="form-label">Category <span class="req">*</span></label>
+                <select id="productCategory" class="form-select">
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+
+              <!-- Selling Price -->
+              <div class="form-group">
+                <label class="form-label">Selling Price (₹) <span class="req">*</span></label>
+                <input type="number" id="productPrice" class="form-input"
+                       placeholder="e.g., 1499" min="1" step="1">
+                <span class="form-hint">The price shown to customers</span>
+              </div>
+
+              <!-- Original Price -->
+              <div class="form-group">
+                <label class="form-label">Original / MRP (₹)</label>
+                <input type="number" id="productOrigPrice" class="form-input"
+                       placeholder="e.g., 1999 — leave blank if no discount" min="1" step="1">
+                <span class="form-hint">Used to show the "Save X%" badge</span>
+              </div>
+
+              <!-- Description -->
+              <div class="form-group full">
+                <label class="form-label">Description</label>
+                <textarea id="productDesc" class="form-textarea"
+                  placeholder="Describe the product — material, number of pieces, dimensions, care instructions..."></textarea>
+              </div>
+
+              <!-- Product Image Upload -->
+              <div class="form-group full">
+                <label class="form-label">Product Photos <span class="form-hint">(First photo is the Cover Image. Hover thumbnail to set as Cover)</span></label>
+                <div class="images-gallery-container">
+                  <div class="images-grid" id="adminImagesGrid">
+                    <!-- Images and the "Add Image" card are rendered here by JS -->
+                  </div>
+                  <input type="file" id="productImageInput" accept="image/*"
+                         style="display:none;" onchange="previewImages(this)" multiple>
+                </div>
+              </div>
+
+              <!-- Featured toggle -->
+              <div class="form-group full">
+                <div class="toggle-section">
+                  <div class="toggle-row">
+                    <div class="toggle-info">
+                      <div class="toggle-label">⭐ Featured Product</div>
+                      <div class="toggle-desc">Featured products appear first in the store. Use for your best-selling items.</div>
+                    </div>
+                    <input type="checkbox" class="toggle-switch" id="productFeatured">
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /form-grid -->
+
+            <div class="form-actions">
+              <button type="button" class="btn-save-product" onclick="saveProduct()">
+                ✔ &nbsp;<span id="saveBtnText">Add Product</span>
+              </button>
+              <button type="button" class="btn-clear-form" onclick="resetForm()">Clear Form</button>
+              <button type="button" class="btn-back" onclick="switchTab('products')">← Back to Products</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ──────────────────────────────────
+           TAB: SETTINGS
+      ────────────────────────────────── -->
+      <div class="tab-panel" id="panel-settings">
+        <div class="settings-grid">
+
+          <!-- Change Password -->
+          <div class="settings-card">
+            <h4>🔐 Change Password</h4>
+            <p>Update your admin panel password. Make sure to save the new password in a safe place.</p>
+            <div class="settings-fields">
+              <input type="password" id="currPass" class="form-input" placeholder="Current password">
+              <input type="password" id="newPass"  class="form-input" placeholder="New password (min 6 characters)">
+              <input type="password" id="confPass" class="form-input" placeholder="Confirm new password">
+            </div>
+            <button class="btn-settings btn-settings-dark" onclick="changePassword()">Update Password</button>
+          </div>
+
+          <!-- Backup & Restore -->
+          <div class="settings-card">
+            <h4>💾 Backup & Restore</h4>
+            <p>Export all your products as a JSON backup file. You can import it later to restore all products if needed.</p>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <button class="btn-settings btn-settings-dark" onclick="exportProducts()">
+                ⬇ Export Products Backup
+              </button>
+              <label class="btn-settings btn-settings-outline" style="cursor:pointer;">
+                ⬆ Import from Backup
+                <input type="file" accept=".json" style="display:none;" onchange="importProducts(this)">
+              </label>
+            </div>
+          </div>
+
+          <!-- Firebase Cloud Sync -->
+          <div class="settings-card">
+            <h4>🔥 Firebase Cloud Sync</h4>
+            <p>Connect your showroom storefront to Firebase Firestore so products and orders sync automatically across devices and persist permanently.</p>
+            <div id="firebaseConfigStatus" style="margin: 15px 0; font-weight: 600;">
+              <!-- Populated by JS -->
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); line-height: 1.45;">
+              To change credentials, edit <code style="font-family: monospace; background: var(--bg-warm); padding: 2px 5px; border-radius: 4px; font-size: 11px;">js/firebase-config.js</code> and refresh the page.
+            </p>
+          </div>
+
+          <!-- Store Information -->
+          <div class="settings-card">
+            <h4>🏪 Store Information</h4>
+            <p>Your store's contact details shown on the website.</p>
+            <div class="store-info-row">
+              <div><span class="si-key">Store</span><span class="si-val">Rajendra Showroom</span></div>
+              <div><span class="si-key">Address</span><span class="si-val">Patni Plaza, Shop No. 3, NSC Bose Road, Chennai</span></div>
+              <div><span class="si-key">Phone</span><span class="si-val">+91 63691 42027</span></div>
+              <div><span class="si-key">Email</span><span class="si-val">pranathwork@gmail.com</span></div>
+              <div><span class="si-key">WhatsApp</span><span class="si-val">+91 63691 42027</span></div>
+            </div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="settings-card">
+            <h4>⚠ Reset Data</h4>
+            <p>Reset all products back to the original 10 sample products. <strong>Warning:</strong> All your custom products, prices and uploaded photos will be permanently deleted.</p>
+            <button class="btn-settings btn-settings-danger" onclick="resetProductsToDefault()">
+              🗑 Reset All Products to Default
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /admin-content -->
+  </div><!-- /adminPanel -->
+
+  <!-- Toast Notification -->
+  <div class="admin-toast" id="adminToast"></div>
+
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js?v=1.1"></script>
+  <script src="js/db.js?v=1.1"></script>
+  <script src="js/data.js?v=1.7"></script>
+  <script src="js/admin.js?v=1.7"></script>
+</body>
+</html>
