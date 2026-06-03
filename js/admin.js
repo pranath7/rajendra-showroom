@@ -663,7 +663,63 @@ function makeCover(idx) {
   renderImagePreviews();
 }
 
-// --- Video Upload to Firebase Storage ---
+// --- Video Upload & paste URL management ---
+
+function toggleVideoSourceMode(mode) {
+  var uploadArea = document.getElementById("videoUploadArea");
+  var linkArea = document.getElementById("videoLinkArea");
+  if (!uploadArea || !linkArea) return;
+  
+  if (mode === "upload") {
+    uploadArea.style.display = "flex";
+    linkArea.style.display = "none";
+  } else {
+    uploadArea.style.display = "none";
+    linkArea.style.display = "block";
+  }
+}
+
+function convertToEmbedUrl(url) {
+  if (!url) return "";
+  url = url.trim();
+  // YouTube watch/short/embed links
+  var ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/embed\/)([\w-]+)/);
+  if (ytMatch) return "https://www.youtube.com/embed/" + ytMatch[1];
+  
+  // Google Drive view links
+  var gdMatch = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
+  if (gdMatch) return "https://drive.google.com/file/d/" + gdMatch[1] + "/preview";
+  
+  return url;
+}
+
+function handleVideoUrlInput(val) {
+  var embedUrl = convertToEmbedUrl(val);
+  document.getElementById("productVideoUrl").value = embedUrl;
+  renderAdminVideoPreview(embedUrl);
+}
+
+function renderAdminVideoPreview(url) {
+  var container = document.getElementById("videoPreviewContainer");
+  var wrap = document.getElementById("videoPreviewWrap");
+  if (!container || !wrap) return;
+
+  if (!url) {
+    wrap.style.display = "none";
+    container.innerHTML = "";
+    return;
+  }
+
+  var isEmbed = url.includes("youtube.com/embed/") || url.includes("drive.google.com/file/d/");
+  if (isEmbed) {
+    container.innerHTML = `<iframe src="${url}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen
+      style="width:100%;max-width:400px;height:225px;border-radius:10px;border:2px solid #e0dbd2;background:#000;"></iframe>`;
+  } else {
+    container.innerHTML = `<video src="${url}" controls playsinline
+      style="width:100%;max-width:400px;border-radius:10px;border:2px solid #e0dbd2;background:#000;"></video>`;
+  }
+  wrap.style.display = "block";
+}
 
 function uploadProductVideo(input) {
   var file = input.files[0];
@@ -676,10 +732,8 @@ function uploadProductVideo(input) {
     return;
   }
 
-  // Show filename
   document.getElementById("videoFileName").textContent = file.name;
 
-  // Check Firebase Storage is available
   if (typeof firebase === "undefined" || !firebase.apps.length) {
     showAdminToast("Firebase not available. Trying local preview...", "info");
     _previewLocalVideo(file);
@@ -691,7 +745,6 @@ function uploadProductVideo(input) {
   var storageRef = storage.ref(fileName);
   var uploadTask = storageRef.put(file);
 
-  // Show progress bar
   document.getElementById("videoUploadProgress").style.display = "block";
   document.getElementById("videoPreviewWrap").style.display    = "none";
 
@@ -708,10 +761,9 @@ function uploadProductVideo(input) {
     },
     function() {
       uploadTask.snapshot.ref.getDownloadURL().then(function(url) {
-        document.getElementById("productVideoUrl").value        = url;
+        document.getElementById("productVideoUrl").value = url;
         document.getElementById("videoUploadProgress").style.display = "none";
-        document.getElementById("videoPreviewWrap").style.display    = "block";
-        document.getElementById("productVideoPreview").src           = url;
+        renderAdminVideoPreview(url);
         showAdminToast("Video uploaded successfully!", "success");
       });
     }
@@ -720,17 +772,18 @@ function uploadProductVideo(input) {
 
 function _previewLocalVideo(file) {
   var url = URL.createObjectURL(file);
-  document.getElementById("productVideoUrl").value         = "";
-  document.getElementById("videoPreviewWrap").style.display = "block";
-  document.getElementById("productVideoPreview").src        = url;
+  document.getElementById("productVideoUrl").value = url;
+  renderAdminVideoPreview(url);
 }
 
 function removeProductVideo() {
-  document.getElementById("productVideoUrl").value          = "";
-  document.getElementById("productVideoPreview").src        = "";
-  document.getElementById("videoPreviewWrap").style.display = "none";
-  document.getElementById("videoFileName").textContent      = "No video selected";
-  document.getElementById("productVideoFile").value         = "";
+  document.getElementById("productVideoUrl").value = "";
+  var textInput = document.getElementById("productVideoUrlInput");
+  if (textInput) textInput.value = "";
+  var fileInput = document.getElementById("productVideoFile");
+  if (fileInput) fileInput.value = "";
+  document.getElementById("videoFileName").textContent = "No video selected";
+  renderAdminVideoPreview("");
   showAdminToast("Video removed", "info");
 }
 
@@ -860,17 +913,33 @@ function editProduct(id) {
   }
   var vedEl = document.getElementById("productVideoUrl");
   if (vedEl) { vedEl.value = p.video || ""; }
-  if (false) {// dummy close
-  }
-  // Show existing video preview if any
-  var vPrev = document.getElementById("productVideoPreview");
-  var vWrap = document.getElementById("videoPreviewWrap");
-  if (p.video && vPrev && vWrap) {
-    vPrev.src = p.video;
-    vWrap.style.display = "block";
-    document.getElementById("videoFileName").textContent = "Video uploaded";
-  } else if (vWrap) {
-    vWrap.style.display = "none";
+  
+  if (p.video) {
+    renderAdminVideoPreview(p.video);
+    var isUpload = p.video.includes("firebasestorage.googleapis.com") || p.video.startsWith("blob:");
+    var radioUp = document.querySelector('input[name="videoSourceType"][value="upload"]');
+    var radioLink = document.querySelector('input[name="videoSourceType"][value="link"]');
+    
+    if (isUpload) {
+      if (radioUp) radioUp.checked = true;
+      toggleVideoSourceMode("upload");
+      document.getElementById("videoFileName").textContent = "Video uploaded";
+      var urlInput = document.getElementById("productVideoUrlInput");
+      if (urlInput) urlInput.value = "";
+    } else {
+      if (radioLink) radioLink.checked = true;
+      toggleVideoSourceMode("link");
+      var urlInput = document.getElementById("productVideoUrlInput");
+      if (urlInput) urlInput.value = p.video;
+    }
+  } else {
+    renderAdminVideoPreview("");
+    var radioUp = document.querySelector('input[name="videoSourceType"][value="upload"]');
+    if (radioUp) radioUp.checked = true;
+    toggleVideoSourceMode("upload");
+    document.getElementById("videoFileName").textContent = "No video selected";
+    var urlInput = document.getElementById("productVideoUrlInput");
+    if (urlInput) urlInput.value = "";
   }
   
   document.getElementById("productName").value       = p.name;
@@ -928,16 +997,22 @@ function resetForm() {
   document.getElementById("productForm").reset();
   document.getElementById("formTitle").textContent   = "Add New Product";
   document.getElementById("saveBtnText").textContent = "Add Product";
+  
   var vEl = document.getElementById("productVideoUrl");
   if (vEl) vEl.value = "";
-  var vPrev = document.getElementById("productVideoPreview");
-  if (vPrev) vPrev.src = "";
-  var vWrap = document.getElementById("videoPreviewWrap");
-  if (vWrap) vWrap.style.display = "none";
-  var vName = document.getElementById("videoFileName");
-  if (vName) vName.textContent = "No video selected";
+  var vUrlIn = document.getElementById("productVideoUrlInput");
+  if (vUrlIn) vUrlIn.value = "";
   var vFile = document.getElementById("productVideoFile");
   if (vFile) vFile.value = "";
+  var vName = document.getElementById("videoFileName");
+  if (vName) vName.textContent = "No video selected";
+  
+  renderAdminVideoPreview("");
+  
+  var radioUp = document.querySelector('input[name="videoSourceType"][value="upload"]');
+  if (radioUp) radioUp.checked = true;
+  toggleVideoSourceMode("upload");
+
   renderImagePreviews();
 }
 

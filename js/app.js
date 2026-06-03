@@ -549,7 +549,7 @@ function openModal(id) {
         <div class="modal-main-img-wrap" id="modalMainWrap">
           ${productImages.length > 0
             ? `<img id="modalMainImg" src="${productImages[0]}" alt="${p.name}">`
-            : `<video src="${productVideo}" controls playsinline style="width:100%;border-radius:12px;max-height:360px;background:#000;"></video>`
+            : renderStorefrontVideoMarkup(productVideo)
           }
         </div>
         ${hasMultipleMedia ? `
@@ -839,19 +839,21 @@ function setModalMainImg(el, productId, imgIdx) {
   el.classList.add("active");
 }
 
-function convertVideoUrl(url) {
-  if (!url) return null;
-  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
-  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
-  const gdMatch = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
-  if (gdMatch) return `https://drive.google.com/file/d/${gdMatch[1]}/preview`;
-  return url;
+function renderStorefrontVideoMarkup(url) {
+  if (!url) return "";
+  const isEmbed = url.includes("youtube.com/embed/") || url.includes("drive.google.com/file/d/");
+  if (isEmbed) {
+    return `<iframe src="${url}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen
+      style="width:100%;height:340px;border-radius:12px;background:#000;border:none;"></iframe>`;
+  } else {
+    return `<video src="${url}" controls playsinline style="width:100%;border-radius:12px;max-height:360px;background:#000;"></video>`;
+  }
 }
 
 function setModalMainVideo(el, videoSrc) {
   const wrap = document.getElementById("modalMainWrap");
   if (!wrap) return;
-  wrap.innerHTML = `<video src="${videoSrc}" controls playsinline style="width:100%;border-radius:12px;max-height:360px;background:#000;"></video>`;
+  wrap.innerHTML = renderStorefrontVideoMarkup(videoSrc);
   const thumbs = el.parentNode.querySelectorAll(".modal-thumb");
   thumbs.forEach(t => t.classList.remove("active"));
   el.classList.add("active");

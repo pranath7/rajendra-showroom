@@ -1238,25 +1238,36 @@
               </div>
 
 
-              <!-- Product Video Upload -->
+              <!-- Product Video Selection -->
               <div class="form-group full">
-                <label class="form-label">&#127916; Product Video <span class="form-hint">(Optional — upload MP4, max 100MB. Plays directly on your site!)</span></label>
+                <label class="form-label">&#127916; Product Video <span class="form-hint">(Optional — upload a file or paste a YouTube / Google Drive / direct link)</span></label>
+                
+                <!-- Toggle between Upload and Link modes -->
+                <div style="display:flex;gap:20px;margin-bottom:12px;font-size:13px;flex-wrap:wrap;">
+                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;color:#1a1a1a;">
+                    <input type="radio" name="videoSourceType" value="upload" checked onchange="toggleVideoSourceMode('upload')">
+                    📤 Upload Video File (Firebase)
+                  </label>
+                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;color:#1a1a1a;">
+                    <input type="radio" name="videoSourceType" value="link" onchange="toggleVideoSourceMode('link')">
+                    🔗 Paste Video Link (YouTube/Drive)
+                  </label>
+                </div>
 
-                <!-- Current video preview -->
+                <!-- Video preview wrap -->
                 <div id="videoPreviewWrap" style="display:none;margin-bottom:12px;">
-                  <video id="productVideoPreview" controls playsinline
-                    style="width:100%;max-width:400px;border-radius:10px;border:2px solid #e0dbd2;background:#000;"></video>
+                  <div id="videoPreviewContainer"></div>
                   <button type="button" onclick="removeProductVideo()"
                     style="display:block;margin-top:8px;padding:6px 14px;background:#e53935;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;">
                     Remove Video
                   </button>
                 </div>
 
-                <!-- Upload button -->
+                <!-- Mode 1: File Upload -->
                 <div id="videoUploadArea" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                   <label for="productVideoFile"
                     style="padding:10px 20px;background:#1a1a1a;color:#fff;border-radius:8px;cursor:pointer;font-size:13px;display:inline-block;">
-                    &#128190; Choose Video File
+                    💾 Choose Video File
                   </label>
                   <input type="file" id="productVideoFile" accept="video/mp4,video/webm,video/ogg"
                     style="display:none;" onchange="uploadProductVideo(this)">
@@ -1271,7 +1282,17 @@
                   </div>
                 </div>
 
-                <!-- Hidden field stores the Firebase URL -->
+                <!-- Mode 2: Paste Link Input -->
+                <div id="videoLinkArea" style="display:none;width:100%;">
+                  <input type="url" id="productVideoUrlInput" placeholder="Paste YouTube link, Google Drive link, or direct MP4 link"
+                    style="width:100%;padding:10px 14px;border:1.5px solid #e0dbd2;border-radius:8px;font-size:14px;outline:none;"
+                    oninput="handleVideoUrlInput(this.value)">
+                  <div style="margin-top:6px;font-size:12px;color:#888;">
+                    💡 <strong>Examples:</strong> YouTube watch links, Google Drive shareable links (make sure it's shared with 'Anyone with the link').
+                  </div>
+                </div>
+
+                <!-- Hidden field stores the final URL saved to DB -->
                 <input type="hidden" id="productVideoUrl" value="">
               </div>
 
