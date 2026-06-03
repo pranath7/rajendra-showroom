@@ -446,7 +446,7 @@ function openModal(id) {
   }
 
   // Specifications, copy and highlights
-  const specsData = getProductSpecs(p.category, p.name);
+  const specsData = getProductSpecs(p);
   const specListHTML = specsData.specs.map(s => `
     <li><strong>${s.key}</strong> <span>${s.value}</span></li>
   `).join("");
@@ -1119,78 +1119,127 @@ function whatsappExpressShipping(id) {
 }
 
 /* Upgraded Dynamic E-commerce Specifications & Related Lists */
-function getProductSpecs(category, name) {
-  const cat = category || "";
+function getProductSpecs(p) {
+  const desc = p.description || "";
+  const cat = p.category || "";
+  const name = p.name || "";
   
-  if (cat.includes("Dinner Sets")) {
-    return {
-      description: `Elevate your dining experiences with the elegant and timeless ${name}. Fusing classical luxury aesthetics with modern everyday comfort, each piece features exquisite finishing and details. Fired at extremely high temperatures to ensure chip-resistant durability and structural strength, it serves as a statement piece on any dining table.`,
-      specs: [
-        { key: "Composition", value: "6 Dinner Plates, 6 Side Plates, 6 Veg Bowls, 2 Serving Bowls, 1 Large Oval Platter" },
-        { key: "Material", value: "Fine Bone China / Vitrified Porcelain" },
-        { key: "Finish", value: "Hand-Applied Gold Rim Trim" },
-        { key: "Care Instructions", value: "Dishwasher safe. Handwash recommended to preserve gold linings." }
-      ],
-      highlights: [
+  // 1. Determine Composition
+  let composition = "Complete Packaged Set";
+  const compRegex = /(\d+\s*-\s*piece|\d+\s*pc|\d+\s*piece|\d+\s*pieces|set\s+of\s+\d+)/i;
+  const compMatch = desc.match(compRegex);
+  if (compMatch) {
+    composition = compMatch[0].charAt(0).toUpperCase() + compMatch[0].slice(1);
+  } else if (cat.includes("Dinner Sets")) {
+    composition = "6 Dinner Plates, 6 Side Plates, 6 Veg Bowls, 2 Serving Bowls, 1 Large Oval Platter";
+  } else if (cat.includes("Tea Sets") || cat.includes("Teaware")) {
+    composition = "1 Teapot (800ml), 6 Cups, 6 Saucers, 1 Milk Pot, 1 Sugar Bowl";
+  } else if (cat.includes("Glassware")) {
+    composition = "Set of 6 Premium Glasses";
+  }
+
+  // 2. Determine Material
+  let material = "Vitrified Fine Ceramic";
+  const descLower = desc.toLowerCase();
+  if (descLower.includes("stainless steel") || descLower.includes("steel")) {
+    material = "Food-Grade Stainless Steel";
+  } else if (descLower.includes("bone china")) {
+    material = "Fine Bone China";
+  } else if (descLower.includes("porcelain")) {
+    material = "Premium Vitrified Porcelain";
+  } else if (descLower.includes("stoneware")) {
+    material = "Stoneware Ceramic";
+  } else if (descLower.includes("glass") || descLower.includes("crystal")) {
+    material = "Premium Glass / Crystal";
+  } else if (cat.includes("Dinner Sets")) {
+    material = "Fine Bone China / Vitrified Porcelain";
+  } else if (cat.includes("Glassware")) {
+    material = "Lead-Free Premium Crystal Glass";
+  }
+
+  // 3. Determine Care Instructions
+  let care = "Microwave and dishwasher safe";
+  if (descLower.includes("handwash") || descLower.includes("hand wash") || descLower.includes("hand-wash")) {
+    care = "Handwash recommended to preserve gold linings";
+  } else if (descLower.includes("dishwasher") && descLower.includes("microwave")) {
+    care = "Microwave and dishwasher safe";
+  } else if (descLower.includes("dishwasher")) {
+    care = "Dishwasher friendly";
+  } else if (descLower.includes("microwave")) {
+    care = "Microwave safe";
+  } else if (cat.includes("Glassware")) {
+    care = "Dishwasher safe glass mixture";
+  }
+
+  // 4. Determine Features / Highlights ("About The Product")
+  let highlights = [];
+  
+  // Split by common bullet delimiters: newlines with -, *, •, or numbers
+  const lines = desc.split(/\r?\n/);
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    // Clean up bullets and grab content
+    const bulletMatch = trimmed.match(/^[\-\*•\d\.\)]\s*(.+)/);
+    if (bulletMatch && bulletMatch[1].trim()) {
+      highlights.push(bulletMatch[1].trim());
+    }
+  });
+
+  // If no explicit bullet points, extract sentences
+  if (highlights.length === 0 && desc.trim()) {
+    const sentences = desc.split(/[.!?]\s+/).map(s => s.trim()).filter(Boolean);
+    sentences.forEach(s => {
+      let clean = s;
+      if (clean.endsWith(".") || clean.endsWith("!") || clean.endsWith("?")) {
+        clean = clean.slice(0, -1);
+      }
+      if (clean.length > 15) {
+        highlights.push(clean);
+      }
+    });
+  }
+
+  // Fallback to standard category-aware template if still empty
+  if (highlights.length === 0) {
+    if (cat.includes("Dinner Sets")) {
+      highlights = [
         "Brilliant craftsmanship with exquisite designs embossed on finest premium porcelain crockery",
         "Toxin-free vitrified glaze ensuring it is completely lead and cadmium free",
         "High resistance to scratching, glaze wear, and temperature fluctuations",
         "Shipped in an ultra-secure luxury gift box, perfect for housewarmings or wedding presents"
-      ]
-    };
-  }
-  
-  if (cat.includes("Tea Sets") || cat.includes("Cups & Mugs") || cat.includes("Teaware") || cat.includes("Mugs")) {
-    return {
-      description: `Add a gentle touch of luxury to your tea or coffee hours with the ${name}. Fusing clean silhouettes with a modern edge, each piece is accented with delicate platinum or gold detailing. Perfect for daily quiet relaxation or cozy, elegant social gatherings with friends.`,
-      specs: [
-        { key: "Composition", value: (cat.includes("Tea") || cat.includes("Teaware")) ? "1 Teapot (800ml), 6 Cups, 6 Saucers, 1 Milk Pot, 1 Sugar Bowl" : "Set of 2 Coffee Mugs" },
-        { key: "Capacity", value: (cat.includes("Tea") || cat.includes("Teaware")) ? "180 ML per Cup" : "300 ML per Mug" },
-        { key: "Material", value: "Premium Vitrified Porcelain / Stoneware" },
-        { key: "Care Instructions", value: "Microwave safe (without gold details). Dishwasher friendly." }
-      ],
-      highlights: [
+      ];
+    } else if (cat.includes("Tea Sets") || cat.includes("Cups & Mugs") || cat.includes("Teaware") || cat.includes("Mugs")) {
+      highlights = [
         "Artisan stoneware and porcelain that is lightweight yet durable",
         "Comfortable ergonomic handle design ensuring a secure, warm grip",
         "Lead and cadmium free material certified for hot beverage safety",
         "Packaged in a signature premium gift box ideal for corporate or personal gifting"
-      ]
-    };
-  }
-
-  if (cat.includes("Glassware")) {
-    return {
-      description: `Designed for wine connoisseurs and sophisticated home entertaining, the ${name} offers perfect optical clarity and exceptional strength. Fired using premium lead-free crystal components, it features a laser-cut ultra-thin rim and elegant pulled stem.`,
-      specs: [
-        { key: "Composition", value: "Set of 6 Premium Glasses" },
-        { key: "Capacity", value: "360 ML" },
-        { key: "Material", value: "Lead-Free Premium Crystal Glass" },
-        { key: "Country of Origin", value: "Designed in Europe" }
-      ],
-      highlights: [
+      ];
+    } else if (cat.includes("Glassware")) {
+      highlights = [
         "High-resonance crystal with excellent transparency to admire rich beverage colors",
         "Laser-cut thin rim ensuring a smooth, uninterrupted tasting flow",
         "Reinforced joint connections between stem and bowl to resist breakage",
         "Dishwasher safe glass mixture that remains brilliant after repeated wash cycles"
-      ]
-    };
+      ];
+    } else {
+      highlights = [
+        "Crafted with double-glazed vitrification to protect against scratches and stains",
+        "Lead and cadmium free structure, completely safe for regular contact with food",
+        "Beautiful packaging layout ready for corporate, bulk, or personal gifting",
+        "Sturdily designed and weighted for premium table presence and comfortable handfeel"
+      ];
+    }
   }
-  
-  // Default fallback for general products (Cutlery, Bowls, Plates, Serving, Cookware, Gift Sets, etc.)
+
   return {
-    description: `Enhance your household presentation and dining styling with the ${name}. This collection brings together premium craftsmanship, aesthetic design, and high durability. It is carefully curated for families who appreciate quality materials and refined finishes.`,
+    description: desc || `Enhance your household presentation and dining styling with the ${name}. This collection brings together premium craftsmanship, aesthetic design, and high durability. It is carefully curated for families who appreciate quality materials and refined finishes.`,
     specs: [
-      { key: "Composition", value: "Complete Packaged Set" },
-      { key: "Material", value: "Vitrified Fine Ceramic / Food-Grade Stainless Steel" },
-      { key: "Features", value: "Toxin-free, lead-free and environment-safe materials" },
-      { key: "Care", value: "Microwave and dishwasher safe" }
+      { key: "Composition", value: composition },
+      { key: "Material", value: material },
+      { key: "Care", value: care }
     ],
-    highlights: [
-      "Crafted with double-glazed vitrification to protect against scratches and stains",
-      "Lead and cadmium free structure, completely safe for regular contact with food",
-      "Beautiful packaging layout ready for corporate, bulk, or personal gifting",
-      "Sturdily designed and weighted for premium table presence and comfortable handfeel"
-    ]
+    highlights: highlights
   };
 }
 
