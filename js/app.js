@@ -201,12 +201,27 @@ function productCardHTML(p) {
     : 0;
   const stars = renderStars(rating);
 
-  const imgHTML = p.image
-    ? `<img class="product-img" src="${p.image}" alt="${p.name}" loading="lazy">`
-    : `<div class="product-placeholder">
-         <div class="placeholder-icon">🍽</div>
-         <div class="placeholder-text">Photo coming soon</div>
-       </div>`;
+  let imgHTML = "";
+  if (p.image) {
+    imgHTML = `<img class="product-img" src="${p.image}" alt="${p.name}" loading="lazy">`;
+  } else if (p.video) {
+    const isEmbed = p.video.includes("youtube.com/embed/") || p.video.includes("drive.google.com/file/d/");
+    if (isEmbed) {
+      imgHTML = `
+        <div class="product-placeholder" style="background:#111;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <div class="placeholder-icon" style="font-size:36px;color:#d4af37;margin-bottom:6px;">🎬</div>
+          <div class="placeholder-text" style="color:#d4af37;font-weight:600;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Watch Video</div>
+        </div>`;
+    } else {
+      imgHTML = `<video class="product-img" src="${p.video}" muted loop autoplay playsinline style="object-fit:cover;width:100%;height:100%;background:#000;display:block;"></video>`;
+    }
+  } else {
+    imgHTML = `
+      <div class="product-placeholder">
+        <div class="placeholder-icon">🍽</div>
+        <div class="placeholder-text">Photo coming soon</div>
+      </div>`;
+  }
 
   const badgeHTML = discount > 0
     ? `<span class="product-badge badge-sale">−${discount}%</span>`
