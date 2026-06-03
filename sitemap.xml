@@ -3,7 +3,7 @@
 
   <!-- Main Store Page -->
   <url>
-    <loc>https://rajendracrockery.netlify.app/</loc>
+    <loc>https://rajendrashowroom.store/</loc>
     <lastmod>2024-06-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -11,7 +11,7 @@
 
   <!-- Category Pages (anchor links) -->
   <url>
-    <loc>https://rajendracrockery.netlify.app/#products</loc>
+    <loc>https://rajendrashowroom.store/#products</loc>
     <lastmod>2024-06-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
