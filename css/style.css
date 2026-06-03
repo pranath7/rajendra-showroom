@@ -2380,3 +2380,139 @@ input, select, textarea { font-family: inherit; }
   100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
 }
 
+/* ============================================================
+   MOBILE RESPONSIVENESS AND TOUCH TARGET OPTIMIZATIONS
+   ============================================================ */
+
+/* Scrollable Table Wrapper */
+.table-responsive {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+}
+
+/* Checkout Modal Card (Overrides fullscreen class) */
+.checkout-modal-card {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  max-width: 480px;
+  width: 90%;
+  max-height: 90vh;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+  z-index: 1060;
+  overflow-y: auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.checkout-modal-card.open {
+  opacity: 1;
+  pointer-events: all;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Storefront & Admin Tweaks */
+@media (max-width: 768px) {
+  /* Scrollable Site Category Navigation */
+  .site-nav {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nav-inner {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 0 16px;
+  }
+  .nav-item {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+  .whatsapp-nav {
+    padding: 12px 8px;
+    margin-left: auto;
+  }
+
+  /* Related Products Grid (2 columns on mobile instead of 4) */
+  .related-products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  /* Checkout Modal mobile viewport tweaks */
+  .checkout-modal-card {
+    max-height: 85vh;
+    border-radius: 12px;
+  }
+
+  /* Sizing up touch targets for mobile accessibility */
+  .qty-adjust-btn, .qty-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+  .color-swatch-btn {
+    padding: 10px 16px;
+    min-height: 44px;
+  }
+  .product-wishlist {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+    opacity: 1; /* Make wishlist icon persistent on mobile (no hover state) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  /* 2-Column Storefront Grid instead of 1 large card */
+  .products-grid:not(.list-view) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .product-card {
+    border-radius: var(--radius);
+  }
+  .product-info {
+    padding: 10px 12px;
+  }
+  .product-name {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  .price-current {
+    font-size: 16px;
+  }
+  .product-rating {
+    display: none; /* Hide rating line on tiny phone grids to keep clean spacing */
+  }
+
+  /* 2x2 Feature Circles on small screens */
+  .feature-circles-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 8px;
+  }
+  .feature-circle-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 6px;
+  }
+  .feature-circle-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  .feature-circle-label {
+    font-size: 8.5px;
+  }
+}
+
+

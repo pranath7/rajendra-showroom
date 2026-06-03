@@ -18,20 +18,53 @@ let cartOpen         = false;
 let modalOpen        = false;
 
 /* ─── Boot ───────────────────────────────────────────────── */
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadProducts();
+document.addEventListener("DOMContentLoaded", () => {
   loadCart();
-  CATEGORIES = await db.getCategories();
+  
+  // Stale-While-Revalidate caching: load cache instantly to render page
+  const cachedProducts = localStorage.getItem(STORE_KEY);
+  allProducts = cachedProducts ? JSON.parse(cachedProducts) : DEFAULT_PRODUCTS.map(p => ({ ...p }));
+
+  const cachedCategories = localStorage.getItem("rs_categories");
+  if (cachedCategories) {
+    CATEGORIES = JSON.parse(cachedCategories);
+  }
+
+  // Render storefront instantly
   renderTopNavCategories();
   renderCategories();
   renderProducts();
   bindEvents();
   updateCartUI();
+
+  // Run background revalidation sync from Firebase
+  triggerBackgroundSync();
 });
 
 /* ─── Storage ────────────────────────────────────────────── */
-async function loadProducts() {
-  allProducts = await db.getProducts();
+async function triggerBackgroundSync() {
+  if (typeof db !== "undefined") {
+    try {
+      const [freshProducts, freshCategories] = await Promise.all([
+        db.getProducts(),
+        db.getCategories()
+      ]);
+      
+      // Update active memory
+      allProducts = freshProducts;
+      if (freshCategories && freshCategories.length > 0) {
+        CATEGORIES = freshCategories;
+      }
+      
+      // Re-render silently to show latest products/prices
+      renderTopNavCategories();
+      renderCategories();
+      renderProducts();
+      console.log("⚡ Storefront synchronized with Cloud Database (Firestore) in background.");
+    } catch (e) {
+      console.warn("Background revalidation sync warning:", e);
+    }
+  }
 }
 
 function loadCart() {
