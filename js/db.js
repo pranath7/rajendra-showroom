@@ -88,6 +88,10 @@ window.db = {
         
         // Sort products by ID to keep order consistent
         const sorted = list.sort((a, b) => a.id - b.id);
+
+        // Merge locally-stored videos back (videos are too large for Firestore)
+        const videoStore = JSON.parse(localStorage.getItem("rs_product_videos") || "{}");
+        sorted.forEach(p => { if (videoStore[p.id]) p.video = videoStore[p.id]; });
         
         // Cache to LocalStorage to keep in sync
         localStorage.setItem("rs_products", JSON.stringify(sorted));
@@ -100,34 +104,55 @@ window.db = {
 
     // LocalStorage Fallback
     const stored = localStorage.getItem("rs_products");
+    let fallbackList;
     if (stored) {
       const parsed = JSON.parse(stored);
-      return parsed.length > 0 ? parsed : DEFAULT_PRODUCTS.map(p => ({ ...p }));
+      fallbackList = parsed.length > 0 ? parsed : DEFAULT_PRODUCTS.map(p => ({ ...p }));
+    } else {
+      fallbackList = DEFAULT_PRODUCTS.map(p => ({ ...p }));
+      localStorage.setItem("rs_products", JSON.stringify(fallbackList));
     }
-    const defaults = DEFAULT_PRODUCTS.map(p => ({ ...p }));
-    localStorage.setItem("rs_products", JSON.stringify(defaults));
-    return defaults;
+    // Merge videos
+    const videoStore = JSON.parse(localStorage.getItem("rs_product_videos") || "{}");
+    fallbackList.forEach(p => { if (videoStore[p.id]) p.video = videoStore[p.id]; });
+    return fallbackList;
   },
 
   async saveProduct(p) {
+    // ── Separate video from the product doc (videos are too large for Firestore 1MB limit)
+    const videoData = p.video || null;
+    const productWithoutVideo = { ...p };
+    delete productWithoutVideo.video;
+
+    // Save video separately in localStorage keyed by product ID
+    const videoStore = JSON.parse(localStorage.getItem("rs_product_videos") || "{}");
+    if (videoData) {
+      videoStore[p.id] = videoData;
+    } else {
+      delete videoStore[p.id]; // remove if video was deleted
+    }
+    localStorage.setItem("rs_product_videos", JSON.stringify(videoStore));
+
     let firebaseError = null;
     if (useFirebase && isFirebaseResponsive) {
       try {
-        await withTimeout(firestoreDb.collection("products").doc(String(p.id)).set(p), 4000);
+        // Save product WITHOUT video to Firestore
+        await withTimeout(firestoreDb.collection("products").doc(String(p.id)).set(productWithoutVideo), 6000);
       } catch (e) {
         console.error("Error saving product to Firebase:", e);
         firebaseError = e.message || e;
       }
     }
     
-    // Always update LocalStorage as well!
+    // Always update LocalStorage products list (without video embedded, video is in rs_product_videos)
     const stored = localStorage.getItem("rs_products");
     let list = stored ? JSON.parse(stored) : DEFAULT_PRODUCTS.map(x => ({ ...x }));
     const idx = list.findIndex(x => x.id === p.id);
+    // Store without video in the list (video lives in rs_product_videos)
     if (idx >= 0) {
-      list[idx] = p;
+      list[idx] = productWithoutVideo;
     } else {
-      list.push(p);
+      list.push(productWithoutVideo);
     }
     localStorage.setItem("rs_products", JSON.stringify(list));
     
