@@ -663,6 +663,32 @@ function makeCover(idx) {
   renderImagePreviews();
 }
 
+function convertToEmbedUrl(url) {
+  if (!url) return null;
+  // YouTube: watch?v=ID or youtu.be/ID
+  var ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+  if (ytMatch) return "https://www.youtube.com/embed/" + ytMatch[1];
+  // Google Drive: /file/d/ID/
+  var gdMatch = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
+  if (gdMatch) return "https://drive.google.com/file/d/" + gdMatch[1] + "/preview";
+  // Already embed or direct
+  return url;
+}
+
+function previewVideoUrl(url) {
+  var previewDiv = document.getElementById("videoUrlPreview");
+  var iframe = document.getElementById("videoIframe");
+  if (!previewDiv || !iframe) return;
+  var embedUrl = convertToEmbedUrl(url);
+  if (embedUrl && url.length > 5) {
+    iframe.src = embedUrl;
+    previewDiv.style.display = "block";
+  } else {
+    iframe.src = "";
+    previewDiv.style.display = "none";
+  }
+}
+
 function renderImagePreviews() {
   const grid = document.getElementById("adminImagesGrid");
   if (!grid) return;
@@ -845,8 +871,14 @@ function resetForm() {
   editingId = null;
   productImages = [];
   document.getElementById("productForm").reset();
-  document.getElementById("formTitle").textContent   = "➕  Add New Product";
+  document.getElementById("formTitle").textContent   = "Add New Product";
   document.getElementById("saveBtnText").textContent = "Add Product";
+  var vEl = document.getElementById("productVideoUrl");
+  if (vEl) vEl.value = "";
+  var vPrev = document.getElementById("videoUrlPreview");
+  if (vPrev) vPrev.style.display = "none";
+  var vIframe = document.getElementById("videoIframe");
+  if (vIframe) vIframe.src = "";
   renderImagePreviews();
 }
 
