@@ -274,7 +274,7 @@ function addToCart(id, qty = 1) {
   const product = allProducts.find(p => p.id === id);
   if (!product) return;
 
-  let color = selectedColor;
+  let color = window.selectedProductColor;
   if (!color) {
     const productColors = Array.isArray(product.colors) ? product.colors : (product.colors ? product.colors.split(",").map(c => c.trim()).filter(Boolean) : []);
     if (productColors.length > 0) {
