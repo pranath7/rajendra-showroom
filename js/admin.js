@@ -754,18 +754,20 @@ async function saveProduct() {
   showAdminToast("Saving product to cloud database...", "info");
 
   const res = await db.saveProduct(targetProduct);
-  if (res && res.success === false) {
-    showAdminToast(`❌ Database Error: ${res.error || "Failed to save to database"}`, "error");
+  if (res && res.success === false && res.mode !== "local_only") {
+    showAdminToast("Failed to save. Check your connection and try again.", "error");
     return;
   }
+
+  const savedToCloud = res && res.success === true && res.mode === "firebase";
 
   if (isEdit) {
     const idx = products.findIndex(p => p.id === editingId);
     if (idx >= 0) products[idx] = targetProduct;
-    showAdminToast(`✔  "${name}" updated successfully!`, "success");
+    showAdminToast(savedToCloud ? 'Updated successfully!' : 'Saved locally (cloud sync pending)', savedToCloud ? "success" : "info");
   } else {
     products.push(targetProduct);
-    showAdminToast(`✔  "${name}" added to store!`, "success");
+    showAdminToast(savedToCloud ? 'Product added to store!' : 'Saved locally (cloud sync pending)', savedToCloud ? "success" : "info");
   }
 
   await populateOrderProductDropdown();
