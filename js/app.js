@@ -378,6 +378,17 @@ function addToCart(id, qty = 1) {
   }
   saveCart();
   updateCartUI();
+
+  // ── Meta Pixel: AddToCart ──────────────────────────────────
+  if (typeof fbq === 'function') {
+    fbq('track', 'AddToCart', {
+      content_ids:  [String(product.id)],
+      content_name: product.name,
+      content_type: 'product',
+      value:        product.price * qty,
+      currency:     'INR'
+    });
+  }
   renderCartItems();
 }
 
@@ -497,6 +508,17 @@ let currentModalQty = 1;
 function openModal(id) {
   const p = allProducts.find(x => x.id === id);
   if (!p) return;
+
+  // ── Meta Pixel: ViewContent ────────────────────────────────
+  if (typeof fbq === 'function') {
+    fbq('track', 'ViewContent', {
+      content_ids:  [String(p.id)],
+      content_name: p.name,
+      content_type: 'product',
+      value:        p.price,
+      currency:     'INR'
+    });
+  }
 
   // Resolve rating and reviews count (ensure it's not 0 or empty)
   const rating = p.rating || parseFloat((4.5 + ((p.id * 7) % 5) * 0.1).toFixed(1));
@@ -1180,6 +1202,17 @@ async function confirmUpiPayment() {
   document.getElementById("successWaBtn").onclick = () => {
     window.open(`https://wa.me/${WA_NUMBER}?text=${waMsg}`, "_blank");
   };
+
+  // ── Meta Pixel: Purchase ──────────────────────────────────
+  if (typeof fbq === 'function') {
+    fbq('track', 'Purchase', {
+      content_ids:  pendingCart.map(i => String(i.id)),
+      content_type: 'product',
+      value:        grand,
+      currency:     'INR',
+      num_items:    pendingCart.reduce((s, i) => s + i.qty, 0)
+    });
+  }
 
   // Clear cart
   cart = [];
