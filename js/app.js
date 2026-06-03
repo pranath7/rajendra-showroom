@@ -265,32 +265,52 @@ function addToCart(id, qty = 1) {
   const product = allProducts.find(p => p.id === id);
   if (!product) return;
 
-  const existing = cart.find(i => i.id === id);
+  let color = selectedColor;
+  if (!color) {
+    const productColors = Array.isArray(product.colors) ? product.colors : (product.colors ? product.colors.split(",").map(c => c.trim()).filter(Boolean) : []);
+    if (productColors.length > 0) {
+      color = window.selectedProductColor && productColors.includes(window.selectedProductColor)
+        ? window.selectedProductColor
+        : productColors[0];
+    }
+  }
+
+  const existing = cart.find(i => i.id === id && i.selectedColor === color);
   if (existing) {
     existing.qty += qty;
   } else {
-    cart.push({ id: product.id, name: product.name, price: product.price, image: product.image, qty: qty });
+    cart.push({ 
+      id: product.id, 
+      name: product.name, 
+      price: product.price, 
+      image: product.image, 
+      qty: qty,
+      selectedColor: color
+    });
   }
   saveCart();
   updateCartUI();
-  showToast(`✔  "${product.name}" added to cart`, "success");
-}
-
-function removeFromCart(id) {
-  cart = cart.filter(i => i.id !== id);
-  saveCart();
-  updateCartUI();
   renderCartItems();
 }
 
-function changeQty(id, delta) {
-  const item = cart.find(i => i.id === id);
-  if (!item) return;
-  item.qty += delta;
-  if (item.qty <= 0) { removeFromCart(id); return; }
+function changeQty(id, color, delta) {
+  const item = cart.find(i => i.id === id && i.selectedColor === color);
+  if (item) {
+    item.qty += delta;
+    if (item.qty <= 0) {
+      removeFromCart(id, color);
+    } else {
+      saveCart();
+      renderCartItems();
+    }
+  }
+}
+
+function removeFromCart(id, color) {
+  cart = cart.filter(i => !(i.id === id && i.selectedColor === color));
   saveCart();
-  updateCartUI();
   renderCartItems();
+  updateCartUI();
 }
 
 function updateCartUI() {
@@ -326,14 +346,15 @@ function renderCartItems() {
       </div>
       <div class="cart-item-info">
         <div class="cart-item-name">${item.name}</div>
+        ${item.selectedColor ? `<div class="cart-item-variant" style="font-size:11.5px; color:var(--text-light); margin-top:2px;">Color: ${item.selectedColor}</div>` : ""}
         <div class="cart-item-price">₹${item.price.toLocaleString("en-IN")}</div>
         <div class="cart-item-controls">
-          <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
+          <button class="qty-btn" onclick="changeQty(${item.id}, ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, -1)">−</button>
           <span class="qty-val">${item.qty}</span>
-          <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+          <button class="qty-btn" onclick="changeQty(${item.id}, ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, 1)">+</button>
         </div>
       </div>
-      <button class="cart-item-remove" onclick="removeFromCart(${item.id})">×</button>
+      <button class="cart-item-remove" onclick="removeFromCart(${item.id}, ${item.selectedColor ? `'${item.selectedColor}'` : 'null'})">×</button>
     </div>`).join("");
 
   document.getElementById("cartSubtotal").textContent = `₹${subtotal.toLocaleString("en-IN")}`;
@@ -371,9 +392,10 @@ function whatsappCart() {
     showToast("Your cart is empty!", "info");
     return;
   }
-  const itemLines = cart.map(i =>
-    `• ${i.name} × ${i.qty} — ₹${(i.price * i.qty).toLocaleString("en-IN")}`
-  ).join("\n");
+  const itemLines = cart.map(i => {
+    const variantText = i.selectedColor ? ` (${i.selectedColor})` : "";
+    return `• ${i.name}${variantText} × ${i.qty} — ₹${(i.price * i.qty).toLocaleString("en-IN")}`;
+  }).join("\n");
   const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const msg = encodeURIComponent(
     `Hi! I'd like to place an order from Rajendra Showroom:\n\n${itemLines}\n\n*Total: ₹${total.toLocaleString("en-IN")}*\n\nPlease confirm availability and delivery. Thank you!`
@@ -387,6 +409,9 @@ let currentModalQty = 1;
 function openModal(id) {
   const p = allProducts.find(x => x.id === id);
   if (!p) return;
+
+  // Reset selected product color
+  window.selectedProductColor = null;
 
   // Scroll details modal to top on product change
   const modalEl = document.getElementById("productModal");
@@ -428,6 +453,35 @@ function openModal(id) {
   const highlightsHTML = specsData.highlights.map(h => `
     <li>${h}</li>
   `).join("");
+
+  // Variant Colors Setup
+  const colors = Array.isArray(p.colors) ? p.colors : (p.colors ? p.colors.split(",").map(c => c.trim()).filter(Boolean) : []);
+  let colorSelectorHTML = "";
+  if (colors.length > 0) {
+    if (!window.selectedProductColor || !colors.includes(window.selectedProductColor)) {
+      window.selectedProductColor = colors[0];
+    }
+    const swatches = colors.map(color => {
+      const colorVal = getColorCode(color);
+      const isSelected = color === window.selectedProductColor;
+      return `
+        <button type="button" class="color-swatch-btn ${isSelected ? 'active' : ''}" 
+                onclick="selectProductColor('${color}')">
+          <span class="color-circle" style="background-color: ${colorVal};"></span>
+          <span class="color-name">${color}</span>
+        </button>
+      `;
+    }).join("");
+    
+    colorSelectorHTML = `
+      <div class="modal-color-selector">
+        <label class="color-label">Color: <span id="activeColorName" style="font-weight:600; color: var(--gold-dark);">${window.selectedProductColor}</span></label>
+        <div class="color-swatches-grid">
+          ${swatches}
+        </div>
+      </div>
+    `;
+  }
 
   // Cross sell items ("Pairs well with")
   const crossSells = getCrossSellItems(p);
@@ -509,6 +563,9 @@ function openModal(id) {
         <div class="modal-tax-notice">Tax included.</div>
         
         <p class="modal-desc-para">${specsData.description}</p>
+        
+        <!-- Color Selector Variant -->
+        ${colorSelectorHTML}
         
         <!-- Quantity Selector -->
         <div class="modal-qty-container">
@@ -991,7 +1048,10 @@ async function confirmUpiPayment() {
 
   // Setup success screen
   document.getElementById("successOrderId").textContent = `#${orderGroupId.toString().slice(-6)}`;
-  const itemLines = pendingCart.map(i => `• ${i.name} × ${i.qty} — ₹${(i.price * i.qty).toLocaleString("en-IN")}`).join("\n");
+  const itemLines = pendingCart.map(i => {
+    const variantText = i.selectedColor ? ` (${i.selectedColor})` : "";
+    return `• ${i.name}${variantText} × ${i.qty} — ₹${(i.price * i.qty).toLocaleString("en-IN")}`;
+  }).join("\n");
   const subtotal = pendingCart.reduce((s, i) => s + i.price * i.qty, 0);
   const grand = subtotal + (shippingCharge || 0);
   const shippingText = (shippingCharge || 0) === 0 ? "FREE" : `₹${shippingCharge}`;
@@ -1338,5 +1398,46 @@ function closeInfoModal() {
   modal.style.pointerEvents = "none";
   modal.style.transform = "translate(-50%, -50%) scale(0.95)";
   document.body.style.overflow = "";
+}
+
+/* ─── Product Color Variant Swatches Helpers ──────────────── */
+window.selectedProductColor = null;
+
+function getColorCode(colorName) {
+  const map = {
+    green: "#0B8043",
+    pink: "#FF8DA1",
+    yellow: "#FFEB3B",
+    blue: "#1A73E8",
+    gold: "#D2A138",
+    white: "#FFFFFF",
+    black: "#000000",
+    red: "#DB4437",
+    grey: "#7F8C8D",
+    gray: "#7F8C8D",
+    silver: "#BDC3C7",
+    cream: "#FFFDD0",
+    beige: "#F5F5DC",
+    bronze: "#CD7F32",
+    emerald: "#50C878",
+    royal: "#4169E1",
+    amber: "#FFBF00"
+  };
+  const clean = colorName.trim().toLowerCase();
+  return map[clean] || clean;
+}
+
+function selectProductColor(color) {
+  window.selectedProductColor = color;
+  
+  // Update text label
+  const labelEl = document.getElementById("activeColorName");
+  if (labelEl) labelEl.textContent = color;
+  
+  // Update button active state classes
+  document.querySelectorAll(".color-swatch-btn").forEach(btn => {
+    const isThis = btn.querySelector(".color-name").textContent.trim() === color;
+    btn.classList.toggle("active", isThis);
+  });
 }
 

@@ -1120,6 +1120,59 @@ input, select, textarea { font-family: inherit; }
   pointer-events: none;
 }
 
+/* Color Selector Swatches */
+.modal-color-selector {
+  margin-bottom: 24px;
+}
+.color-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  display: block;
+}
+.color-swatches-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+.color-swatch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1.5px solid var(--border-dark);
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  background: #fff;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--text);
+  outline: none;
+}
+.color-swatch-btn:hover {
+  background: var(--bg-warm);
+  border-color: var(--text-light);
+}
+.color-swatch-btn.active {
+  border: 1.5px solid #d81b60 !important;
+  background: #fff5f7 !important;
+  color: #d81b60 !important;
+  box-shadow: 0 2px 8px rgba(216, 27, 96, 0.15);
+}
+.color-circle {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid rgba(0,0,0,0.1);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
+}
+
 /* Express Shipping Notice */
 .express-shipping-notice {
   font-size: 13.5px;

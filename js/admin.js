@@ -603,6 +603,10 @@ async function saveProduct() {
   const origPrice = parseFloat(document.getElementById("productOrigPrice").value) || price;
   const desc      = document.getElementById("productDesc").value.trim();
   const featured  = document.getElementById("productFeatured").checked;
+  const colorsStr = document.getElementById("productColors").value.trim();
+
+  // Parse colors as a list of trimmed strings
+  const colors = colorsStr ? colorsStr.split(",").map(c => c.trim()).filter(Boolean) : [];
 
   if (!name)            { showAdminToast("Please enter a product name", "error"); return; }
   if (!price || price <= 0) { showAdminToast("Please enter a valid price", "error"); return; }
@@ -613,14 +617,14 @@ async function saveProduct() {
     const idx = products.findIndex(p => p.id === editingId);
     if (idx >= 0) {
       products[idx] = { ...products[idx], name, category, price, originalPrice: origPrice, description: desc, featured,
-        images: productImages, image: productImages[0] || null };
+        images: productImages, image: productImages[0] || null, colors };
       targetProduct = products[idx];
       showAdminToast(`✔  "${name}" updated!`, "success");
     }
   } else {
     const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
     targetProduct = { id: newId, name, category, price, originalPrice: origPrice,
-      description: desc, images: productImages, image: productImages[0] || null, featured, inStock: true, rating: 0, reviews: 0 };
+      description: desc, images: productImages, image: productImages[0] || null, featured, inStock: true, rating: 0, reviews: 0, colors };
     products.push(targetProduct);
     showAdminToast(`✔  "${name}" added to store!`, "success");
   }
@@ -653,6 +657,7 @@ function editProduct(id) {
   document.getElementById("productOrigPrice").value  = p.originalPrice || "";
   document.getElementById("productDesc").value       = p.description || "";
   document.getElementById("productFeatured").checked = p.featured;
+  document.getElementById("productColors").value     = p.colors ? p.colors.join(", ") : "";
   
   renderImagePreviews();
   
