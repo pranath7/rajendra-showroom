@@ -717,25 +717,6 @@ function renderImagePreviews() {
       <span class="add-image-icon">📷</span>
       <span class="add-image-text">Add Photo</span>
     </div>
-  `;
-
-               style="width:100%;height:100%;object-fit:cover;border-radius:6px;"
-               onmouseenter="this.play()" onmouseleave="this.pause();this.currentTime=0">
-        </video>
-        <div class="image-thumb-badge" style="background:#e53935;">🎬 Video</div>
-        <button type="button" class="btn-delete-thumb" onclick="removeVideo()" title="Remove video">×</button>
-      </div>
-    `;
-  } else {
-    html += `
-      <div class="add-image-card" onclick="document.getElementById('productVideoInput').click()" title="Add Product Video"
-           style="border-color:#e53935;">
-        <span class="add-image-icon">🎬</span>
-        <span class="add-image-text" style="color:#e53935;">Add Video</span>
-      </div>
-    `;
-  }
-
   grid.innerHTML = html;
 }
 
@@ -894,7 +875,6 @@ function deleteProduct(id) {
 function resetForm() {
   editingId     = null;
   productImages = [];
-  productVideo  = null;
   const videoUrlEl = document.getElementById("productVideoUrl");
   if (videoUrlEl) videoUrlEl.value = "";
   const previewDiv = document.getElementById("videoUrlPreview");
