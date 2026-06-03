@@ -450,7 +450,7 @@ function renderCartItems() {
   }
 
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const delivery = subtotal >= 2000 ? 0 : 99;
+  const delivery = subtotal >= 5000 ? 0 : 99;
   const grand    = subtotal + delivery;
 
   body.innerHTML = cart.map(item => `
@@ -919,7 +919,7 @@ function addToWishlist(id) {
 
 /* ─── Online Checkout Functions ───────────────────────────── */
 function getDynamicShippingRate(subtotal, state, pincode) {
-  if (subtotal >= 2000) return 0;
+  if (subtotal >= 5000) return 0;
   
   const pin = (pincode || "").trim();
   
@@ -954,7 +954,7 @@ function calculateDynamicShipping() {
   // Update UI Elements
   document.getElementById("checkoutSubtotal").textContent = `₹${subtotal.toLocaleString("en-IN")}`;
   document.getElementById("checkoutShipping").textContent = delivery === 0 
-    ? (subtotal >= 2000 ? "FREE (Order > ₹2,000)" : "₹" + delivery) 
+    ? (subtotal >= 5000 ? "FREE (Order > ₹5,000)" : "₹" + delivery) 
     : `₹${delivery}`;
     
   // Show zone descriptive text
@@ -1591,8 +1591,8 @@ function openInfoModal(type) {
     bodyHTML = `
       <div style="font-family:var(--font-serif); font-size:24px; font-weight:500; margin-bottom:16px; color:var(--text);">${title}</div>
       <ul style="font-size:14px; line-height:1.8; color:var(--text-light); padding-left:20px; margin-bottom:16px;">
-        <li style="margin-bottom:8px;"><strong>Free Chennai Delivery:</strong> We offer free home delivery across Chennai for all orders valued above ₹2,000.</li>
-        <li style="margin-bottom:8px;"><strong>Standard Delivery:</strong> A flat delivery charge of ₹99 applies to orders under ₹2,000.</li>
+        <li style="margin-bottom:8px;"><strong>Free Chennai Delivery:</strong> We offer free home delivery across Chennai for all orders valued above ₹5,000.</li>
+        <li style="margin-bottom:8px;"><strong>Standard Delivery:</strong> A flat delivery charge of ₹99 applies to orders under ₹5,000.</li>
         <li style="margin-bottom:8px;"><strong>Safe Transit Packaging:</strong> All orders are carefully packed in multiple layers of bubble wrap, corrugated sheets, and double-boxed to guarantee break-safe transit.</li>
         <li><strong>Timelines:</strong> Local deliveries are dispatched within 24-48 hours. Orders across India are shipped via premium courier services and arrive within 3-7 business days.</li>
       </ul>
