@@ -632,7 +632,7 @@ function previewImages(input) {
     const reader = new FileReader();
     reader.onload = async e => {
       try {
-        const compressed = await compressImage(e.target.result, 800, 800, 0.7);
+        const compressed = await compressImage(e.target.result, 1200, 1200, 0.85);
         newImages.push(compressed);
       } catch (err) {
         console.error("Compression error:", err);
@@ -663,30 +663,84 @@ function makeCover(idx) {
   renderImagePreviews();
 }
 
+// ── Video Upload ───────────────────────────────────────────
+let productVideo = null; // base64 or null
+
+function previewVideo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const maxMB = 50;
+  if (file.size > maxMB * 1024 * 1024) {
+    showAdminToast(`Video must be under ${maxMB}MB`, "error");
+    input.value = "";
+    return;
+  }
+  showAdminToast("Loading video preview...", "info");
+  const reader = new FileReader();
+  reader.onload = e => {
+    productVideo = e.target.result;
+    input.value = "";
+    renderImagePreviews();
+    showAdminToast("✅ Video added successfully!", "success");
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeVideo() {
+  productVideo = null;
+  renderImagePreviews();
+  showAdminToast("Video removed.", "info");
+}
+
 function renderImagePreviews() {
   const grid = document.getElementById("adminImagesGrid");
   if (!grid) return;
 
   let html = "";
+
+  // ── Photo thumbnails ────────────────────────────────────
   productImages.forEach((img, idx) => {
     html += `
       <div class="image-thumb-card ${idx === 0 ? 'is-cover' : ''}">
         <img src="${img}" alt="Preview ${idx + 1}">
-        <div class="image-thumb-badge">${idx === 0 ? 'Cover' : idx + 1}</div>
-        <button type="button" class="btn-delete-thumb" onclick="removeThumb(${idx})" title="Remove image">×</button>
+        <div class="image-thumb-badge">${idx === 0 ? '📸 Cover' : idx + 1}</div>
+        <button type="button" class="btn-delete-thumb" onclick="removeThumb(${idx})" title="Remove">×</button>
         ${idx > 0 ? `
-          <button type="button" class="btn-set-cover" onclick="makeCover(${idx})" title="Set as Cover image">Set Cover</button>
+          <button type="button" class="btn-set-cover" onclick="makeCover(${idx})" title="Set as Cover">Set Cover</button>
         ` : ""}
       </div>
     `;
   });
 
+  // ── Add Photo card ───────────────────────────────────────
   html += `
-    <div class="add-image-card" onclick="document.getElementById('productImageInput').click()">
-      <span class="add-image-icon">➕</span>
+    <div class="add-image-card" onclick="document.getElementById('productImageInput').click()" title="Add Photos">
+      <span class="add-image-icon">📷</span>
       <span class="add-image-text">Add Photo</span>
     </div>
   `;
+
+  // ── Video card ───────────────────────────────────────────
+  if (productVideo) {
+    html += `
+      <div class="image-thumb-card video-thumb-card">
+        <video src="${productVideo}" muted playsinline
+               style="width:100%;height:100%;object-fit:cover;border-radius:6px;"
+               onmouseenter="this.play()" onmouseleave="this.pause();this.currentTime=0">
+        </video>
+        <div class="image-thumb-badge" style="background:#e53935;">🎬 Video</div>
+        <button type="button" class="btn-delete-thumb" onclick="removeVideo()" title="Remove video">×</button>
+      </div>
+    `;
+  } else {
+    html += `
+      <div class="add-image-card" onclick="document.getElementById('productVideoInput').click()" title="Add Product Video"
+           style="border-color:#e53935;">
+        <span class="add-image-icon">🎬</span>
+        <span class="add-image-text" style="color:#e53935;">Add Video</span>
+      </div>
+    `;
+  }
 
   grid.innerHTML = html;
 }
@@ -735,7 +789,7 @@ async function saveProduct() {
     const img = productImages[i];
     if (img && img.startsWith("data:image/") && img.length > 150 * 1024) {
       try {
-        const comp = await compressImage(img, 800, 800, 0.7);
+        const comp = await compressImage(img, 1200, 1200, 0.85);
         compressedImages.push(comp);
       } catch (err) {
         console.error("Compression error during save:", err);
@@ -747,7 +801,8 @@ async function saveProduct() {
   }
   productImages = compressedImages;
   targetProduct.images = productImages;
-  targetProduct.image = productImages[0] || null;
+  targetProduct.image  = productImages[0] || null;
+  targetProduct.video  = productVideo || null;  // save video field
 
   showAdminToast("Saving product to cloud database...", "info");
 
@@ -784,6 +839,9 @@ function editProduct(id) {
     productImages = [];
   }
   
+  // Load video
+  productVideo = p.video || null;
+
   document.getElementById("productName").value       = p.name;
   document.getElementById("productCategory").value   = p.category;
   document.getElementById("productPrice").value      = p.price;
@@ -834,8 +892,9 @@ function deleteProduct(id) {
 }
 
 function resetForm() {
-  editingId = null;
+  editingId    = null;
   productImages = [];
+  productVideo  = null;
   document.getElementById("productForm").reset();
   document.getElementById("formTitle").textContent   = "➕  Add New Product";
   document.getElementById("saveBtnText").textContent = "Add Product";

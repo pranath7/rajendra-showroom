@@ -1230,10 +1230,13 @@
                 <label class="form-label">Product Photos <span class="form-hint">(First photo is the Cover Image. Hover thumbnail to set as Cover)</span></label>
                 <div class="images-gallery-container">
                   <div class="images-grid" id="adminImagesGrid">
-                    <!-- Images and the "Add Image" card are rendered here by JS -->
+                    <!-- Images/videos and the "Add" cards are rendered here by JS -->
                   </div>
+                  <!-- Hidden file inputs -->
                   <input type="file" id="productImageInput" accept="image/*"
                          style="display:none;" onchange="previewImages(this)" multiple>
+                  <input type="file" id="productVideoInput" accept="video/mp4,video/webm,video/ogg,video/quicktime"
+                         style="display:none;" onchange="previewVideo(this)">
                 </div>
               </div>
 
@@ -1359,6 +1362,6 @@
   <script src="js/firebase-config.js?v=3.0"></script>
   <script src="js/db.js?v=3.0"></script>
   <script src="js/data.js?v=3.0"></script>
-  <script src="js/admin.js?v=3.2"></script>
+  <script src="js/admin.js?v=3.5"></script>
 </body>
 </html>
