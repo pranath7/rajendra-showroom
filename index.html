@@ -83,7 +83,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="css/style.css?v=2.5">
+  <link rel="stylesheet" href="css/style.css?v=2.6">
 </head>
 <body>
 
@@ -95,6 +95,9 @@
   <!-- ═══ Header ═══════════════════════════════════════════ -->
   <header class="site-header">
     <div class="header-inner">
+      <!-- Hamburger Trigger (Mobile only) -->
+      <button class="mobile-menu-trigger" id="mobileMenuTrigger">☰</button>
+
       <!-- Logo -->
       <a href="index.html" class="logo-wrap">
         <img src="images/logo.png" alt="Rajendra Showroom Logo">
@@ -108,12 +111,12 @@
 
       <!-- Actions -->
       <div class="header-actions">
-        <a href="https://wa.me/916369142027" target="_blank" style="color:#25D366; font-weight:600;">
-          💬 WhatsApp
+        <a href="https://wa.me/916369142027" target="_blank" style="color:#25D366; font-weight:600; display: flex; align-items: center; gap: 4px;">
+          <span>💬</span> <span class="action-text">WhatsApp</span>
         </a>
         <button class="cart-trigger" id="cartTrigger">
           <span class="cart-icon">🛒</span>
-          <span>Cart</span>
+          <span class="action-text">Cart</span>
           <span class="cart-count-badge" style="display:none;">0</span>
         </button>
       </div>
@@ -582,13 +585,64 @@
     </div>
   </div>
 
+  <!-- ═══ Mobile Menu Drawer ════════════════════════════════ -->
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+  <div class="mobile-menu-drawer" id="mobileMenuDrawer">
+    <div class="mm-head">
+      <h3>Menu</h3>
+      <button class="mm-close-btn" onclick="closeMobileMenu()">✕</button>
+    </div>
+    <div class="mm-body">
+      <!-- Categories List -->
+      <div class="mm-section">
+        <h4 class="mm-section-title">Categories</h4>
+        <ul class="mm-category-list" id="mobileCategoryList">
+          <!-- Populated by JS -->
+        </ul>
+      </div>
+      
+      <!-- Price Filter -->
+      <div class="mm-section">
+        <h4 class="mm-section-title">Price Range</h4>
+        <div class="price-range-wrap" style="padding: 10px 0;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:8px;">
+            <span>₹0</span>
+            <span id="mobilePriceDisplay">₹10,000</span>
+          </div>
+          <input type="range" class="price-slider" id="mobilePriceSlider" min="0" max="20000" value="10000" step="100">
+        </div>
+      </div>
+
+      <!-- Info Links -->
+      <div class="mm-section">
+        <h4 class="mm-section-title">Information</h4>
+        <ul class="mm-links">
+          <li><a href="#" onclick="openInfoModal('about'); closeMobileMenu(); return false;">About Us</a></li>
+          <li><a href="#" onclick="openInfoModal('delivery'); closeMobileMenu(); return false;">Delivery Policy</a></li>
+          <li><a href="#" onclick="openInfoModal('return'); closeMobileMenu(); return false;">Return Policy</a></li>
+          <li><a href="#" onclick="openInfoModal('privacy'); closeMobileMenu(); return false;">Privacy Policy</a></li>
+        </ul>
+      </div>
+      
+      <!-- WhatsApp Quick Order -->
+      <div class="mm-section" style="border-top: none; margin-top: 15px;">
+        <a href="https://wa.me/916369142027?text=Hi! I'd like to place a custom order from Rajendra Showroom."
+           target="_blank"
+           class="btn-wa-lg"
+           style="font-size:13px; font-weight:600; padding:12px; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none;">
+           💬 Quick WhatsApp Order
+        </a>
+      </div>
+    </div>
+  </div>
+
   <!-- Firebase Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=2.5"></script>
-  <script src="js/db.js?v=2.5"></script>
-  <script src="js/data.js?v=2.5"></script>
-  <script src="js/app.js?v=2.5"></script>
+  <script src="js/firebase-config.js?v=2.6"></script>
+  <script src="js/db.js?v=2.6"></script>
+  <script src="js/data.js?v=2.6"></script>
+  <script src="js/app.js?v=2.6"></script>
   <script>
     // View toggle
     function setView(v) {

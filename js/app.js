@@ -79,22 +79,41 @@ function saveCart() {
 /* ─── Render Categories Sidebar ──────────────────────────── */
 function renderCategories() {
   const list = document.getElementById("categoryList");
-  if (!list) return;
-
-  list.innerHTML = CATEGORIES.map(cat => {
+  const mobileList = document.getElementById("mobileCategoryList");
+  
+  const html = CATEGORIES.map(cat => {
     const count = cat.id === "all"
       ? allProducts.length
       : allProducts.filter(p => p.category === cat.id).length;
 
-    return `
-      <li class="cat-item ${cat.id === activeCategory ? "active" : ""}"
-          data-cat="${cat.id}"
-          onclick="setCategory('${cat.id}')">
-        <span class="cat-icon">${cat.icon}</span>
-        <span>${cat.label}</span>
-        <span class="cat-count">${count}</span>
-      </li>`;
-  }).join("");
+    const isActive = cat.id === activeCategory;
+    
+    return {
+      desktop: `
+        <li class="cat-item ${isActive ? "active" : ""}"
+            data-cat="${cat.id}"
+            onclick="setCategory('${cat.id}')">
+          <span class="cat-icon">${cat.icon}</span>
+          <span>${cat.label}</span>
+          <span class="cat-count">${count}</span>
+        </li>`,
+      mobile: `
+        <li class="mm-cat-item ${isActive ? "active" : ""}"
+            data-cat="${cat.id}"
+            onclick="setCategory('${cat.id}'); closeMobileMenu();">
+          <span class="cat-icon">${cat.icon}</span>
+          <span>${cat.label}</span>
+          <span class="cat-count" style="margin-left:auto; font-size:11px; color:var(--text-muted);">${count}</span>
+        </li>`
+    };
+  });
+
+  if (list) {
+    list.innerHTML = html.map(x => x.desktop).join("");
+  }
+  if (mobileList) {
+    mobileList.innerHTML = html.map(x => x.mobile).join("");
+  }
 }
 
 function renderTopNavCategories() {
@@ -262,17 +281,44 @@ function bindEvents() {
   // Price slider
   const priceSlider = document.getElementById("priceSlider");
   const priceDisplay = document.getElementById("priceDisplay");
+  const mobilePriceSlider = document.getElementById("mobilePriceSlider");
+  const mobilePriceDisplay = document.getElementById("mobilePriceDisplay");
+
   if (priceSlider) {
     priceSlider.addEventListener("input", e => {
       maxPriceFilter = parseInt(e.target.value);
       if (priceDisplay) priceDisplay.textContent = `₹${maxPriceFilter.toLocaleString("en-IN")}`;
       const pct = (maxPriceFilter / 20000) * 100;
       priceSlider.style.background = `linear-gradient(to right, var(--gold) 0%, var(--gold) ${pct}%, var(--border-dark) ${pct}%, var(--border-dark) 100%)`;
+      
+      // Sync mobile price slider visually
+      if (mobilePriceSlider) {
+        mobilePriceSlider.value = maxPriceFilter;
+        mobilePriceSlider.style.background = `linear-gradient(to right, var(--gold) 0%, var(--gold) ${pct}%, var(--border-dark) ${pct}%, var(--border-dark) 100%)`;
+      }
+      if (mobilePriceDisplay) mobilePriceDisplay.textContent = `₹${maxPriceFilter.toLocaleString("en-IN")}`;
+
       renderProducts();
     });
   }
 
+  if (mobilePriceSlider) {
+    mobilePriceSlider.addEventListener("input", e => {
+      maxPriceFilter = parseInt(e.target.value);
+      if (mobilePriceDisplay) mobilePriceDisplay.textContent = `₹${maxPriceFilter.toLocaleString("en-IN")}`;
+      const pct = (maxPriceFilter / 20000) * 100;
+      mobilePriceSlider.style.background = `linear-gradient(to right, var(--gold) 0%, var(--gold) ${pct}%, var(--border-dark) ${pct}%, var(--border-dark) 100%)`;
+      
+      // Sync desktop price slider visually
+      if (priceSlider) {
+        priceSlider.value = maxPriceFilter;
+        priceSlider.style.background = `linear-gradient(to right, var(--gold) 0%, var(--gold) ${pct}%, var(--border-dark) ${pct}%, var(--border-dark) 100%)`;
+      }
+      if (priceDisplay) priceDisplay.textContent = `₹${maxPriceFilter.toLocaleString("en-IN")}`;
 
+      renderProducts();
+    });
+  }
 
   // Nav items click bindings
   document.querySelectorAll(".nav-item[data-cat]").forEach(el => {
@@ -288,13 +334,17 @@ function bindEvents() {
   document.getElementById("cartClose")?.addEventListener("click", closeCart);
   document.getElementById("cartOverlay")?.addEventListener("click", closeCart);
 
+  // Mobile Menu triggers
+  document.getElementById("mobileMenuTrigger")?.addEventListener("click", openMobileMenu);
+  document.getElementById("mobileMenuOverlay")?.addEventListener("click", closeMobileMenu);
+
   // Modal close
   document.getElementById("modalOverlay")?.addEventListener("click", closeModal);
   document.getElementById("modalClose")?.addEventListener("click", closeModal);
 
   // Escape key
   document.addEventListener("keydown", e => {
-    if (e.key === "Escape") { closeCart(); closeModal(); closeCheckoutModal(); closeUpiModal(); }
+    if (e.key === "Escape") { closeCart(); closeModal(); closeCheckoutModal(); closeUpiModal(); closeMobileMenu(); }
   });
 }
 
@@ -1530,5 +1580,18 @@ function selectProductColor(color) {
     const isThis = btn.querySelector(".color-name").textContent.trim() === color;
     btn.classList.toggle("active", isThis);
   });
+}
+
+/* ─── Mobile Menu Drawer ────────────────────────────────── */
+function openMobileMenu() {
+  document.getElementById("mobileMenuDrawer")?.classList.add("open");
+  document.getElementById("mobileMenuOverlay")?.classList.add("visible");
+  document.body.style.overflow = "hidden";
+}
+
+function closeMobileMenu() {
+  document.getElementById("mobileMenuDrawer")?.classList.remove("open");
+  document.getElementById("mobileMenuOverlay")?.classList.remove("visible");
+  document.body.style.overflow = "";
 }
 
