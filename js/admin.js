@@ -537,13 +537,49 @@ function renderProductTable() {
 }
 
 /* ─── Image Preview & Gallery ───────────────────────────── */
+function compressImage(base64Str, maxWidth = 800, maxHeight = 800, quality = 0.7) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = base64Str;
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+
+      // Keep aspect ratio
+      if (width > height) {
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
+      resolve(compressedDataUrl);
+    };
+    img.onerror = () => {
+      resolve(base64Str);
+    };
+  });
+}
+
 function previewImages(input) {
   const files = Array.from(input.files);
   if (!files.length) return;
 
   const validFiles = files.filter(file => {
-    if (file.size > 5 * 1024 * 1024) {
-      showAdminToast(`"${file.name}" is over 5 MB and was skipped`, "error");
+    if (file.size > 10 * 1024 * 1024) {
+      showAdminToast(`"${file.name}" is over 10 MB and was skipped`, "error");
       return false;
     }
     return true;
@@ -551,18 +587,28 @@ function previewImages(input) {
 
   if (validFiles.length === 0) return;
 
+  showAdminToast("Processing and compressing images...", "info");
+
   let loadedCount = 0;
   const newImages = [];
 
   validFiles.forEach(file => {
     const reader = new FileReader();
-    reader.onload = e => {
-      newImages.push(e.target.result);
+    reader.onload = async e => {
+      try {
+        const compressed = await compressImage(e.target.result, 800, 800, 0.7);
+        newImages.push(compressed);
+      } catch (err) {
+        console.error("Compression error:", err);
+        newImages.push(e.target.result);
+      }
+      
       loadedCount++;
       if (loadedCount === validFiles.length) {
         productImages = productImages.concat(newImages);
         renderImagePreviews();
         input.value = ""; // clear input
+        showAdminToast("Images processed successfully!", "success");
       }
     };
     reader.readAsDataURL(file);
@@ -639,7 +685,29 @@ async function saveProduct() {
       description: desc, images: productImages, image: productImages[0] || null, featured, inStock: true, rating: 0, reviews: 0, colors };
   }
 
-  showAdminToast("Saving product...", "info");
+  showAdminToast("Processing and compressing images...", "info");
+
+  // Compress any Base64 images that are large before saving
+  const compressedImages = [];
+  for (let i = 0; i < productImages.length; i++) {
+    const img = productImages[i];
+    if (img && img.startsWith("data:image/") && img.length > 150 * 1024) {
+      try {
+        const comp = await compressImage(img, 800, 800, 0.7);
+        compressedImages.push(comp);
+      } catch (err) {
+        console.error("Compression error during save:", err);
+        compressedImages.push(img);
+      }
+    } else {
+      compressedImages.push(img);
+    }
+  }
+  productImages = compressedImages;
+  targetProduct.images = productImages;
+  targetProduct.image = productImages[0] || null;
+
+  showAdminToast("Saving product to cloud database...", "info");
 
   const res = await db.saveProduct(targetProduct);
   if (res && res.success === false) {
