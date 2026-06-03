@@ -632,7 +632,7 @@ function previewImages(input) {
     const reader = new FileReader();
     reader.onload = async e => {
       try {
-        const compressed = await compressImage(e.target.result, 1200, 1200, 0.85);
+        const compressed = await compressImage(e.target.result, 800, 800, 0.7);
         newImages.push(compressed);
       } catch (err) {
         console.error("Compression error:", err);
@@ -663,60 +663,31 @@ function makeCover(idx) {
   renderImagePreviews();
 }
 
-// ── Video URL (YouTube / Google Drive) ─────────────────────────
-
-function convertToEmbedUrl(url) {
-  if (!url) return null;
-  // YouTube: watch?v=ID or youtu.be/ID
-  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
-  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
-  // Google Drive: /file/d/ID/
-  const gdMatch = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
-  if (gdMatch) return `https://drive.google.com/file/d/${gdMatch[1]}/preview`;
-  // Already an embed URL or direct link
-  return url;
-}
-
-function previewVideoUrl(url) {
-  const previewDiv = document.getElementById("videoUrlPreview");
-  const iframe = document.getElementById("videoIframe");
-  if (!previewDiv || !iframe) return;
-  const embedUrl = convertToEmbedUrl(url);
-  if (embedUrl) {
-    iframe.src = embedUrl;
-    previewDiv.style.display = "block";
-  } else {
-    iframe.src = "";
-    previewDiv.style.display = "none";
-  }
-}
-
 function renderImagePreviews() {
   const grid = document.getElementById("adminImagesGrid");
   if (!grid) return;
 
   let html = "";
-
-  // ── Photo thumbnails ────────────────────────────────────
   productImages.forEach((img, idx) => {
     html += `
       <div class="image-thumb-card ${idx === 0 ? 'is-cover' : ''}">
         <img src="${img}" alt="Preview ${idx + 1}">
-        <div class="image-thumb-badge">${idx === 0 ? '📸 Cover' : idx + 1}</div>
-        <button type="button" class="btn-delete-thumb" onclick="removeThumb(${idx})" title="Remove">×</button>
+        <div class="image-thumb-badge">${idx === 0 ? 'Cover' : idx + 1}</div>
+        <button type="button" class="btn-delete-thumb" onclick="removeThumb(${idx})" title="Remove image">×</button>
         ${idx > 0 ? `
-          <button type="button" class="btn-set-cover" onclick="makeCover(${idx})" title="Set as Cover">Set Cover</button>
+          <button type="button" class="btn-set-cover" onclick="makeCover(${idx})" title="Set as Cover image">Set Cover</button>
         ` : ""}
       </div>
     `;
   });
 
-  // ── Add Photo card ───────────────────────────────────────
   html += `
-    <div class="add-image-card" onclick="document.getElementById('productImageInput').click()" title="Add Photos">
-      <span class="add-image-icon">📷</span>
+    <div class="add-image-card" onclick="document.getElementById('productImageInput').click()">
+      <span class="add-image-icon">➕</span>
       <span class="add-image-text">Add Photo</span>
     </div>
+  `;
+
   grid.innerHTML = html;
 }
 
@@ -764,7 +735,7 @@ async function saveProduct() {
     const img = productImages[i];
     if (img && img.startsWith("data:image/") && img.length > 150 * 1024) {
       try {
-        const comp = await compressImage(img, 1200, 1200, 0.85);
+        const comp = await compressImage(img, 800, 800, 0.7);
         compressedImages.push(comp);
       } catch (err) {
         console.error("Compression error during save:", err);
@@ -776,10 +747,9 @@ async function saveProduct() {
   }
   productImages = compressedImages;
   targetProduct.images = productImages;
-  targetProduct.image  = productImages[0] || null;
-  // Save video URL (not base64 — just a YouTube/Drive URL string)
-  const videoUrl = (document.getElementById("productVideoUrl")?.value || "").trim();
-  targetProduct.video  = videoUrl || null;
+  targetProduct.image = productImages[0] || null;
+  var videoUrlEl = document.getElementById("productVideoUrl");
+  targetProduct.video = videoUrlEl ? (videoUrlEl.value || "").trim() || null : null;
 
   showAdminToast("Saving product to cloud database...", "info");
 
@@ -815,14 +785,11 @@ function editProduct(id) {
   } else {
     productImages = [];
   }
-  
-  // Load video URL
-  const videoUrlEl = document.getElementById("productVideoUrl");
-  if (videoUrlEl) {
-    videoUrlEl.value = p.video || "";
-    if (p.video) previewVideoUrl(p.video);
+  var vedEl = document.getElementById("productVideoUrl");
+  if (vedEl) { vedEl.value = p.video || ""; }
+  if (false) {// dummy close
   }
-
+  
   document.getElementById("productName").value       = p.name;
   document.getElementById("productCategory").value   = p.category;
   document.getElementById("productPrice").value      = p.price;
@@ -873,14 +840,8 @@ function deleteProduct(id) {
 }
 
 function resetForm() {
-  editingId     = null;
+  editingId = null;
   productImages = [];
-  const videoUrlEl = document.getElementById("productVideoUrl");
-  if (videoUrlEl) videoUrlEl.value = "";
-  const previewDiv = document.getElementById("videoUrlPreview");
-  if (previewDiv) previewDiv.style.display = "none";
-  const iframe = document.getElementById("videoIframe");
-  if (iframe) iframe.src = "";
   document.getElementById("productForm").reset();
   document.getElementById("formTitle").textContent   = "➕  Add New Product";
   document.getElementById("saveBtnText").textContent = "Add Product";
