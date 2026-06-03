@@ -83,7 +83,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="css/style.css?v=2.8">
+  <link rel="stylesheet" href="css/style.css?v=3.0">
 </head>
 <body>
 
@@ -221,6 +221,59 @@
       </div>
     </section>
   </div>
+
+  <!-- ═══ Store Reviews Section ═════════════════════════════ -->
+  <section class="store-reviews-section">
+    <div class="store-reviews-inner">
+      <div class="reviews-header-center">
+        <span class="reviews-eyebrow">✦ &nbsp; Customer Testimonials &nbsp; ✦</span>
+        <h2 class="reviews-main-title">What Our Patrons Say</h2>
+        <p class="reviews-subtitle">Real experiences shared by families who love dining and gifting with us.</p>
+        <div class="reviews-score-badge">
+          <span class="stars">★★★★★</span>
+          <span class="score-text"><strong>4.8 / 5</strong> average rating based on 280+ Chennai reviews</span>
+        </div>
+      </div>
+
+      <div class="store-reviews-grid">
+        <div class="store-review-card">
+          <div class="sr-avatar">K</div>
+          <div class="sr-info">
+            <div class="sr-name">Karthik R.</div>
+            <div class="sr-meta">Chennai · Verified Buyer</div>
+          </div>
+          <div class="sr-stars">★★★★★</div>
+          <p class="sr-text">
+            Bought a 24-piece bone china dinner set for my sister's wedding. The gold detailing looks exceptionally premium. The packaging was double-boxed with layers of bubble wrap, ensuring zero damage. Truly Chennai's finest crockery store!
+          </p>
+        </div>
+
+        <div class="store-review-card">
+          <div class="sr-avatar">M</div>
+          <div class="sr-info">
+            <div class="sr-name">Meenakshi S.</div>
+            <div class="sr-meta">Adyar, Chennai · Verified Buyer</div>
+          </div>
+          <div class="sr-stars">★★★★★</div>
+          <p class="sr-text">
+            I've been visiting their shop at NSC Bose Road for decades, and ordering online via WhatsApp is just as seamless. Ordered a beautiful ceramic tea set last week, and it was delivered to my house within 24 hours. The finish is flawless.
+          </p>
+        </div>
+
+        <div class="store-review-card">
+          <div class="sr-avatar">P</div>
+          <div class="sr-info">
+            <div class="sr-name">Pooja Krishnan</div>
+            <div class="sr-meta">T. Nagar, Chennai · Verified Buyer</div>
+          </div>
+          <div class="sr-stars">★★★★★</div>
+          <p class="sr-text">
+            Fantastic customer service! I was confused about gifting options for a housewarming party. The team guided me on WhatsApp with pictures of their stoneware mugs and salad bowls. The gift boxes they provided look so elegant and luxury!
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- ═══ Footer ════════════════════════════════════════════ -->
   <footer class="site-footer">
@@ -522,7 +575,8 @@
           <label class="upi-utr-label">🧾 &nbsp;UPI Reference / UTR Number</label>
           <input type="text" id="utrInput" class="upi-utr-input"
                  placeholder="e.g. 426831901234"
-                 maxlength="22" inputmode="numeric">
+                 maxlength="22" inputmode="numeric"
+                 oninput="onUtrInput(this)">
           <p class="upi-utr-hint">
             Open your UPI app → <strong>Transaction History</strong> → tap this payment → copy the <em>Reference / UTR number</em>
           </p>
@@ -540,6 +594,7 @@
         <button class="upi-confirm-btn" id="upiConfirmBtn" onclick="confirmUpiPayment()" disabled style="opacity:0.45; cursor:not-allowed;">
           ✅ Confirm Payment
         </button>
+        <p style="font-size:11px;color:#888;text-align:center;margin:4px 0 0;">Button unlocks after you enter your UTR or after 30s</p>
         <button class="upi-fail-btn" onclick="failUpiPayment()">❌ Cancel / Payment Failed</button>
       </div>
 
@@ -628,10 +683,10 @@
   <!-- Firebase Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=2.8"></script>
-  <script src="js/db.js?v=2.8"></script>
-  <script src="js/data.js?v=2.8"></script>
-  <script src="js/app.js?v=2.8"></script>
+  <script src="js/firebase-config.js?v=3.0"></script>
+  <script src="js/db.js?v=3.0"></script>
+  <script src="js/data.js?v=3.0"></script>
+  <script src="js/app.js?v=3.0"></script>
   <script>
     // View toggle
     function setView(v) {

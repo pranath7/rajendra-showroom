@@ -1009,6 +1009,32 @@ function showProcessingScreen(label) {
   startUpiTimer();
 }
 
+// Called every time the user types in the UTR input field
+// Immediately unlock the confirm button if they've entered a valid UTR
+function onUtrInput(inputEl) {
+  const val = inputEl.value.trim().replace(/\s/g, "");
+  const btn = document.getElementById("upiConfirmBtn");
+  if (!btn) return;
+  if (val.length >= 10) {
+    // Valid UTR length — unlock button immediately
+    btn.disabled = false;
+    btn.style.opacity = "1";
+    btn.style.cursor = "pointer";
+    // Also stop the timer since we don't need it anymore
+    if (_upiTimerInterval) {
+      clearInterval(_upiTimerInterval);
+      _upiTimerInterval = null;
+      const wrapEl = document.getElementById("upiTimerWrap");
+      if (wrapEl) wrapEl.style.display = "none";
+    }
+  } else {
+    // Not enough digits yet — keep button disabled
+    btn.disabled = true;
+    btn.style.opacity = "0.45";
+    btn.style.cursor = "not-allowed";
+  }
+}
+
 function startUpiTimer() {
   if (_upiTimerInterval) clearInterval(_upiTimerInterval);
   let seconds = 30;
