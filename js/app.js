@@ -537,12 +537,11 @@ function openModal(id) {
     ? Math.round((1 - p.price / p.originalPrice) * 100) : 0;
 
   const productImages = p.images || (p.image ? [p.image] : []);
-  const rawVideoUrl   = p.video || null;
-  const productVideo  = rawVideoUrl ? convertVideoUrl(rawVideoUrl) : null;
+  const productVideo  = p.video || null;
   let imgHTML = "";
 
   if (productImages.length === 0 && !productVideo) {
-    imgHTML = `<div class="modal-placeholder"><div class="mp-icon">🍽</div><p style="font-size:12px;opacity:0.4;letter-spacing:1px;">Photo coming soon</p></div>`;
+    imgHTML = `<div class="modal-placeholder"><div class="mp-icon">&#127869;</div><p style="font-size:12px;opacity:0.4;letter-spacing:1px;">Photo coming soon</p></div>`;
   } else {
     const hasMultipleMedia = productImages.length > 1 || (productImages.length >= 1 && productVideo);
     imgHTML = `
@@ -550,8 +549,7 @@ function openModal(id) {
         <div class="modal-main-img-wrap" id="modalMainWrap">
           ${productImages.length > 0
             ? `<img id="modalMainImg" src="${productImages[0]}" alt="${p.name}">`
-            : `<iframe src="${productVideo}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen
-                style="width:100%;height:340px;border-radius:12px;"></iframe>`
+            : `<video src="${productVideo}" controls playsinline style="width:100%;border-radius:12px;max-height:360px;background:#000;"></video>`
           }
         </div>
         ${hasMultipleMedia ? `
@@ -564,7 +562,7 @@ function openModal(id) {
           ${productVideo ? `
             <div class="modal-thumb modal-thumb-video" onclick="setModalMainVideo(this, '${productVideo}')" title="Watch product video">
               <div style="width:100%;height:100%;background:#111;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;">
-                <span style="font-size:20px;">🎬</span>
+                <span style="font-size:20px;">&#127916;</span>
                 <span style="font-size:9px;color:#fff;letter-spacing:0.5px;">VIDEO</span>
               </div>
             </div>
@@ -819,7 +817,15 @@ function setModalMainImg(el, productId, imgIdx) {
   const productImages = p.images || (p.image ? [p.image] : []);
   const src = productImages[imgIdx];
   
-  const main = document.getElementById("modalMainImg");
+  const wrap = document.getElementById("modalMainWrap");
+  if (!wrap) return;
+  
+  let main = document.getElementById("modalMainImg");
+  if (!main) {
+    wrap.innerHTML = `<img id="modalMainImg" src="" alt="${p.name}" style="opacity:0; transition: opacity 0.15s ease;">`;
+    main = document.getElementById("modalMainImg");
+  }
+  
   if (main && src) {
     main.style.opacity = "0";
     setTimeout(() => {
@@ -845,9 +851,7 @@ function convertVideoUrl(url) {
 function setModalMainVideo(el, videoSrc) {
   const wrap = document.getElementById("modalMainWrap");
   if (!wrap) return;
-  wrap.innerHTML = `<iframe src="${videoSrc}" frameborder="0"
-    allow="autoplay; encrypted-media" allowfullscreen
-    style="width:100%;height:340px;border-radius:12px;background:#000;"></iframe>`;
+  wrap.innerHTML = `<video src="${videoSrc}" controls playsinline style="width:100%;border-radius:12px;max-height:360px;background:#000;"></video>`;
   const thumbs = el.parentNode.querySelectorAll(".modal-thumb");
   thumbs.forEach(t => t.classList.remove("active"));
   el.classList.add("active");

@@ -663,30 +663,75 @@ function makeCover(idx) {
   renderImagePreviews();
 }
 
-function convertToEmbedUrl(url) {
-  if (!url) return null;
-  // YouTube: watch?v=ID or youtu.be/ID
-  var ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
-  if (ytMatch) return "https://www.youtube.com/embed/" + ytMatch[1];
-  // Google Drive: /file/d/ID/
-  var gdMatch = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
-  if (gdMatch) return "https://drive.google.com/file/d/" + gdMatch[1] + "/preview";
-  // Already embed or direct
-  return url;
+// --- Video Upload to Firebase Storage ---
+
+function uploadProductVideo(input) {
+  var file = input.files[0];
+  if (!file) return;
+
+  var maxMB = 100;
+  if (file.size > maxMB * 1024 * 1024) {
+    showAdminToast("Video must be under 100MB", "error");
+    input.value = "";
+    return;
+  }
+
+  // Show filename
+  document.getElementById("videoFileName").textContent = file.name;
+
+  // Check Firebase Storage is available
+  if (typeof firebase === "undefined" || !firebase.apps.length) {
+    showAdminToast("Firebase not available. Trying local preview...", "info");
+    _previewLocalVideo(file);
+    return;
+  }
+
+  var storage = firebase.storage();
+  var fileName = "product-videos/" + Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  var storageRef = storage.ref(fileName);
+  var uploadTask = storageRef.put(file);
+
+  // Show progress bar
+  document.getElementById("videoUploadProgress").style.display = "block";
+  document.getElementById("videoPreviewWrap").style.display    = "none";
+
+  uploadTask.on("state_changed",
+    function(snapshot) {
+      var pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+      document.getElementById("videoUploadPct").textContent    = pct;
+      document.getElementById("videoProgressBar").style.width  = pct + "%";
+    },
+    function(error) {
+      console.error("Upload error:", error);
+      showAdminToast("Upload failed: " + error.message, "error");
+      document.getElementById("videoUploadProgress").style.display = "none";
+    },
+    function() {
+      uploadTask.snapshot.ref.getDownloadURL().then(function(url) {
+        document.getElementById("productVideoUrl").value        = url;
+        document.getElementById("videoUploadProgress").style.display = "none";
+        document.getElementById("videoPreviewWrap").style.display    = "block";
+        document.getElementById("productVideoPreview").src           = url;
+        showAdminToast("Video uploaded successfully!", "success");
+      });
+    }
+  );
 }
 
-function previewVideoUrl(url) {
-  var previewDiv = document.getElementById("videoUrlPreview");
-  var iframe = document.getElementById("videoIframe");
-  if (!previewDiv || !iframe) return;
-  var embedUrl = convertToEmbedUrl(url);
-  if (embedUrl && url.length > 5) {
-    iframe.src = embedUrl;
-    previewDiv.style.display = "block";
-  } else {
-    iframe.src = "";
-    previewDiv.style.display = "none";
-  }
+function _previewLocalVideo(file) {
+  var url = URL.createObjectURL(file);
+  document.getElementById("productVideoUrl").value         = "";
+  document.getElementById("videoPreviewWrap").style.display = "block";
+  document.getElementById("productVideoPreview").src        = url;
+}
+
+function removeProductVideo() {
+  document.getElementById("productVideoUrl").value          = "";
+  document.getElementById("productVideoPreview").src        = "";
+  document.getElementById("videoPreviewWrap").style.display = "none";
+  document.getElementById("videoFileName").textContent      = "No video selected";
+  document.getElementById("productVideoFile").value         = "";
+  showAdminToast("Video removed", "info");
 }
 
 function renderImagePreviews() {
@@ -817,6 +862,16 @@ function editProduct(id) {
   if (vedEl) { vedEl.value = p.video || ""; }
   if (false) {// dummy close
   }
+  // Show existing video preview if any
+  var vPrev = document.getElementById("productVideoPreview");
+  var vWrap = document.getElementById("videoPreviewWrap");
+  if (p.video && vPrev && vWrap) {
+    vPrev.src = p.video;
+    vWrap.style.display = "block";
+    document.getElementById("videoFileName").textContent = "Video uploaded";
+  } else if (vWrap) {
+    vWrap.style.display = "none";
+  }
   
   document.getElementById("productName").value       = p.name;
   document.getElementById("productCategory").value   = p.category;
@@ -875,10 +930,14 @@ function resetForm() {
   document.getElementById("saveBtnText").textContent = "Add Product";
   var vEl = document.getElementById("productVideoUrl");
   if (vEl) vEl.value = "";
-  var vPrev = document.getElementById("videoUrlPreview");
-  if (vPrev) vPrev.style.display = "none";
-  var vIframe = document.getElementById("videoIframe");
-  if (vIframe) vIframe.src = "";
+  var vPrev = document.getElementById("productVideoPreview");
+  if (vPrev) vPrev.src = "";
+  var vWrap = document.getElementById("videoPreviewWrap");
+  if (vWrap) vWrap.style.display = "none";
+  var vName = document.getElementById("videoFileName");
+  if (vName) vName.textContent = "No video selected";
+  var vFile = document.getElementById("productVideoFile");
+  if (vFile) vFile.value = "";
   renderImagePreviews();
 }
 
