@@ -4,17 +4,9 @@
   <!-- Main Store Page -->
   <url>
     <loc>https://rajendrashowroom.store/</loc>
-    <lastmod>2024-06-02</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
-  </url>
-
-  <!-- Category Pages (anchor links) -->
-  <url>
-    <loc>https://rajendrashowroom.store/#products</loc>
-    <lastmod>2024-06-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
   </url>
 
 </urlset>
