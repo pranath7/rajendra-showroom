@@ -663,33 +663,32 @@ function makeCover(idx) {
   renderImagePreviews();
 }
 
-// ── Video Upload ───────────────────────────────────────────
-let productVideo = null; // base64 or null
+// ── Video URL (YouTube / Google Drive) ─────────────────────────
 
-function previewVideo(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const maxMB = 50;
-  if (file.size > maxMB * 1024 * 1024) {
-    showAdminToast(`Video must be under ${maxMB}MB`, "error");
-    input.value = "";
-    return;
-  }
-  showAdminToast("Loading video preview...", "info");
-  const reader = new FileReader();
-  reader.onload = e => {
-    productVideo = e.target.result;
-    input.value = "";
-    renderImagePreviews();
-    showAdminToast("✅ Video added successfully!", "success");
-  };
-  reader.readAsDataURL(file);
+function convertToEmbedUrl(url) {
+  if (!url) return null;
+  // YouTube: watch?v=ID or youtu.be/ID
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+  // Google Drive: /file/d/ID/
+  const gdMatch = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
+  if (gdMatch) return `https://drive.google.com/file/d/${gdMatch[1]}/preview`;
+  // Already an embed URL or direct link
+  return url;
 }
 
-function removeVideo() {
-  productVideo = null;
-  renderImagePreviews();
-  showAdminToast("Video removed.", "info");
+function previewVideoUrl(url) {
+  const previewDiv = document.getElementById("videoUrlPreview");
+  const iframe = document.getElementById("videoIframe");
+  if (!previewDiv || !iframe) return;
+  const embedUrl = convertToEmbedUrl(url);
+  if (embedUrl) {
+    iframe.src = embedUrl;
+    previewDiv.style.display = "block";
+  } else {
+    iframe.src = "";
+    previewDiv.style.display = "none";
+  }
 }
 
 function renderImagePreviews() {
@@ -720,11 +719,6 @@ function renderImagePreviews() {
     </div>
   `;
 
-  // ── Video card ───────────────────────────────────────────
-  if (productVideo) {
-    html += `
-      <div class="image-thumb-card video-thumb-card">
-        <video src="${productVideo}" muted playsinline
                style="width:100%;height:100%;object-fit:cover;border-radius:6px;"
                onmouseenter="this.play()" onmouseleave="this.pause();this.currentTime=0">
         </video>
@@ -802,7 +796,9 @@ async function saveProduct() {
   productImages = compressedImages;
   targetProduct.images = productImages;
   targetProduct.image  = productImages[0] || null;
-  targetProduct.video  = productVideo || null;  // save video field
+  // Save video URL (not base64 — just a YouTube/Drive URL string)
+  const videoUrl = (document.getElementById("productVideoUrl")?.value || "").trim();
+  targetProduct.video  = videoUrl || null;
 
   showAdminToast("Saving product to cloud database...", "info");
 
@@ -839,8 +835,12 @@ function editProduct(id) {
     productImages = [];
   }
   
-  // Load video
-  productVideo = p.video || null;
+  // Load video URL
+  const videoUrlEl = document.getElementById("productVideoUrl");
+  if (videoUrlEl) {
+    videoUrlEl.value = p.video || "";
+    if (p.video) previewVideoUrl(p.video);
+  }
 
   document.getElementById("productName").value       = p.name;
   document.getElementById("productCategory").value   = p.category;
@@ -892,9 +892,15 @@ function deleteProduct(id) {
 }
 
 function resetForm() {
-  editingId    = null;
+  editingId     = null;
   productImages = [];
   productVideo  = null;
+  const videoUrlEl = document.getElementById("productVideoUrl");
+  if (videoUrlEl) videoUrlEl.value = "";
+  const previewDiv = document.getElementById("videoUrlPreview");
+  if (previewDiv) previewDiv.style.display = "none";
+  const iframe = document.getElementById("videoIframe");
+  if (iframe) iframe.src = "";
   document.getElementById("productForm").reset();
   document.getElementById("formTitle").textContent   = "➕  Add New Product";
   document.getElementById("saveBtnText").textContent = "Add Product";

@@ -537,7 +537,8 @@ function openModal(id) {
     ? Math.round((1 - p.price / p.originalPrice) * 100) : 0;
 
   const productImages = p.images || (p.image ? [p.image] : []);
-  const productVideo  = p.video || null;
+  const rawVideoUrl   = p.video || null;
+  const productVideo  = rawVideoUrl ? convertVideoUrl(rawVideoUrl) : null;
   let imgHTML = "";
 
   if (productImages.length === 0 && !productVideo) {
@@ -549,7 +550,8 @@ function openModal(id) {
         <div class="modal-main-img-wrap" id="modalMainWrap">
           ${productImages.length > 0
             ? `<img id="modalMainImg" src="${productImages[0]}" alt="${p.name}">`
-            : `<video id="modalMainVideo" src="${productVideo}" controls playsinline style="width:100%;border-radius:12px;max-height:380px;"></video>`
+            : `<iframe src="${productVideo}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen
+                style="width:100%;height:340px;border-radius:12px;"></iframe>`
           }
         </div>
         ${hasMultipleMedia ? `
@@ -831,13 +833,21 @@ function setModalMainImg(el, productId, imgIdx) {
   el.classList.add("active");
 }
 
+function convertVideoUrl(url) {
+  if (!url) return null;
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+  const gdMatch = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
+  if (gdMatch) return `https://drive.google.com/file/d/${gdMatch[1]}/preview`;
+  return url;
+}
+
 function setModalMainVideo(el, videoSrc) {
   const wrap = document.getElementById("modalMainWrap");
   if (!wrap) return;
-  // Replace content with video player
-  wrap.innerHTML = `<video src="${videoSrc}" controls autoplay playsinline
-    style="width:100%;border-radius:12px;max-height:380px;background:#000;"></video>`;
-  // Mark video thumb active, clear image thumbs
+  wrap.innerHTML = `<iframe src="${videoSrc}" frameborder="0"
+    allow="autoplay; encrypted-media" allowfullscreen
+    style="width:100%;height:340px;border-radius:12px;background:#000;"></iframe>`;
   const thumbs = el.parentNode.querySelectorAll(".modal-thumb");
   thumbs.forEach(t => t.classList.remove("active"));
   el.classList.add("active");
