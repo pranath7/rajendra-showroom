@@ -16,6 +16,48 @@ let productImages = [];
 /* ─── Boot ─────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", () => {
   checkAuth();
+
+  // Handle "+ Add New Category..." selection in the category dropdown
+  const catSel = document.getElementById("productCategory");
+  if (catSel) {
+    catSel.addEventListener("change", async (e) => {
+      if (e.target.value === "__add_new_category__") {
+        const name = prompt("Enter the name of the new category:");
+        if (name && name.trim()) {
+          const cleanName = name.trim();
+          
+          // Check if category already exists
+          const exists = CATEGORIES.some(c => c.label.toLowerCase() === cleanName.toLowerCase());
+          if (exists) {
+            alert("This category already exists!");
+            // Reset to default
+            catSel.value = CATEGORIES[1] ? CATEGORIES[1].id : "";
+            return;
+          }
+
+          // Request optional emoji icon
+          const icon = prompt("Enter an emoji/icon for the category (or leave blank for a default package 📦):");
+          const cleanIcon = icon && icon.trim() ? icon.trim() : "📦";
+
+          const newCat = {
+            id: cleanName,
+            label: cleanName,
+            icon: cleanIcon
+          };
+
+          await db.saveCategory(newCat);
+          CATEGORIES.push(newCat);
+          
+          // Re-populate dropdown and select the newly created category
+          populateCategoryDropdown();
+          catSel.value = cleanName;
+        } else {
+          // Reset to default if cancelled
+          catSel.value = CATEGORIES[1] ? CATEGORIES[1].id : "";
+        }
+      }
+    });
+  }
 });
 
 async function checkAuth() {
@@ -52,6 +94,7 @@ async function showPanel() {
   document.getElementById("adminPanel").style.display  = "block";
   await loadProducts();
   await loadOrders();
+  CATEGORIES = await db.getCategories();
   populateCategoryDropdown();
   await populateOrderProductDropdown();
   switchTab("dashboard");
@@ -411,14 +454,19 @@ function formatDate(dateStr) {
   return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-/* ─── Category Dropdown ─────────────────────────────────── */
 function populateCategoryDropdown() {
   const sel = document.getElementById("productCategory");
   if (!sel) return;
-  sel.innerHTML = CATEGORIES
+  
+  const optionsHtml = CATEGORIES
     .filter(c => c.id !== "all")
     .map(c => `<option value="${c.id}">${c.label}</option>`)
     .join("");
+    
+  sel.innerHTML = optionsHtml + `
+    <option value="" disabled>──────────────</option>
+    <option value="__add_new_category__" style="font-weight:bold; color:var(--gold-dark);">+ Add New Category...</option>
+  `;
 }
 
 /* ─── Product Table ─────────────────────────────────────── */

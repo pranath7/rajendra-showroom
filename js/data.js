@@ -2,7 +2,7 @@
 //  Rajendra Showroom – Default Data
 // ============================================================
 
-const CATEGORIES = [
+let CATEGORIES = [
   { id: "all",          label: "All Products",   icon: "◈" },
   { id: "Dinner Sets",  label: "Dinner Sets",    icon: "🍽" },
   { id: "Tea Sets",     label: "Tea Sets",       icon: "🫖" },

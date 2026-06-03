@@ -21,6 +21,8 @@ let modalOpen        = false;
 document.addEventListener("DOMContentLoaded", async () => {
   await loadProducts();
   loadCart();
+  CATEGORIES = await db.getCategories();
+  renderTopNavCategories();
   renderCategories();
   renderProducts();
   bindEvents();
@@ -60,6 +62,26 @@ function renderCategories() {
         <span class="cat-count">${count}</span>
       </li>`;
   }).join("");
+}
+
+function renderTopNavCategories() {
+  const container = document.getElementById("topNavInner");
+  if (!container) return;
+
+  const itemsHtml = CATEGORIES.map(cat => {
+    // Exclude the 'all' option from top nav if you want (standard navbar style)
+    // or keep it to be consistent with the sidebar. Let's keep 'all' as the first tab.
+    return `<span class="nav-item ${cat.id === activeCategory ? 'active' : ''}" data-cat="${cat.id}">${cat.label}</span>`;
+  }).join("");
+
+  container.innerHTML = `
+    ${itemsHtml}
+    <div class="nav-divider"></div>
+    <a class="whatsapp-nav" href="https://wa.me/916369142027" target="_blank">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.99 2C6.477 2 2 6.477 2 11.99c0 1.72.454 3.33 1.24 4.73L2 22l5.47-1.22A9.957 9.957 0 0011.99 22C17.51 22 22 17.52 22 11.99 22 6.477 17.51 2 11.99 2zm0 18.18c-1.65 0-3.19-.44-4.52-1.21l-.32-.19-3.37.75.8-3.28-.21-.34A8.17 8.17 0 013.82 12c0-4.51 3.67-8.18 8.17-8.18 4.51 0 8.18 3.67 8.18 8.18 0 4.51-3.67 8.18-8.18 8.18z"/></svg>
+      +91 63691 42027
+    </a>
+  `;
 }
 
 /* ─── Render Products ─────────────────────────────────────── */

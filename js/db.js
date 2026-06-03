@@ -236,5 +236,68 @@ window.db = {
     }
     localStorage.setItem("rs_admin_pass", password);
     return true;
+  },
+
+  // --- Categories ---
+  async getCategories() {
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        const snapshot = await withTimeout(firestoreDb.collection("categories").get(), 3000);
+        if (snapshot.empty) {
+          // Initialize empty Firestore with default categories in parallel
+          console.log("Initializing database with default categories...");
+          const writePromises = CATEGORIES.map(c => 
+            firestoreDb.collection("categories").doc(c.id).set(c)
+          );
+          await withTimeout(Promise.all(writePromises), 4000);
+          return CATEGORIES.map(c => ({ ...c }));
+        }
+        const list = [];
+        snapshot.forEach(doc => {
+          list.push(doc.data());
+        });
+        // Preserve default sorting based on the order of items in CATEGORIES
+        const defaultOrder = CATEGORIES.map(c => c.id);
+        return list.sort((a, b) => {
+          let idxA = defaultOrder.indexOf(a.id);
+          let idxB = defaultOrder.indexOf(b.id);
+          if (idxA === -1) idxA = 999;
+          if (idxB === -1) idxB = 999;
+          return idxA - idxB;
+        });
+      } catch (e) {
+        console.error("Error fetching categories from Firebase, falling back to local storage:", e);
+        isFirebaseResponsive = false;
+      }
+    }
+
+    // LocalStorage Fallback
+    const stored = localStorage.getItem("rs_categories");
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    localStorage.setItem("rs_categories", JSON.stringify(CATEGORIES));
+    return CATEGORIES.map(c => ({ ...c }));
+  },
+
+  async saveCategory(c) {
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        await withTimeout(firestoreDb.collection("categories").doc(c.id).set(c), 3000);
+        return true;
+      } catch (e) {
+        console.error("Error saving category to Firebase:", e);
+        isFirebaseResponsive = false;
+      }
+    }
+
+    // LocalStorage
+    const stored = localStorage.getItem("rs_categories");
+    let list = stored ? JSON.parse(stored) : [...CATEGORIES];
+    if (!list.some(x => x.id === c.id)) {
+      list.push(c);
+      localStorage.setItem("rs_categories", JSON.stringify(list));
+    }
+    return true;
   }
 };
