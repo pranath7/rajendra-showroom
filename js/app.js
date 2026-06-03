@@ -12,7 +12,7 @@ let cart             = [];
 let activeCategory   = "all";
 let currentSort      = "featured";
 let currentView      = "grid";
-let maxPriceFilter   = 10000;
+let maxPriceFilter   = 100000;
 let searchQuery      = "";
 let cartOpen         = false;
 let modalOpen        = false;
@@ -288,7 +288,7 @@ function bindEvents() {
     priceSlider.addEventListener("input", e => {
       maxPriceFilter = parseInt(e.target.value);
       if (priceDisplay) priceDisplay.textContent = `₹${maxPriceFilter.toLocaleString("en-IN")}`;
-      const pct = (maxPriceFilter / 20000) * 100;
+      const pct = (maxPriceFilter / 100000) * 100;
       priceSlider.style.background = `linear-gradient(to right, var(--gold) 0%, var(--gold) ${pct}%, var(--border-dark) ${pct}%, var(--border-dark) 100%)`;
       
       // Sync mobile price slider visually
@@ -306,7 +306,7 @@ function bindEvents() {
     mobilePriceSlider.addEventListener("input", e => {
       maxPriceFilter = parseInt(e.target.value);
       if (mobilePriceDisplay) mobilePriceDisplay.textContent = `₹${maxPriceFilter.toLocaleString("en-IN")}`;
-      const pct = (maxPriceFilter / 20000) * 100;
+      const pct = (maxPriceFilter / 100000) * 100;
       mobilePriceSlider.style.background = `linear-gradient(to right, var(--gold) 0%, var(--gold) ${pct}%, var(--border-dark) ${pct}%, var(--border-dark) 100%)`;
       
       // Sync desktop price slider visually
