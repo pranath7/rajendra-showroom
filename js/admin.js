@@ -956,3 +956,70 @@ async function runDbDiagnostics() {
   resDiv.innerHTML = html;
   btn.disabled = false;
 }
+
+/* ─── Database Speed Optimizer ──────────────────────────── */
+async function optimizeDatabaseImages() {
+  const btn = document.getElementById("btnOptimizeImages");
+  const resDiv = document.getElementById("optimizationResult");
+  if (!btn || !resDiv) return;
+
+  if (!confirm("Are you sure you want to optimize all images in the Cloud Database? This will compress all large uploaded photos to 800px JPEG format to make the website load extremely fast.")) return;
+
+  btn.disabled = true;
+  resDiv.style.display = "block";
+  resDiv.innerHTML = "Fetching products from cloud database...";
+
+  try {
+    const freshProducts = await db.getProducts();
+    let optimizedCount = 0;
+    let totalSavedBytes = 0;
+
+    resDiv.innerHTML = `Found ${freshProducts.length} products. Scanning images...`;
+
+    for (let i = 0; i < freshProducts.length; i++) {
+      const p = freshProducts[i];
+      let productModified = false;
+      const originalImages = p.images || (p.image ? [p.image] : []);
+      const newImages = [];
+
+      resDiv.innerHTML = `Scanning product ${i + 1}/${freshProducts.length}: <strong>${p.name}</strong>...`;
+
+      for (let j = 0; j < originalImages.length; j++) {
+        const img = originalImages[j];
+        if (img && img.startsWith("data:image/") && img.length > 150 * 1024) {
+          const originalSize = img.length;
+          resDiv.innerHTML = `Compressing image ${j + 1} of ${p.name} (Original: ${(originalSize/1024).toFixed(0)} KB)...`;
+          
+          const comp = await compressImage(img, 800, 800, 0.7);
+          newImages.push(comp);
+          
+          const compressedSize = comp.length;
+          totalSavedBytes += (originalSize - compressedSize);
+          productModified = true;
+        } else {
+          newImages.push(img);
+        }
+      }
+
+      if (productModified) {
+        p.images = newImages;
+        p.image = newImages[0] || null;
+        await db.saveProduct(p);
+        optimizedCount++;
+      }
+    }
+
+    const savedKb = (totalSavedBytes / 1024).toFixed(0);
+    resDiv.innerHTML = `
+      <div style="color:#27AE60; font-weight:bold; margin-bottom:6px;">✅ Optimization Completed!</div>
+      <div>Optimized: <strong>${optimizedCount} products</strong></div>
+      <div>Total space saved: <strong>${savedKb} KB</strong> (~${(savedKb/1024).toFixed(1)} MB)</div>
+      <div style="margin-top:8px; font-size:11.5px; color:var(--text-light);">Your storefront will now load significantly faster! Please refresh your website to see the speed boost.</div>
+    `;
+  } catch (e) {
+    console.error("Optimization failed:", e);
+    resDiv.innerHTML = `<span style="color:#C0392B;">❌ Optimization Failed:</span> ${e.message || e}`;
+  }
+
+  btn.disabled = false;
+}
