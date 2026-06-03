@@ -676,7 +676,7 @@ function openModal(id) {
     <!-- Top Navigation Header -->
     <div class="modal-header-nav">
       <div class="mhn-logo">
-        <img src="images/logo.png" alt="Rajendra Showroom">
+        <img src="images/logo.png?v=3.13" alt="Rajendra Showroom">
         <span style="font-family: var(--font-serif); font-size: 16px; font-weight: 600; letter-spacing: 0.5px; color: var(--text);">Rajendra</span>
       </div>
       <button class="mhn-back-btn" onclick="closeModal()">← Back to Shop</button>
