@@ -439,13 +439,27 @@ function deleteOrder(id) {
   if (!o) return;
   if (!confirm(`Delete order for "${o.productName}"? This cannot be undone.`)) return;
   const row = document.getElementById(`order-row-${id}`);
-  if (row) { row.style.opacity = "0"; row.style.transition = "opacity 0.3s"; }
+  if (row) { row.style.opacity = "0.4"; }
   setTimeout(async () => {
+    const res = await db.deleteOrder(id);
+    if (res && res.success === false) {
+      showAdminToast(`❌ Database Error: ${res.error || "Failed to delete order"}`, "error");
+      if (row) { row.style.opacity = "1"; }
+      return;
+    }
     orders = orders.filter(x => x.id !== id);
-    await db.deleteOrder(id);
-    renderOrdersTable();
-    showAdminToast("Order deleted.", "info");
-  }, 300);
+    if (row) {
+      row.style.opacity = "0";
+      row.style.transition = "opacity 0.3s";
+      setTimeout(() => {
+        renderOrdersTable();
+        showAdminToast("Order deleted.", "info");
+      }, 300);
+    } else {
+      renderOrdersTable();
+      showAdminToast("Order deleted.", "info");
+    }
+  }, 100);
 }
 
 function formatDate(dateStr) {
@@ -612,25 +626,34 @@ async function saveProduct() {
   if (!price || price <= 0) { showAdminToast("Please enter a valid price", "error"); return; }
 
   let targetProduct = null;
+  let isEdit = (editingId !== null);
 
-  if (editingId !== null) {
-    const idx = products.findIndex(p => p.id === editingId);
-    if (idx >= 0) {
-      products[idx] = { ...products[idx], name, category, price, originalPrice: origPrice, description: desc, featured,
-        images: productImages, image: productImages[0] || null, colors };
-      targetProduct = products[idx];
-      showAdminToast(`✔  "${name}" updated!`, "success");
-    }
+  if (isEdit) {
+    const original = products.find(p => p.id === editingId);
+    if (!original) { showAdminToast("Product not found", "error"); return; }
+    targetProduct = { ...original, name, category, price, originalPrice: origPrice, description: desc, featured,
+      images: productImages, image: productImages[0] || null, colors };
   } else {
     const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
     targetProduct = { id: newId, name, category, price, originalPrice: origPrice,
       description: desc, images: productImages, image: productImages[0] || null, featured, inStock: true, rating: 0, reviews: 0, colors };
-    products.push(targetProduct);
-    showAdminToast(`✔  "${name}" added to store!`, "success");
   }
 
-  if (targetProduct) {
-    await db.saveProduct(targetProduct);
+  showAdminToast("Saving product...", "info");
+
+  const res = await db.saveProduct(targetProduct);
+  if (res && res.success === false) {
+    showAdminToast(`❌ Database Error: ${res.error || "Failed to save to database"}`, "error");
+    return;
+  }
+
+  if (isEdit) {
+    const idx = products.findIndex(p => p.id === editingId);
+    if (idx >= 0) products[idx] = targetProduct;
+    showAdminToast(`✔  "${name}" updated successfully!`, "success");
+  } else {
+    products.push(targetProduct);
+    showAdminToast(`✔  "${name}" added to store!`, "success");
   }
 
   await populateOrderProductDropdown();
@@ -671,14 +694,33 @@ function deleteProduct(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
   if (!confirm(`Delete "${p.name}" permanently?`)) return;
+  
   const row = document.getElementById(`row-${p.id}`);
-  if (row) { row.style.opacity = "0"; row.style.transition = "all 0.3s"; }
+  showAdminToast("Deleting product...", "info");
+  
+  if (row) { row.style.opacity = "0.4"; }
+  
   setTimeout(async () => {
+    const res = await db.deleteProduct(id);
+    if (res && res.success === false) {
+      showAdminToast(`❌ Database Error: ${res.error || "Failed to delete product"}`, "error");
+      if (row) { row.style.opacity = "1"; }
+      return;
+    }
+    
     products = products.filter(x => x.id !== id);
-    await db.deleteProduct(id);
-    renderProductTable();
-    showAdminToast(`🗑  "${p.name}" deleted.`, "info");
-  }, 300);
+    if (row) {
+      row.style.opacity = "0";
+      row.style.transition = "all 0.3s";
+      setTimeout(() => {
+        renderProductTable();
+        showAdminToast(`🗑  "${p.name}" deleted.`, "info");
+      }, 300);
+    } else {
+      renderProductTable();
+      showAdminToast(`🗑  "${p.name}" deleted.`, "info");
+    }
+  }, 100);
 }
 
 function resetForm() {
@@ -773,4 +815,70 @@ function showAdminToast(msg, type = "success") {
   el.className   = `admin-toast ${type} show`;
   clearTimeout(el._t);
   el._t = setTimeout(() => el.classList.remove("show"), 3500);
+}
+
+/* ─── Database Diagnostics ──────────────────────────────── */
+async function runDbDiagnostics() {
+  const btn = document.getElementById("btnRunDiagnostics");
+  const resDiv = document.getElementById("diagnosticsResult");
+  if (!btn || !resDiv) return;
+
+  btn.disabled = true;
+  resDiv.style.display = "block";
+  resDiv.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><div class="upi-spinner-sm"></div> Running connection and permission tests...</div>`;
+
+  let html = `<h5 style="margin-top:0;margin-bottom:8px;font-family:var(--font-serif);font-size:14px;color:var(--text);">Database Diagnostics Report</h5>`;
+  
+  if (typeof firebase === "undefined") {
+    html += `<span style="color:#C0392B;">❌ Firebase SDK is not loaded.</span> Check your internet connection or CDN links.`;
+    resDiv.innerHTML = html;
+    btn.disabled = false;
+    return;
+  }
+  
+  if (typeof FIREBASE_CONFIG === "undefined" || !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey === "YOUR_API_KEY") {
+    html += `<span style="color:#D35400;">ℹ️ Firebase Config is missing or empty.</span> Currently operating in offline Local Storage mode.`;
+    resDiv.innerHTML = html;
+    btn.disabled = false;
+    return;
+  }
+
+  html += `<div style="font-size:11px;font-family:monospace;color:var(--text-light);margin-bottom:10px;line-height:1.4;">Project ID: ${FIREBASE_CONFIG.projectId}<br>Auth Domain: ${FIREBASE_CONFIG.authDomain}</div>`;
+
+  try {
+    const testDb = firebase.firestore();
+    
+    // Test 1: Write document
+    html += `<div>1. Testing Database Write... `;
+    const testDocRef = testDb.collection("settings").doc("connTest");
+    await testDocRef.set({ testVal: "diagnostics", timestamp: Date.now() });
+    html += `<span style="color:#27AE60;font-weight:bold;">✅ SUCCESS</span></div>`;
+
+    // Test 2: Read document
+    html += `<div>2. Testing Database Read... `;
+    const snap = await testDocRef.get();
+    if (snap.exists && snap.data().testVal === "diagnostics") {
+      html += `<span style="color:#27AE60;font-weight:bold;">✅ SUCCESS</span></div>`;
+    } else {
+      html += `<span style="color:#C0392B;font-weight:bold;">❌ FAILED (Data mismatch)</span></div>`;
+    }
+
+    // Test 3: Delete document
+    html += `<div>3. Testing Database Delete... `;
+    await testDocRef.delete();
+    html += `<span style="color:#27AE60;font-weight:bold;">✅ SUCCESS</span></div>`;
+
+    html += `<div style="margin-top:10px;padding:8px;border-radius:6px;background:rgba(39,174,96,0.08);color:#27AE60;font-weight:600;font-size:12px;text-align:center;">🔥 Cloud Database is 100% Operational!</div>`;
+  } catch (e) {
+    console.error("Diagnostics error:", e);
+    html += `<span style="color:#C0392B;font-weight:bold;">❌ FAILED</span></div>`;
+    html += `<div style="margin-top:10px;padding:8px;border-radius:6px;background:rgba(192,57,43,0.08);color:#C0392B;font-size:11.5px;line-height:1.4;word-break:break-all;"><strong>Error Code:</strong> ${e.code || "unknown"}<br><strong>Message:</strong> ${e.message || e}</div>`;
+    
+    if (e.code === "permission-denied") {
+      html += `<div style="font-size:11px;color:var(--text-muted);margin-top:6px;line-height:1.35;">💡 <em>Tip: Your Firestore Security Rules may have expired or need updating to allow read/write access. Ensure rules allow read/write for all users.</em></div>`;
+    }
+  }
+
+  resDiv.innerHTML = html;
+  btn.disabled = false;
 }
