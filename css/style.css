@@ -56,6 +56,13 @@ input, select, textarea { font-family: inherit; }
   font-weight: 400;
   letter-spacing: 1.8px;
   text-transform: uppercase;
+  white-space: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.announcement-bar::-webkit-scrollbar {
+  display: none;
 }
 
 /* ─── Header ─────────────────────────────────────────────── */
@@ -2553,6 +2560,8 @@ input, select, textarea { font-family: inherit; }
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+    top: 10px;
+    z-index: 10;
   }
   .logo-wrap img {
     height: 42px;
@@ -2579,6 +2588,10 @@ input, select, textarea { font-family: inherit; }
     display: flex;
     align-items: center;
     padding: 12px 16px;
+  }
+  
+  .announcement-bar {
+    text-align: left;
   }
 }
 
