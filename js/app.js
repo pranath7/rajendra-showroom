@@ -1150,11 +1150,12 @@ async function confirmUpiPayment() {
       productName: item.name,
       customer: name,
       phone: phone,
+      address: address,
       price: item.price,
       qty: item.qty,
       total: item.price * item.qty,
       date: dateStr,
-      notes: `UPI Order | Shipping Charge: ₹${shippingCharge || 0} | UTR: ${utr} | Address: ${address}`,
+      notes: `UPI Order | Shipping: Rs.${shippingCharge || 0} | UTR: ${utr} | Address: ${address}`,
       utr: utr,
       status: "paid",
       createdAt: new Date().toISOString()

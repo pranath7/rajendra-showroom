@@ -363,6 +363,41 @@ function resetOrderForm() {
   document.getElementById("orderDate").value = new Date().toISOString().split("T")[0];
 }
 
+// Helper: build the address / UTR / shipping sub-info HTML for the orders table
+function getOrderCustomerInfoHTML(o) {
+  let html = "";
+
+  // 1. Address — prefer dedicated field, fall back to parsing notes
+  let address = (o.address || "").trim();
+  if (!address && o.notes) {
+    const m = o.notes.match(/Address:\s*(.+?)(\||$)/i);
+    if (m) address = m[1].trim();
+  }
+  if (address) {
+    html += `<div style="font-size:11.5px;color:#555;margin-top:4px;line-height:1.4;max-width:220px;">📍 ${address}</div>`;
+  }
+
+  // 2. UTR — prefer dedicated field, fall back to parsing notes
+  let utr = (o.utr || "").trim();
+  if (!utr && o.notes) {
+    const m = o.notes.match(/UTR:\s*([^\|]+)/i);
+    if (m) utr = m[1].trim();
+  }
+  if (utr) {
+    html += `<div style="font-size:11px;color:#888;margin-top:2px;">🔖 UTR: ${utr}</div>`;
+  }
+
+  // 3. Shipping — parse from notes
+  if (o.notes) {
+    const m = o.notes.match(/Shipping[^:]*:\s*(?:Rs\.?|₹)?\s*(\d+)/i);
+    if (m && m[1] !== "0") {
+      html += `<div style="font-size:11px;color:#888;">🚚 Shipping: ₹${m[1]}</div>`;
+    }
+  }
+
+  return html;
+}
+
 function renderOrdersTable() {
   const tbody  = document.getElementById("ordersTableBody");
   const search = (document.getElementById("ordersSearch")?.value || "").toLowerCase();
@@ -402,23 +437,7 @@ function renderOrdersTable() {
       <td>
         <div style="font-size:13.5px;font-weight:500;">${o.customer}</div>
         ${o.phone ? `<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">📞 ${o.phone}</div>` : ""}
-        ${(() => {
-          // Parse address from notes field: "... | Address: ..."
-          const notesStr = o.notes || "";
-          const addrMatch = notesStr.match(/Address:\s*(.+?)(?:\s*\||$)/i);
-          const address = addrMatch ? addrMatch[1].trim() : (o.address || "");
-          // Parse UTR if present
-          const utrMatch = notesStr.match(/UTR:\s*([^\|]+)/i);
-          const utr = utrMatch ? utrMatch[1].trim() : "";
-          // Parse shipping from notes
-          const shipMatch = notesStr.match(/Shipping Charge:\s*₹?(\d+)/i);
-          const shipping = shipMatch ? shipMatch[1] : "";
-          let html = "";
-          if (address) html += `<div style="font-size:11.5px;color:#555;margin-top:4px;line-height:1.4;max-width:200px;">📍 ${address}</div>`;
-          if (utr) html += `<div style="font-size:11px;color:#888;margin-top:2px;">🔖 UTR: ${utr}</div>`;
-          if (shipping) html += `<div style="font-size:11px;color:#888;">🚚 Shipping: ₹${shipping}</div>`;
-          return html;
-        })()}
+        ${getOrderCustomerInfoHTML(o)}
       </td>
       <td style="font-size:15px;font-weight:700;">₹${(o.price * o.qty).toLocaleString("en-IN")}</td>
       <td>
