@@ -140,7 +140,80 @@ function updateFirebaseStatusUI() {
       configText.innerHTML = `<span style="color:#D35400;">ℹ Not Configured</span><br><span style="font-size:12px; font-weight:normal; color:var(--text-muted);">Currently storing data locally in this browser. Changes will not sync to customer devices until Firebase config is supplied.</span>`;
     }
   }
+
+  // Also update Cloudinary status
+  loadCloudinaryConfig();
 }
+
+/* ─── Cloudinary Image Storage Setup ────────────────────── */
+function loadCloudinaryConfig() {
+  const saved = JSON.parse(localStorage.getItem("rs_cloudinary_config") || "{}");
+  const nameInput = document.getElementById("cloudNameInput");
+  const presetInput = document.getElementById("cloudPresetInput");
+  if (nameInput && saved.cloudName) nameInput.value = saved.cloudName;
+  if (presetInput && saved.uploadPreset) presetInput.value = saved.uploadPreset;
+
+  // Patch the live config object so it works immediately
+  if (saved.cloudName && saved.cloudName !== "YOUR_CLOUD_NAME" && typeof CLOUDINARY_CONFIG !== "undefined") {
+    CLOUDINARY_CONFIG.cloudName = saved.cloudName;
+    CLOUDINARY_CONFIG.uploadPreset = saved.uploadPreset;
+  }
+
+  updateCloudinaryStatus();
+}
+
+function updateCloudinaryPreview() {
+  updateCloudinaryStatus();
+}
+
+function updateCloudinaryStatus() {
+  const statusEl = document.getElementById("cloudinaryStatus");
+  if (!statusEl) return;
+
+  const nameInput = document.getElementById("cloudNameInput");
+  const presetInput = document.getElementById("cloudPresetInput");
+  const name = (nameInput && nameInput.value.trim()) || (typeof CLOUDINARY_CONFIG !== "undefined" && CLOUDINARY_CONFIG.cloudName) || "";
+  const preset = (presetInput && presetInput.value.trim()) || (typeof CLOUDINARY_CONFIG !== "undefined" && CLOUDINARY_CONFIG.uploadPreset) || "";
+
+  const isConfigured = name && name !== "YOUR_CLOUD_NAME" && preset && preset !== "YOUR_UPLOAD_PRESET";
+
+  if (isConfigured) {
+    statusEl.style.background = "#f0fdf4";
+    statusEl.style.border = "1.5px solid #27AE60";
+    statusEl.style.color = "#1a7a4a";
+    statusEl.innerHTML = `✅ Image upload is ACTIVE — Cloud: <strong>${name}</strong> · Preset: <strong>${preset}</strong><br><span style="font-size:11px;font-weight:400;">Photos will upload directly to Cloudinary and be stored permanently.</span>`;
+  } else {
+    statusEl.style.background = "#fff8f0";
+    statusEl.style.border = "1.5px solid #f39c12";
+    statusEl.style.color = "#b7700a";
+    statusEl.innerHTML = `⚠️ Not configured yet — follow the steps below and click Save to enable direct photo uploads.`;
+  }
+}
+
+function saveCloudinaryConfig() {
+  const nameInput = document.getElementById("cloudNameInput");
+  const presetInput = document.getElementById("cloudPresetInput");
+  const name = nameInput ? nameInput.value.trim() : "";
+  const preset = presetInput ? presetInput.value.trim() : "";
+
+  if (!name || !preset) {
+    showAdminToast("Please enter both your Cloud Name and Upload Preset.", "error");
+    return;
+  }
+
+  // Save to localStorage for persistence
+  localStorage.setItem("rs_cloudinary_config", JSON.stringify({ cloudName: name, uploadPreset: preset }));
+
+  // Patch live config object immediately — no page reload needed
+  if (typeof CLOUDINARY_CONFIG !== "undefined") {
+    CLOUDINARY_CONFIG.cloudName = name;
+    CLOUDINARY_CONFIG.uploadPreset = preset;
+  }
+
+  updateCloudinaryStatus();
+  showAdminToast("✅ Image storage configured! You can now upload product photos of any size.", "success");
+}
+
 
 /* ─── Tab Switching ─────────────────────────────────────── */
 function switchTab(tab) {
@@ -572,23 +645,54 @@ function renderProductTable() {
   }).join("");
 }
 
-/* ─── Image Upload to Firebase Storage ──────────────────── */
+/* ─── Image Upload to Cloudinary (Free CDN) ─────────────── */
 
-// Upload a single File object to Firebase Storage and return its download URL
+// Upload a single File to Cloudinary and return its permanent CDN URL
 async function uploadImageToStorage(file) {
-  if (typeof firebase === "undefined" || !firebase.apps.length) {
-    throw new Error("Firebase not available. Cannot upload image.");
+  // Check Cloudinary is configured
+  if (
+    typeof CLOUDINARY_CONFIG === "undefined" ||
+    !CLOUDINARY_CONFIG.cloudName ||
+    CLOUDINARY_CONFIG.cloudName === "YOUR_CLOUD_NAME"
+  ) {
+    throw new Error(
+      "Cloudinary is not configured yet. Please follow the setup steps in the Admin Panel → Settings → Image Storage Setup."
+    );
   }
-  const storage = firebase.storage();
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-  const storageRef = storage.ref("product-images/" + Date.now() + "_" + safeName);
-  const snapshot = await storageRef.put(file);
-  return await snapshot.ref.getDownloadURL();
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_CONFIG.uploadPreset);
+  formData.append("folder", "rajendra-showroom/products");
+
+  const response = await fetch(
+    "https://api.cloudinary.com/v1_1/" + CLOUDINARY_CONFIG.cloudName + "/image/upload",
+    { method: "POST", body: formData }
+  );
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || "Upload failed — check your Cloudinary settings.");
+  }
+
+  const data = await response.json();
+  return data.secure_url; // permanent HTTPS CDN URL, never expires
 }
 
 async function previewImages(input) {
   const files = Array.from(input.files);
   if (!files.length) return;
+
+  // Check config first before starting
+  if (
+    typeof CLOUDINARY_CONFIG === "undefined" ||
+    !CLOUDINARY_CONFIG.cloudName ||
+    CLOUDINARY_CONFIG.cloudName === "YOUR_CLOUD_NAME"
+  ) {
+    showAdminToast("⚠️ Image storage not set up yet. Go to Settings → Image Storage Setup.", "error");
+    input.value = "";
+    return;
+  }
 
   // Show upload progress UI
   const progressEl = document.getElementById("imageUploadProgress");
@@ -606,12 +710,12 @@ async function previewImages(input) {
       continue;
     }
     try {
-      showAdminToast(`Uploading "${file.name}" to cloud... (${uploaded + 1}/${files.length})`, "info");
+      showAdminToast(`☁️ Uploading "${file.name}"... (${uploaded + 1}/${files.length})`, "info");
       const url = await uploadImageToStorage(file);
       newUrls.push(url);
     } catch (err) {
       console.error("Upload error:", err);
-      showAdminToast(`Failed to upload "${file.name}": ${err.message}`, "error");
+      showAdminToast(`❌ Failed to upload "${file.name}": ${err.message}`, "error");
     }
     uploaded++;
     if (progressBar && progressPct) {
@@ -627,7 +731,7 @@ async function previewImages(input) {
   if (newUrls.length > 0) {
     productImages = productImages.concat(newUrls);
     renderImagePreviews();
-    showAdminToast(`${newUrls.length} photo(s) uploaded and saved to cloud! ✅`, "success");
+    showAdminToast(`✅ ${newUrls.length} photo(s) uploaded to cloud — saved permanently!`, "success");
   }
 
   input.value = "";
