@@ -572,83 +572,65 @@ function renderProductTable() {
   }).join("");
 }
 
-/* ─── Image Preview & Gallery ───────────────────────────── */
-function compressImage(base64Str, maxWidth = 800, maxHeight = 800, quality = 0.7) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.src = base64Str;
-    img.onload = () => {
-      let width = img.width;
-      let height = img.height;
+/* ─── Image Upload to Firebase Storage ──────────────────── */
 
-      // Keep aspect ratio
-      if (width > height) {
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
-        }
-      } else {
-        if (height > maxHeight) {
-          width = Math.round((width * maxHeight) / height);
-          height = maxHeight;
-        }
-      }
-
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, width, height);
-
-      const compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
-      resolve(compressedDataUrl);
-    };
-    img.onerror = () => {
-      resolve(base64Str);
-    };
-  });
+// Upload a single File object to Firebase Storage and return its download URL
+async function uploadImageToStorage(file) {
+  if (typeof firebase === "undefined" || !firebase.apps.length) {
+    throw new Error("Firebase not available. Cannot upload image.");
+  }
+  const storage = firebase.storage();
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const storageRef = storage.ref("product-images/" + Date.now() + "_" + safeName);
+  const snapshot = await storageRef.put(file);
+  return await snapshot.ref.getDownloadURL();
 }
 
-function previewImages(input) {
+async function previewImages(input) {
   const files = Array.from(input.files);
   if (!files.length) return;
 
-  const validFiles = files.filter(file => {
-    if (file.size > 10 * 1024 * 1024) {
-      showAdminToast(`"${file.name}" is over 10 MB and was skipped`, "error");
-      return false;
+  // Show upload progress UI
+  const progressEl = document.getElementById("imageUploadProgress");
+  const progressBar = document.getElementById("imageProgressBar");
+  const progressPct = document.getElementById("imageProgressPct");
+  if (progressEl) progressEl.style.display = "block";
+
+  let uploaded = 0;
+  const newUrls = [];
+
+  for (const file of files) {
+    if (file.size > 50 * 1024 * 1024) {
+      showAdminToast(`"${file.name}" is over 50MB and was skipped`, "error");
+      uploaded++;
+      continue;
     }
-    return true;
-  });
+    try {
+      showAdminToast(`Uploading "${file.name}" to cloud... (${uploaded + 1}/${files.length})`, "info");
+      const url = await uploadImageToStorage(file);
+      newUrls.push(url);
+    } catch (err) {
+      console.error("Upload error:", err);
+      showAdminToast(`Failed to upload "${file.name}": ${err.message}`, "error");
+    }
+    uploaded++;
+    if (progressBar && progressPct) {
+      const pct = Math.round((uploaded / files.length) * 100);
+      progressBar.style.width = pct + "%";
+      progressPct.textContent = pct;
+    }
+  }
 
-  if (validFiles.length === 0) return;
+  if (progressEl) progressEl.style.display = "none";
+  if (progressBar) progressBar.style.width = "0%";
 
-  showAdminToast("Processing and compressing images...", "info");
+  if (newUrls.length > 0) {
+    productImages = productImages.concat(newUrls);
+    renderImagePreviews();
+    showAdminToast(`${newUrls.length} photo(s) uploaded and saved to cloud! ✅`, "success");
+  }
 
-  let loadedCount = 0;
-  const newImages = [];
-
-  validFiles.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = async e => {
-      try {
-        const compressed = await compressImage(e.target.result, 800, 800, 0.7);
-        newImages.push(compressed);
-      } catch (err) {
-        console.error("Compression error:", err);
-        newImages.push(e.target.result);
-      }
-      
-      loadedCount++;
-      if (loadedCount === validFiles.length) {
-        productImages = productImages.concat(newImages);
-        renderImagePreviews();
-        input.value = ""; // clear input
-        showAdminToast("Images processed successfully!", "success");
-      }
-    };
-    reader.readAsDataURL(file);
-  });
+  input.value = "";
 }
 
 function removeThumb(idx) {
@@ -851,25 +833,7 @@ async function saveProduct() {
       rating: defaultRating, reviews: defaultReviews, colors };
   }
 
-  showAdminToast("Processing and compressing images...", "info");
-
-  // Compress any Base64 images that are large before saving
-  const compressedImages = [];
-  for (let i = 0; i < productImages.length; i++) {
-    const img = productImages[i];
-    if (img && img.startsWith("data:image/") && img.length > 150 * 1024) {
-      try {
-        const comp = await compressImage(img, 800, 800, 0.7);
-        compressedImages.push(comp);
-      } catch (err) {
-        console.error("Compression error during save:", err);
-        compressedImages.push(img);
-      }
-    } else {
-      compressedImages.push(img);
-    }
-  }
-  productImages = compressedImages;
+  // Images are already Firebase Storage URLs at this point — no compression needed
   targetProduct.images = productImages;
   targetProduct.image = productImages[0] || null;
   var videoUrlEl = document.getElementById("productVideoUrl");
@@ -1191,41 +1155,40 @@ async function optimizeDatabaseImages() {
   const resDiv = document.getElementById("optimizationResult");
   if (!btn || !resDiv) return;
 
-  if (!confirm("Are you sure you want to optimize all images in the Cloud Database? This will compress all large uploaded photos to 800px JPEG format to make the website load extremely fast.")) return;
-
   btn.disabled = true;
   resDiv.style.display = "block";
-  resDiv.innerHTML = "Fetching products from cloud database...";
 
   try {
     const freshProducts = await db.getProducts();
-    let optimizedCount = 0;
-    let totalSavedBytes = 0;
+    let base64Count = 0;
 
-    resDiv.innerHTML = `Found ${freshProducts.length} products. Scanning images...`;
+    resDiv.innerHTML = `Found ${freshProducts.length} products. Scanning for old-format images...`;
 
     for (let i = 0; i < freshProducts.length; i++) {
       const p = freshProducts[i];
-      let productModified = false;
       const originalImages = p.images || (p.image ? [p.image] : []);
+      let productModified = false;
       const newImages = [];
 
       resDiv.innerHTML = `Scanning product ${i + 1}/${freshProducts.length}: <strong>${p.name}</strong>...`;
 
-      for (let j = 0; j < originalImages.length; j++) {
-        const img = originalImages[j];
-        if (img && img.startsWith("data:image/") && img.length > 150 * 1024) {
-          const originalSize = img.length;
-          resDiv.innerHTML = `Compressing image ${j + 1} of ${p.name} (Original: ${(originalSize/1024).toFixed(0)} KB)...`;
-          
-          const comp = await compressImage(img, 800, 800, 0.7);
-          newImages.push(comp);
-          
-          const compressedSize = comp.length;
-          totalSavedBytes += (originalSize - compressedSize);
-          productModified = true;
+      for (const img of originalImages) {
+        if (img && img.startsWith("data:image/")) {
+          // Old base64 image — convert to Firebase Storage URL
+          resDiv.innerHTML = `Uploading old base64 image for <strong>${p.name}</strong> to cloud storage...`;
+          try {
+            const blob = await (await fetch(img)).blob();
+            const file = new File([blob], "legacy_" + Date.now() + ".jpg", { type: "image/jpeg" });
+            const url = await uploadImageToStorage(file);
+            newImages.push(url);
+            base64Count++;
+            productModified = true;
+          } catch (err) {
+            console.error("Migration error:", err);
+            newImages.push(img); // keep as-is if upload fails
+          }
         } else {
-          newImages.push(img);
+          newImages.push(img); // already a URL, keep it
         }
       }
 
@@ -1234,22 +1197,26 @@ async function optimizeDatabaseImages() {
         p.image = newImages[0] || null;
         const res = await db.saveProduct(p);
         if (res && res.success === false) {
-          throw new Error(`Failed to save optimized product "${p.name}": ${res.error || "Unknown error"}`);
+          throw new Error(`Failed to update product "${p.name}": ${res.error || "Unknown error"}`);
         }
-        optimizedCount++;
       }
     }
 
-    const savedKb = (totalSavedBytes / 1024).toFixed(0);
-    resDiv.innerHTML = `
-      <div style="color:#27AE60; font-weight:bold; margin-bottom:6px;">✅ Optimization Completed!</div>
-      <div>Optimized: <strong>${optimizedCount} products</strong></div>
-      <div>Total space saved: <strong>${savedKb} KB</strong> (~${(savedKb/1024).toFixed(1)} MB)</div>
-      <div style="margin-top:8px; font-size:11.5px; color:var(--text-light);">Your storefront will now load significantly faster! Please refresh your website to see the speed boost.</div>
-    `;
+    if (base64Count > 0) {
+      resDiv.innerHTML = `
+        <div style="color:#27AE60; font-weight:bold; margin-bottom:6px;">✅ Migration Completed!</div>
+        <div>Migrated <strong>${base64Count} old images</strong> to permanent Firebase Storage URLs.</div>
+        <div style="margin-top:8px; font-size:11.5px; color:var(--text-light);">All product images are now stored permanently in the cloud. They will never vanish again!</div>
+      `;
+    } else {
+      resDiv.innerHTML = `
+        <div style="color:#27AE60; font-weight:bold;">✅ All images are already stored in Firebase Storage!</div>
+        <div style="font-size:12px;margin-top:6px;color:var(--text-muted);">No migration needed. Your database is fully optimized.</div>
+      `;
+    }
   } catch (e) {
-    console.error("Optimization failed:", e);
-    resDiv.innerHTML = `<span style="color:#C0392B;">❌ Optimization Failed:</span> ${e.message || e}`;
+    console.error("Migration failed:", e);
+    resDiv.innerHTML = `<span style="color:#C0392B;">❌ Migration Failed:</span> ${e.message || e}`;
   }
 
   btn.disabled = false;
