@@ -133,14 +133,13 @@ window.db = {
     }
     localStorage.setItem("rs_product_videos", JSON.stringify(videoStore));
 
-    let firebaseError = null;
     if (useFirebase && isFirebaseResponsive) {
       try {
         // Save product WITHOUT video to Firestore
         await withTimeout(firestoreDb.collection("products").doc(String(p.id)).set(productWithoutVideo), 6000);
       } catch (e) {
         console.error("Error saving product to Firebase:", e);
-        firebaseError = e.message || e;
+        return { success: false, error: e.message || e };
       }
     }
     
@@ -156,20 +155,16 @@ window.db = {
     }
     localStorage.setItem("rs_products", JSON.stringify(list));
     
-    if (firebaseError) {
-      return { success: false, error: firebaseError, mode: "local_only" };
-    }
     return { success: true, mode: useFirebase ? "firebase" : "local" };
   },
 
   async deleteProduct(id) {
-    let firebaseError = null;
     if (useFirebase && isFirebaseResponsive) {
       try {
         await withTimeout(firestoreDb.collection("products").doc(String(id)).delete(), 4000);
       } catch (e) {
         console.error("Error deleting product from Firebase:", e);
-        firebaseError = e.message || e;
+        return { success: false, error: e.message || e };
       }
     }
     
@@ -181,9 +176,6 @@ window.db = {
       localStorage.setItem("rs_products", JSON.stringify(list));
     }
     
-    if (firebaseError) {
-      return { success: false, error: firebaseError, mode: "local_only" };
-    }
     return { success: true, mode: useFirebase ? "firebase" : "local" };
   },
 

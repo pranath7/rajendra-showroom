@@ -878,8 +878,8 @@ async function saveProduct() {
   showAdminToast("Saving product to cloud database...", "info");
 
   const res = await db.saveProduct(targetProduct);
-  if (res && res.success === false && res.mode !== "local_only") {
-    showAdminToast("Failed to save. Check your connection and try again.", "error");
+  if (res && res.success === false) {
+    showAdminToast("Failed to save: " + (res.error || "Please check your connection and try again."), "error");
     return;
   }
 
@@ -1041,13 +1041,23 @@ function importProducts(input) {
       const imported = JSON.parse(e.target.result);
       if (!Array.isArray(imported)) throw new Error();
       products = imported;
+      let failedProducts = [];
       for (const p of products) {
-        await db.saveProduct(p);
+        const res = await db.saveProduct(p);
+        if (res && res.success === false) {
+          failedProducts.push(`${p.name} (${res.error || "Unknown error"})`);
+        }
       }
       renderProductTable();
       await populateOrderProductDropdown();
-      showAdminToast(`✔  ${imported.length} products imported!`, "success");
-    } catch { showAdminToast("❌  Invalid JSON file", "error"); }
+      if (failedProducts.length > 0) {
+        showAdminToast(`Imported with errors. Failed to save: ${failedProducts.join(", ")}`, "error");
+      } else {
+        showAdminToast(`✔  ${imported.length} products imported!`, "success");
+      }
+    } catch (err) {
+      showAdminToast("❌  Invalid JSON file or import error", "error");
+    }
   };
   reader.readAsText(file);
 }
@@ -1082,13 +1092,21 @@ async function resetProductsToDefault() {
   }
   
   products = DEFAULT_PRODUCTS.map(p => ({ ...p }));
+  let failedProducts = [];
   for (const p of products) {
-    await db.saveProduct(p);
+    const res = await db.saveProduct(p);
+    if (res && res.success === false) {
+      failedProducts.push(`${p.name} (${res.error || "Unknown error"})`);
+    }
   }
   
   renderProductTable();
   await populateOrderProductDropdown();
-  showAdminToast('Products reset to defaults.', 'info');
+  if (failedProducts.length > 0) {
+    showAdminToast(`Failed to reset some products: ${failedProducts.join(", ")}`, "error");
+  } else {
+    showAdminToast('Products reset to defaults.', 'info');
+  }
 }
 
 /* ─── Toast ─────────────────────────────────────────────── */
@@ -1214,7 +1232,10 @@ async function optimizeDatabaseImages() {
       if (productModified) {
         p.images = newImages;
         p.image = newImages[0] || null;
-        await db.saveProduct(p);
+        const res = await db.saveProduct(p);
+        if (res && res.success === false) {
+          throw new Error(`Failed to save optimized product "${p.name}": ${res.error || "Unknown error"}`);
+        }
         optimizedCount++;
       }
     }
