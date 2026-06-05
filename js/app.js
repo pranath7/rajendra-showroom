@@ -1622,11 +1622,12 @@ function openUpiModal(amount) {
   // Also update the amount reminder inside processing screen
   const remEl = document.getElementById("upiAmtReminder");
   if (remEl) remEl.textContent = `₹${amount.toLocaleString("en-IN")}`;
-  // Update QR with exact amount embedded
-  const upiId = "pranath7@fam";
-  const qrData = encodeURIComponent(`upi://pay?pa=${upiId}&pn=Rajendra%20Showroom&am=${amount}&cu=INR&tn=Crockery%20Order`);
+  // Update VPA and QR code image
+  const upiId = "Q17629536@ybl";
+  const vpaEl = document.getElementById("upiVpaDisplay");
+  if (vpaEl) vpaEl.textContent = upiId;
   const qrEl = document.getElementById("upiQrImg");
-  if (qrEl) qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${qrData}`;
+  if (qrEl) qrEl.src = `images/payment-qr.jpg?v=3.20`;
   document.getElementById("upiScreen").style.display = "block";
   document.getElementById("upiProcessing").style.display = "none";
   document.getElementById("upiError").style.display = "none";
@@ -1699,7 +1700,7 @@ function startUpiTimer() {
 }
 
 function copyUpiId() {
-  const id = "pranath7@fam";
+  const id = "Q17629536@ybl";
   navigator.clipboard.writeText(id).then(() => {
     const btn = document.getElementById("upiCopyBtn");
     if (btn) {
@@ -1709,7 +1710,7 @@ function copyUpiId() {
     }
     showToast("✔ UPI ID copied to clipboard", "success");
   }).catch(() => {
-    showToast("pranath7@fam — copy manually", "info");
+    showToast("Q17629536@ybl — copy manually", "info");
   });
 }
 
@@ -1725,8 +1726,8 @@ function closeUpiModal() {
 function launchUpiApp(app) {
   if (!_pendingOrderData) return;
   const amount = _pendingOrderData.grand;
-  const upiId  = "pranath7@fam"; // Store UPI VPA
-  const name   = "Rajendra Showroom";
+  const upiId  = "Q17629536@ybl"; // Store UPI VPA
+  const name   = "PhonePeMerchant";
   const note   = "Crockery Order";
 
   // Build UPI deep link URI

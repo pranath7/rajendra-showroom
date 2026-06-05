@@ -84,7 +84,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="css/style.css?v=3.19">
+  <link rel="stylesheet" href="css/style.css?v=3.20">
 
   <!-- ═══ Meta Pixel ══════════════════════════════════════════ -->
   <script>
@@ -689,13 +689,13 @@
         <!-- Step 1: Pay -->
         <div class="utr-step-label">Step 1 — Scan & Pay</div>
         <div class="upi-qr-container">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi%3A%2F%2Fpay%3Fpa%3Dpranath7%40fam%26pn%3DRajendra%2BShowroom%26cu%3DINR"
+          <img src="images/payment-qr.jpg?v=3.20"
                alt="Scan to Pay" class="upi-qr-img" id="upiQrImg">
           <div class="upi-qr-caption">Scan with any UPI app</div>
         </div>
 
         <div class="upi-manual-pay-row">
-          <span class="upi-vpa-text" id="upiVpaDisplay">pranath7@fam</span>
+          <span class="upi-vpa-text" id="upiVpaDisplay">Q17629536@ybl</span>
           <button class="upi-copy-btn" onclick="copyUpiId()" id="upiCopyBtn">📋 Copy</button>
         </div>
         <div class="upi-amount-reminder">Pay exactly <strong id="upiAmtReminder"></strong></div>
@@ -894,10 +894,10 @@
   <!-- Firebase Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=3.19"></script>
-  <script src="js/db.js?v=3.19"></script>
+  <script src="js/firebase-config.js?v=3.20"></script>
+  <script src="js/db.js?v=3.20"></script>
   <script src="js/data.js?v=3.3"></script>
-  <script src="js/app.js?v=3.19"></script>
+  <script src="js/app.js?v=3.20"></script>
   <script>
     // View toggle
     function setView(v) {
