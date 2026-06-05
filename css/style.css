@@ -368,7 +368,24 @@ input, select, textarea { font-family: inherit; }
   font-weight: 600;
   letter-spacing: 0.5px;
 }
-.category-list { padding: 10px 0; }
+.category-list {
+  padding: 10px 0;
+  max-height: 380px;
+  overflow-y: auto;
+}
+.category-list::-webkit-scrollbar {
+  width: 5px;
+}
+.category-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.category-list::-webkit-scrollbar-thumb {
+  background: var(--border-dark);
+  border-radius: 10px;
+}
+.category-list::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-dark);
+}
 .cat-item {
   display: flex;
   align-items: center;
