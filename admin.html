@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="images/logo.png?v=3.13">
   <title>Admin Panel — Rajendra Showroom</title>
-  <link rel="stylesheet" href="css/style.css?v=3.18">
+  <link rel="stylesheet" href="css/style.css?v=3.19">
   <style>
     /* ━━━ Base overrides ━━━ */
     body { background: #F0EDE8; }
@@ -1224,22 +1224,19 @@
               <div class="form-group" style="display: flex; align-items: center; padding-top: 10px;">
                 <label class="form-label" style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
                   <input type="checkbox" id="enableSizesToggle" onchange="toggleSizeFields(this.checked)" style="width: 17px; height: 17px; accent-color: var(--gold-dark);">
-                  <span style="font-size: 14px; font-weight: 600;">Product has Small & Big size variants?</span>
+                  <span style="font-size: 14px; font-weight: 600;">Product has size variants?</span>
                 </label>
               </div>
 
               <!-- Size Inputs Container -->
               <div class="form-group full" id="sizeFieldsContainer" style="display: none; background: rgba(212, 175, 55, 0.05); border: 1.5px solid var(--border-dark); padding: 16px; border-radius: 8px; margin-top: 5px;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                  <div>
-                    <label class="form-label" style="font-size: 12px; font-weight: 700;">Small Size (150ml) Price (₹) *</label>
-                    <input type="number" id="sizePriceSmall" class="form-input" placeholder="e.g., 350" min="1" step="1">
-                  </div>
-                  <div>
-                    <label class="form-label" style="font-size: 12px; font-weight: 700;">Big Size (300ml) Price (₹) *</label>
-                    <input type="number" id="sizePriceBig" class="form-input" placeholder="e.g., 550" min="1" step="1">
-                  </div>
+                <div style="font-size: 12.5px; font-weight: 600; margin-bottom: 10px; color: var(--text-light);">Define Size Options (e.g., "Small (150ml)", "Big (300ml)") and their prices:</div>
+                <div id="sizeVariantsList" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px;">
+                  <!-- Dynamic rows added here by JS -->
                 </div>
+                <button type="button" class="btn-edit-row" style="padding: 6px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 5px; width: auto; background: #fff; border: 1px solid var(--border-dark); border-radius: 6px; cursor: pointer;" onclick="addSizeVariantRow('', '')">
+                  ➕ Add Size Option
+                </button>
                 <input type="hidden" id="productSizes" value="">
               </div>
 
@@ -1545,9 +1542,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-  <script src="js/firebase-config.js?v=3.18"></script>
-  <script src="js/db.js?v=3.18"></script>
+  <script src="js/firebase-config.js?v=3.19"></script>
+  <script src="js/db.js?v=3.19"></script>
   <script src="js/data.js?v=3.0"></script>
-  <script src="js/admin.js?v=3.18"></script>
+  <script src="js/admin.js?v=3.19"></script>
 </body>
 </html>

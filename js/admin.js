@@ -924,10 +924,33 @@ function renderImagePreviews() {
   grid.innerHTML = html;
 }
 
+function addSizeVariantRow(name = '', price = '') {
+  const list = document.getElementById("sizeVariantsList");
+  if (!list) return;
+  
+  const row = document.createElement("div");
+  row.className = "size-variant-row";
+  row.style = "display: grid; grid-template-columns: 1.5fr 1fr auto; gap: 10px; align-items: center;";
+  
+  row.innerHTML = `
+    <input type="text" class="form-input size-var-name" placeholder="e.g. Small (150ml)" value="${name}" style="margin:0;">
+    <input type="number" class="form-input size-var-price" placeholder="Price (₹)" value="${price}" min="1" step="1" style="margin:0;">
+    <button type="button" class="btn-delete-row" style="padding: 8px 12px; margin: 0; font-size: 14px; background:#e74c3c; border-color:#e74c3c; color:#fff;" onclick="this.parentNode.remove()">✕</button>
+  `;
+  
+  list.appendChild(row);
+}
+
 function toggleSizeFields(show) {
   const container = document.getElementById("sizeFieldsContainer");
   if (container) {
     container.style.display = show ? "block" : "none";
+  }
+  
+  const list = document.getElementById("sizeVariantsList");
+  if (show && list && list.children.length === 0) {
+    addSizeVariantRow("Small (150ml)", "");
+    addSizeVariantRow("Big (300ml)", "");
   }
 }
 
@@ -944,15 +967,16 @@ async function saveProduct() {
   const enableSizes = document.getElementById("enableSizesToggle").checked;
   let sizesStr = "";
   if (enableSizes) {
-    const priceSmall = document.getElementById("sizePriceSmall").value.trim();
-    const priceBig = document.getElementById("sizePriceBig").value.trim();
-    if (priceSmall && priceBig) {
-      sizesStr = `Small (150ml): ${priceSmall}, Big (300ml): ${priceBig}`;
-    } else if (priceSmall) {
-      sizesStr = `Small (150ml): ${priceSmall}`;
-    } else if (priceBig) {
-      sizesStr = `Big (300ml): ${priceBig}`;
-    }
+    const rows = document.querySelectorAll("#sizeVariantsList .size-variant-row");
+    const sizeParts = [];
+    rows.forEach(row => {
+      const sName = row.querySelector(".size-var-name").value.trim();
+      const sPrice = row.querySelector(".size-var-price").value.trim();
+      if (sName && sPrice) {
+        sizeParts.push(`${sName}: ${sPrice}`);
+      }
+    });
+    sizesStr = sizeParts.join(", ");
   }
 
   // Parse colors as a list of trimmed strings
@@ -1068,22 +1092,19 @@ function editProduct(id) {
     toggleEl.checked = hasSizes;
     toggleSizeFields(hasSizes);
   }
-  const smallEl = document.getElementById("sizePriceSmall");
-  const bigEl = document.getElementById("sizePriceBig");
-  if (smallEl) smallEl.value = "";
-  if (bigEl) bigEl.value = "";
   
-  if (hasSizes) {
+  const list = document.getElementById("sizeVariantsList");
+  if (list) list.innerHTML = "";
+  
+  if (hasSizes && list) {
     const parts = sizesStr.split(",");
     parts.forEach(part => {
       const sub = part.split(":");
       if (sub.length >= 2) {
-        const name = sub[0].trim().toLowerCase();
-        const val = sub[1].trim();
-        if (name.includes("small") && smallEl) {
-          smallEl.value = val;
-        } else if (name.includes("big") && bigEl) {
-          bigEl.value = val;
+        const price = sub.pop().trim();
+        const name = sub.join(":").trim();
+        if (name && price) {
+          addSizeVariantRow(name, price);
         }
       }
     });
@@ -1160,10 +1181,8 @@ function resetForm() {
     toggleEl.checked = false;
     toggleSizeFields(false);
   }
-  const smallEl = document.getElementById("sizePriceSmall");
-  const bigEl = document.getElementById("sizePriceBig");
-  if (smallEl) smallEl.value = "";
-  if (bigEl) bigEl.value = "";
+  const list = document.getElementById("sizeVariantsList");
+  if (list) list.innerHTML = "";
 
   renderImagePreviews();
 }
