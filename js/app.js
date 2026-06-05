@@ -238,14 +238,15 @@ function productCardHTML(p) {
 
   const badgeHTML = (discount > 0 && !isPriceOnRequest)
     ? `<span class="product-badge badge-sale">−${discount}%</span>`
-    : `<span class="product-badge badge-new">New</span>`;
+    : "";
+  const isWishlisted = wishlist.some(x => String(x) === String(p.id));
 
   return `
-    <div class="product-card" onclick="openModal(${p.id})">
+    <div class="product-card" onclick="openModal('${p.id}')">
       <div class="product-img-wrap">
         ${imgHTML}
         ${badgeHTML}
-        <button class="product-wishlist ${wishlist.includes(p.id) ? 'active' : ''}" onclick="event.stopPropagation(); toggleWishlist(${p.id})">${wishlist.includes(p.id) ? '♥' : '♡'}</button>
+        <button class="product-wishlist ${isWishlisted ? 'active' : ''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${isWishlisted ? '♥' : '♡'}</button>
       </div>
       <div class="product-info">
         <div class="product-category">${p.category}</div>
@@ -378,7 +379,7 @@ function bindEvents() {
 
 /* ─── Cart Functions ─────────────────────────────────────── */
 function addToCart(id, qty = 1) {
-  const product = allProducts.find(p => p.id === id);
+  const product = allProducts.find(p => String(p.id) === String(id));
   if (!product) return;
 
   let color = window.selectedProductColor;
@@ -403,7 +404,7 @@ function addToCart(id, qty = 1) {
     }
   }
 
-  const existing = cart.find(i => i.id === id && i.selectedColor === color && i.selectedSize === size);
+  const existing = cart.find(i => String(i.id) === String(id) && i.selectedColor === color && i.selectedSize === size);
   if (existing) {
     existing.qty += qty;
   } else {
@@ -434,7 +435,7 @@ function addToCart(id, qty = 1) {
 }
 
 function changeQty(id, color, size, delta) {
-  const item = cart.find(i => i.id === id && i.selectedColor === color && i.selectedSize === size);
+  const item = cart.find(i => String(i.id) === String(id) && i.selectedColor === color && i.selectedSize === size);
   if (item) {
     item.qty += delta;
     if (item.qty <= 0) {
@@ -447,7 +448,7 @@ function changeQty(id, color, size, delta) {
 }
 
 function removeFromCart(id, color, size) {
-  cart = cart.filter(i => !(i.id === id && i.selectedColor === color && i.selectedSize === size));
+  cart = cart.filter(i => !(String(i.id) === String(id) && i.selectedColor === color && i.selectedSize === size));
   saveCart();
   renderCartItems();
   updateCartUI();
@@ -490,12 +491,12 @@ function renderCartItems() {
         ${item.selectedColor ? `<div class="cart-item-variant" style="font-size:11.5px; color:var(--text-light); margin-top:2px;">Color: ${item.selectedColor}</div>` : ""}
         <div class="cart-item-price">${item.price > 0 ? '₹' + item.price.toLocaleString("en-IN") : 'Price on Request'}</div>
         <div class="cart-item-controls">
-          <button class="qty-btn" onclick="changeQty(${item.id}, ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'}, -1)">−</button>
+          <button class="qty-btn" onclick="changeQty('${item.id}', ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'}, -1)">−</button>
           <span class="qty-val">${item.qty}</span>
-          <button class="qty-btn" onclick="changeQty(${item.id}, ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'}, 1)">+</button>
+          <button class="qty-btn" onclick="changeQty('${item.id}', ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'}, 1)">+</button>
         </div>
       </div>
-      <button class="cart-item-remove" onclick="removeFromCart(${item.id}, ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'})">×</button>
+      <button class="cart-item-remove" onclick="removeFromCart('${item.id}', ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'})">×</button>
     </div>`).join("");
 
   document.getElementById("cartSubtotal").textContent = `₹${subtotal.toLocaleString("en-IN")}`;
@@ -520,7 +521,7 @@ function closeCart() {
 
 /* ─── WhatsApp Functions ─────────────────────────────────── */
 function whatsappProduct(id) {
-  const p = allProducts.find(x => x.id === id);
+  const p = allProducts.find(x => String(x.id) === String(id));
   if (!p) return;
   
   let sizeText = "";
@@ -572,7 +573,7 @@ function whatsappCart() {
 let currentModalQty = 1;
 
 function openModal(id) {
-  const p = allProducts.find(x => x.id === id);
+  const p = allProducts.find(x => String(x.id) === String(id));
   if (!p) return;
 
   // ── Meta Pixel: ViewContent ────────────────────────────────
@@ -634,7 +635,7 @@ function openModal(id) {
         ${hasMultipleMedia ? `
         <div class="modal-thumbnails">
           ${productImages.map((img, idx) => `
-            <div class="modal-thumb ${idx === 0 ? 'active' : ''}" onclick="setModalMainImg(this, ${p.id}, ${idx})">
+            <div class="modal-thumb ${idx === 0 ? 'active' : ''}" onclick="setModalMainImg(this, '${p.id}', ${idx})">
               <img src="${img}" alt="${p.name} - image ${idx + 1}">
             </div>
           `).join("")}
@@ -691,6 +692,7 @@ function openModal(id) {
   }
 
   // Variant Sizes Setup HTML
+  let sizeSelectorHTML = "";
   if (productSizes.length > 0) {
     const swatches = productSizes.map(sz => {
       const isSelected = sz.name === window.selectedProductSize;
@@ -721,7 +723,7 @@ function openModal(id) {
       <h3 class="cross-sell-title">Pairs well with</h3>
       <div class="cross-sell-list">
         ${crossSells.map(item => `
-          <div class="cross-sell-item" onclick="openModal(${item.id})">
+          <div class="cross-sell-item" onclick="openModal('${item.id}')">
             <div class="cross-sell-img">
               ${item.image ? `<img src="${item.image}" alt="${item.name}">` : "🍽"}
             </div>
@@ -742,7 +744,7 @@ function openModal(id) {
       <h3 class="related-products-title">You may also like</h3>
       <div class="related-products-grid">
         ${relatedList.map(item => `
-          <div class="related-card" onclick="openModal(${item.id})">
+          <div class="related-card" onclick="openModal('${item.id}')">
             <div class="related-card-img">
               ${item.image ? `<img src="${item.image}" alt="${item.name}">` : `<div style="font-size:36px;opacity:0.25;text-align:center;padding-top:25%;">🍽</div>`}
               ${(item.originalPrice > item.price && item.price > 0) ? `<span class="related-card-badge">Sale</span>` : ""}
@@ -814,20 +816,20 @@ function openModal(id) {
         <!-- Express Shipping Notice -->
         <div class="express-shipping-notice">
           🚚 &nbsp;<span>Need Express Shipping?</span>
-          <a href="#" onclick="whatsappExpressShipping(${p.id}); return false;">Click here</a>
+          <a href="#" onclick="whatsappExpressShipping('${p.id}'); return false;">Click here</a>
         </div>
         
         <!-- Bulk Order Notice -->
         <div class="bulk-order-notice">
           📦 &nbsp;<span>Want to buy this in bulk?</span>
-          <a href="#" onclick="whatsappBulkOrder(${p.id}); return false;">Click here</a>
+          <a href="#" onclick="whatsappBulkOrder('${p.id}'); return false;">Click here</a>
         </div>
 
         <div class="modal-actions">
-          <button class="btn-add-cart-lg" onclick="addToCart(${p.id}, currentModalQty); closeModal(); openCart();">
+          <button class="btn-add-cart-lg" onclick="addToCart('${p.id}', currentModalQty); closeModal(); openCart();">
             Add to cart
           </button>
-          <button class="btn-wa-lg" onclick="buyItNow(${p.id})">
+          <button class="btn-wa-lg" onclick="buyItNow('${p.id}')">
             Buy It Now
           </button>
         </div>
@@ -1085,7 +1087,7 @@ function renderWishlistItems() {
     if (!item) return "";
     return `
       <div class="wishlist-item" style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--border-dark);">
-        <div style="display:flex; align-items:center; gap:10px; cursor:pointer; flex:1;" onclick="closeWishlist(); openModal(${item.id});">
+        <div style="display:flex; align-items:center; gap:10px; cursor:pointer; flex:1;" onclick="closeWishlist(); openModal('${item.id}');">
           <div style="width:50px; height:50px; border-radius:6px; overflow:hidden; background:var(--bg-warm); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
             ${item.image ? `<img src="${item.image}" style="width:100%; height:100%; object-fit:cover;">` : "🍽"}
           </div>
@@ -1095,8 +1097,8 @@ function renderWishlistItems() {
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
-          <button onclick="addToCart(${item.id}); showToast('🛒 Added to Cart!', 'success');" style="padding:6px 10px; background:var(--text); color:#fff; border:none; border-radius:6px; font-size:11.5px; font-weight:700; cursor:pointer;">Add to Cart</button>
-          <button onclick="toggleWishlist(${item.id})" style="background:none; border:none; color:#ff4d4d; font-size:18px; cursor:pointer; padding:5px;">🗑</button>
+          <button onclick="addToCart('${item.id}'); showToast('🛒 Added to Cart!', 'success');" style="padding:6px 10px; background:var(--text); color:#fff; border:none; border-radius:6px; font-size:11.5px; font-weight:700; cursor:pointer;">Add to Cart</button>
+          <button onclick="toggleWishlist('${item.id}')" style="background:none; border:none; color:#ff4d4d; font-size:18px; cursor:pointer; padding:5px;">🗑</button>
         </div>
       </div>
     `;
