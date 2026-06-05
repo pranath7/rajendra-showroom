@@ -2232,3 +2232,122 @@ function closeMobileMenu() {
   document.body.style.overflow = "";
 }
 
+// --- Integrated Gift Card Modal Controls ---
+let activeGiftCardValue = 1000;
+
+function openGiftCardModal() {
+  closeMobileMenu();
+  const modal = document.getElementById("giftCardModal");
+  const overlay = document.getElementById("giftCardOverlay");
+  if (modal && overlay) {
+    modal.classList.add("open");
+    overlay.classList.add("visible");
+    document.body.style.overflow = "hidden";
+    
+    // Reset inputs
+    const forIn = document.getElementById("giftFor");
+    const fromIn = document.getElementById("giftFrom");
+    const msgIn = document.getElementById("giftMessage");
+    const customIn = document.getElementById("customValueInput");
+    
+    if (forIn) forIn.value = "";
+    if (fromIn) fromIn.value = "";
+    if (msgIn) msgIn.value = "";
+    if (customIn) customIn.value = "";
+    
+    // Set preset active
+    const presets = document.querySelectorAll("#giftCardModal .preset-btn");
+    presets.forEach(btn => btn.classList.remove("active"));
+    if (presets[1]) presets[1].classList.add("active"); // default 1000
+    activeGiftCardValue = 1000;
+    
+    updateGiftCardLivePreview();
+  }
+}
+
+function closeGiftCardModal() {
+  const modal = document.getElementById("giftCardModal");
+  const overlay = document.getElementById("giftCardOverlay");
+  if (modal && overlay) {
+    modal.classList.remove("open");
+    overlay.classList.remove("visible");
+    document.body.style.overflow = "";
+  }
+}
+
+function setGiftCardPresetValue(val, el) {
+  const presets = document.querySelectorAll("#giftCardModal .preset-btn");
+  presets.forEach(btn => btn.classList.remove("active"));
+  if (el) el.classList.add("active");
+  
+  const customIn = document.getElementById("customValueInput");
+  if (customIn) customIn.value = "";
+  
+  activeGiftCardValue = val;
+  updateGiftCardLivePreview();
+}
+
+function updateGiftCardCustomValue(el) {
+  const presets = document.querySelectorAll("#giftCardModal .preset-btn");
+  presets.forEach(btn => btn.classList.remove("active"));
+  
+  const val = parseFloat(el.value);
+  activeGiftCardValue = isNaN(val) || val <= 0 ? 0 : val;
+  updateGiftCardLivePreview();
+}
+
+function updateGiftCardLivePreview() {
+  // Amount
+  const amtEl = document.getElementById("giftMockAmount");
+  if (amtEl) amtEl.textContent = `₹${activeGiftCardValue.toLocaleString("en-IN")}`;
+  
+  // For
+  const forVal = document.getElementById("giftFor")?.value.trim();
+  const forEl = document.getElementById("giftMockFor");
+  if (forEl) forEl.textContent = forVal || "Loved One's Name";
+  
+  // From
+  const fromVal = document.getElementById("giftFrom")?.value.trim();
+  const fromEl = document.getElementById("giftMockFrom");
+  if (fromEl) fromEl.textContent = fromVal || "Your Name";
+  
+  // Message
+  const msgVal = document.getElementById("giftMessage")?.value.trim();
+  const msgEl = document.getElementById("giftMockMessage");
+  if (msgEl) msgEl.textContent = msgVal ? `"${msgVal}"` : `"Wishing you a beautiful home and dining experience!"`;
+}
+
+function sendGiftCardWhatsAppRequest() {
+  const recipient = document.getElementById("giftFor")?.value.trim();
+  const sender = document.getElementById("giftFrom")?.value.trim();
+  const msg = document.getElementById("giftMessage")?.value.trim();
+  
+  if (activeGiftCardValue <= 0) {
+    showToast("Please select or enter a valid Gift Card amount", "error");
+    return;
+  }
+  if (!recipient) {
+    showToast("Please enter the Recipient's Name", "error");
+    document.getElementById("giftFor")?.focus();
+    return;
+  }
+  if (!sender) {
+    showToast("Please enter your name", "error");
+    document.getElementById("giftFrom")?.focus();
+    return;
+  }
+  
+  const customMessage = msg || "Wishing you a beautiful home and dining experience!";
+  
+  const waMessage = `Hi! I would like to buy a Rajendra Showroom E-Gift Card for my loved one. Here are the request details:\n\n` +
+                    `*Gift Card Value:* ₹${activeGiftCardValue.toLocaleString("en-IN")}\n` +
+                    `*For (Recipient):* ${recipient}\n` +
+                    `*From (Sender):* ${sender}\n` +
+                    `*Personal Message:* "${customMessage}"\n\n` +
+                    `Please share your UPI details to complete the purchase so the Voucher Code can be generated. Thank you!`;
+                    
+  const finalUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waMessage)}`;
+  window.open(finalUrl, "_blank");
+}
+
+

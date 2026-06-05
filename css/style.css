@@ -3096,3 +3096,84 @@ input, select, textarea { font-family: inherit; }
     top: 0;
   }
 }
+
+/* ─── Integrated Gift Card Modal Styles ─── */
+.giftcard-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  backdrop-filter: blur(6px);
+}
+.giftcard-modal-overlay.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+.giftcard-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.92);
+  width: 90%;
+  max-width: 820px;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 10010;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+.giftcard-modal.open {
+  opacity: 1;
+  pointer-events: all;
+  transform: translate(-50%, -50%) scale(1);
+}
+.giftcard-modal-inner {
+  position: relative;
+  padding: 36px;
+}
+.giftcard-modal-content {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 30px;
+}
+.preset-btn {
+  padding: 10px;
+  background: var(--bg);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--radius);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.preset-btn:hover {
+  border-color: var(--text-light);
+}
+.preset-btn.active {
+  border-color: var(--gold);
+  background: #fffdf9;
+  color: var(--gold-dark);
+  box-shadow: 0 2px 8px rgba(191, 160, 106, 0.15);
+}
+
+@media (max-width: 768px) {
+  .giftcard-modal {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .giftcard-modal-inner {
+    padding: 36px 20px 20px;
+  }
+  .giftcard-modal-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+

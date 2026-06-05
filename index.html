@@ -135,9 +135,9 @@
         <a href="https://wa.me/916369142027" target="_blank" style="color:#25D366; font-weight:600; display: flex; align-items: center; gap: 4px;">
           <span>💬</span> <span class="action-text">WhatsApp</span>
         </a>
-        <a href="giftcard.html" style="font-weight:600; display: flex; align-items: center; gap: 4px; margin-right: 5px;">
+        <button class="giftcard-trigger" id="giftCardTrigger" onclick="openGiftCardModal()" style="display:flex; align-items:center; gap:5px; background:none; border:none; cursor:pointer; font-size:15px; color:var(--text); font-weight:600; padding:0; margin-right:10px;">
           <span>🎫</span> <span class="action-text">Gift Card</span>
-        </a>
+        </button>
         <button class="wishlist-trigger" id="wishlistTrigger" onclick="openWishlist()" style="display:flex; align-items:center; gap:5px; background:none; border:none; cursor:pointer; font-size:15px; color:var(--text); font-weight:600; padding:0; margin-right:10px;">
           <span class="wishlist-icon" style="font-size:18px;">♡</span>
           <span class="action-text">Wishlist</span>
@@ -366,7 +366,7 @@
             <a href="#" onclick="setCategory('Glassware')">Glassware</a>
             <a href="#" onclick="setCategory('Cookware')">Cookware</a>
             <a href="#" onclick="setCategory('Gift Sets')">Gift Sets</a>
-            <a href="giftcard.html" style="color: var(--gold-light); font-weight: 600;">🎫 Buy Gift Card</a>
+            <a href="#" onclick="openGiftCardModal(); return false;" style="color: var(--gold-light); font-weight: 600;">🎫 Buy Gift Card</a>
           </div>
         </div>
 
@@ -751,6 +751,85 @@
     <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.99 2C6.477 2 2 6.477 2 11.99c0 1.72.454 3.33 1.24 4.73L2 22l5.47-1.22A9.957 9.957 0 0011.99 22C17.51 22 22 17.52 22 11.99 22 6.477 17.51 2 11.99 2zm0 18.18c-1.65 0-3.19-.44-4.52-1.21l-.32-.19-3.37.75.8-3.28-.21-.34A8.17 8.17 0 013.82 12c0-4.51 3.67-8.18 8.17-8.18 4.51 0 8.18 3.67 8.18 8.18 0 4.51-3.67 8.18-8.18 8.18z"/></svg>
   </a>
 
+  <!-- ═══ Gift Card Modal ════════════════════════════════════ -->
+  <div class="giftcard-modal-overlay" id="giftCardOverlay" onclick="closeGiftCardModal()"></div>
+  <div class="giftcard-modal" id="giftCardModal">
+    <div class="giftcard-modal-inner">
+      <button class="modal-close" style="top: 16px; right: 16px; width: 36px; height: 36px;" onclick="closeGiftCardModal()">✕</button>
+      <div class="giftcard-modal-content">
+        <!-- Configuration Form (Left Side) -->
+        <div class="giftcard-form-side" style="text-align: left;">
+          <h2 style="font-family: var(--font-serif); font-size: 24px; margin-bottom: 6px; color: var(--text);">🎫 Purchase E-Gift Card</h2>
+          <p style="font-size: 13px; color: var(--text-light); margin-bottom: 20px; line-height: 1.45;">Treat your loved ones to elegant home crockery. Choose a value, add a custom message, and buy via WhatsApp.</p>
+          
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 6px;">Select Gift Card Value (₹)</label>
+            <div class="value-presets" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px;">
+              <button type="button" class="preset-btn" onclick="setGiftCardPresetValue(500, this)" style="padding: 8px; font-size: 12.5px;">₹500</button>
+              <button type="button" class="preset-btn active" onclick="setGiftCardPresetValue(1000, this)" style="padding: 8px; font-size: 12.5px;">₹1000</button>
+              <button type="button" class="preset-btn" onclick="setGiftCardPresetValue(2000, this)" style="padding: 8px; font-size: 12.5px;">₹2000</button>
+              <button type="button" class="preset-btn" onclick="setGiftCardPresetValue(5000, this)" style="padding: 8px; font-size: 12.5px;">₹5000</button>
+            </div>
+            <div style="position:relative;">
+              <input type="number" id="customValueInput" placeholder="Or enter Custom Amount" oninput="updateGiftCardCustomValue(this)"
+                     style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1.5px solid var(--border-dark); border-radius: 8px; font-size: 13.5px; outline: none; background: var(--bg);">
+              <span style="position:absolute; right:14px; top:50%; transform:translateY(-50%); font-weight:700; color:#888; font-size:12px; pointer-events:none;">INR</span>
+            </div>
+          </div>
+          
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">For</label>
+              <input type="text" id="giftFor" placeholder="Recipient's Name" oninput="updateGiftCardLivePreview()" maxlength="24"
+                     style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1.5px solid var(--border-dark); border-radius: 8px; font-size: 13.5px; outline: none; background: var(--bg);">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">From</label>
+              <input type="text" id="giftFrom" placeholder="Your Name" oninput="updateGiftCardLivePreview()" maxlength="24"
+                     style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1.5px solid var(--border-dark); border-radius: 8px; font-size: 13.5px; outline: none; background: var(--bg);">
+            </div>
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 18px;">
+            <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Greeting Message</label>
+            <textarea id="giftMessage" rows="2" placeholder="Wishing you a beautiful dining experience!" oninput="updateGiftCardLivePreview()" maxlength="120"
+                      style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1.5px solid var(--border-dark); border-radius: 8px; font-size: 13.5px; outline: none; resize: none; background: var(--bg); font-family: var(--font-sans);"></textarea>
+          </div>
+          
+          <button class="btn-wa-lg" onclick="sendGiftCardWhatsAppRequest()" style="width: 100%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; background: #25D366; color: white; padding: 12px; border-radius: 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+            💬 &nbsp; Buy Gift Card via WhatsApp
+          </button>
+        </div>
+        
+        <!-- Live Preview (Right Side) -->
+        <div class="giftcard-preview-side" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-warm); padding: 24px; border-radius: 12px; border: 1px solid var(--border);">
+          <!-- Visual Mock Card -->
+          <div class="giftcard-mock" id="giftcardMock" style="width: 100%; max-width: 320px; height: 190px; border-radius: 12px; position: relative; overflow: hidden; box-shadow: var(--shadow-md); background: radial-gradient(circle at 10% 20%, #2b2a27 0%, #111110 100%); border: 2px solid var(--gold); color: var(--white); padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; text-align: left;">
+            <div class="mock-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <img class="mock-brand-logo" src="images/logo.png?v=3.16" alt="Rajendra Logo" style="height: 24px; filter: brightness(1.2); width: auto; object-fit: contain;">
+              <div class="mock-title" style="font-family: var(--font-serif); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold-light); font-weight: 500; border: 1px solid var(--gold); padding: 2px 6px; border-radius: 4px;">E-Gift Card</div>
+            </div>
+            
+            <div class="mock-amount" id="giftMockAmount" style="font-size: 26px; font-family: var(--font-serif); color: var(--gold-light); font-weight: 600; margin-top: 2px;">₹1,000</div>
+            
+            <div style="display:flex; flex-direction:column; margin-top: auto;">
+              <div class="mock-details" style="font-size: 10px; color: rgba(255,255,255,0.85); line-height: 1.25;">
+                <div class="mock-details-row"><span style="color: var(--gold-light); font-weight: bold; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; width: 32px;">For:</span> <strong id="giftMockFor">Loved One's Name</strong></div>
+                <div class="mock-details-row"><span style="color: var(--gold-light); font-weight: bold; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; width: 32px;">From:</span> <strong id="giftMockFrom">Your Name</strong></div>
+              </div>
+              <div class="mock-message" id="giftMockMessage" style="font-size: 9px; font-style: italic; color: rgba(255,255,255,0.65); border-left: 2px solid var(--gold); padding-left: 6px; margin-top: 4px; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">"Wishing you a beautiful home and dining experience!"</div>
+            </div>
+          </div>
+          
+          <!-- Small Hint -->
+          <div style="font-size: 11px; color: var(--text-light); text-align: center; margin-top: 15px; line-height: 1.45;">
+            After purchase confirmation, we will generate and register your unique voucher code in the database.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ Info Modal (About, Policies) ════════════════════════ -->
   <div class="modal-overlay" id="infoOverlay" onclick="closeInfoModal()"></div>
   <div id="infoModal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); width: 90%; max-width: 550px; max-height: 85vh; border-radius: 12px; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 11000; background: #fff; box-shadow: 0 20px 60px rgba(0,0,0,0.25); overflow-y: auto;">
@@ -792,7 +871,7 @@
       <div class="mm-section">
         <h4 class="mm-section-title">Information</h4>
         <ul class="mm-links">
-          <li><a href="giftcard.html" style="color: var(--gold-dark); font-weight: bold;">🎫 Buy Gift Card</a></li>
+          <li><a href="#" onclick="openGiftCardModal(); closeMobileMenu(); return false;" style="color: var(--gold-dark); font-weight: bold;">🎫 Buy Gift Card</a></li>
           <li><a href="#" onclick="openInfoModal('about'); closeMobileMenu(); return false;">About Us</a></li>
           <li><a href="#" onclick="openInfoModal('delivery'); closeMobileMenu(); return false;">Delivery Policy</a></li>
           <li><a href="#" onclick="openInfoModal('return'); closeMobileMenu(); return false;">Return Policy</a></li>
