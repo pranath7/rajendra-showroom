@@ -189,7 +189,7 @@ input, select, textarea { font-family: inherit; }
 
 /* ─── Nav Bar ────────────────────────────────────────────── */
 .site-nav {
-  display: block;
+  display: none;
   border-top: 1px solid var(--border);
   background: var(--white);
 }
