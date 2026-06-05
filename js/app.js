@@ -390,17 +390,30 @@ function addToCart(id, qty = 1) {
     }
   }
 
-  const existing = cart.find(i => i.id === id && i.selectedColor === color);
+  let size = window.selectedProductSize;
+  let price = product.price;
+  if (size) {
+    price = window.selectedProductPrice;
+  } else {
+    const productSizes = parseProductSizes(product.sizes);
+    if (productSizes.length > 0) {
+      size = productSizes[0].name;
+      price = productSizes[0].price;
+    }
+  }
+
+  const existing = cart.find(i => i.id === id && i.selectedColor === color && i.selectedSize === size);
   if (existing) {
     existing.qty += qty;
   } else {
     cart.push({ 
       id: product.id, 
       name: product.name, 
-      price: product.price, 
+      price: price, 
       image: product.image, 
       qty: qty,
-      selectedColor: color
+      selectedColor: color,
+      selectedSize: size
     });
   }
   saveCart();
@@ -412,19 +425,19 @@ function addToCart(id, qty = 1) {
       content_ids:  [String(product.id)],
       content_name: product.name,
       content_type: 'product',
-      value:        product.price * qty,
+      value:        price * qty,
       currency:     'INR'
     });
   }
   renderCartItems();
 }
 
-function changeQty(id, color, delta) {
-  const item = cart.find(i => i.id === id && i.selectedColor === color);
+function changeQty(id, color, size, delta) {
+  const item = cart.find(i => i.id === id && i.selectedColor === color && i.selectedSize === size);
   if (item) {
     item.qty += delta;
     if (item.qty <= 0) {
-      removeFromCart(id, color);
+      removeFromCart(id, color, size);
     } else {
       saveCart();
       renderCartItems();
@@ -432,8 +445,8 @@ function changeQty(id, color, delta) {
   }
 }
 
-function removeFromCart(id, color) {
-  cart = cart.filter(i => !(i.id === id && i.selectedColor === color));
+function removeFromCart(id, color, size) {
+  cart = cart.filter(i => !(i.id === id && i.selectedColor === color && i.selectedSize === size));
   saveCart();
   renderCartItems();
   updateCartUI();
@@ -472,15 +485,16 @@ function renderCartItems() {
       </div>
       <div class="cart-item-info">
         <div class="cart-item-name">${item.name}</div>
+        ${item.selectedSize ? `<div class="cart-item-variant" style="font-size:11.5px; color:var(--text-light); margin-top:2px;">Size: ${item.selectedSize}</div>` : ""}
         ${item.selectedColor ? `<div class="cart-item-variant" style="font-size:11.5px; color:var(--text-light); margin-top:2px;">Color: ${item.selectedColor}</div>` : ""}
         <div class="cart-item-price">₹${item.price.toLocaleString("en-IN")}</div>
         <div class="cart-item-controls">
-          <button class="qty-btn" onclick="changeQty(${item.id}, ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, -1)">−</button>
+          <button class="qty-btn" onclick="changeQty(${item.id}, ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'}, -1)">−</button>
           <span class="qty-val">${item.qty}</span>
-          <button class="qty-btn" onclick="changeQty(${item.id}, ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, 1)">+</button>
+          <button class="qty-btn" onclick="changeQty(${item.id}, ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'}, 1)">+</button>
         </div>
       </div>
-      <button class="cart-item-remove" onclick="removeFromCart(${item.id}, ${item.selectedColor ? `'${item.selectedColor}'` : 'null'})">×</button>
+      <button class="cart-item-remove" onclick="removeFromCart(${item.id}, ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'})">×</button>
     </div>`).join("");
 
   document.getElementById("cartSubtotal").textContent = `₹${subtotal.toLocaleString("en-IN")}`;
@@ -507,8 +521,31 @@ function closeCart() {
 function whatsappProduct(id) {
   const p = allProducts.find(x => x.id === id);
   if (!p) return;
+  
+  let sizeText = "";
+  let price = p.price;
+  
+  let size = window.selectedProductSize;
+  if (size) {
+    price = window.selectedProductPrice;
+    sizeText = `\nSize: ${size}`;
+  } else {
+    const productSizes = parseProductSizes(p.sizes);
+    if (productSizes.length > 0) {
+      size = productSizes[0].name;
+      price = productSizes[0].price;
+      sizeText = `\nSize: ${size}`;
+    }
+  }
+
+  let colorText = "";
+  let color = window.selectedProductColor;
+  if (color) {
+    colorText = `\nColor: ${color}`;
+  }
+
   const msg = encodeURIComponent(
-    `Hi! I'm interested in ordering:\n\n*${p.name}*\nPrice: ₹${p.price.toLocaleString("en-IN")}\n\nCould you please confirm availability and delivery details?\n\nThank you!`
+    `Hi! I'm interested in ordering:\n\n*${p.name}*${sizeText}${colorText}\nPrice: ₹${price.toLocaleString("en-IN")}\n\nCould you please confirm availability and delivery details?\n\nThank you!`
   );
   window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, "_blank");
 }
@@ -519,8 +556,9 @@ function whatsappCart() {
     return;
   }
   const itemLines = cart.map(i => {
-    const variantText = i.selectedColor ? ` (${i.selectedColor})` : "";
-    return `• ${i.name}${variantText} × ${i.qty} — ₹${(i.price * i.qty).toLocaleString("en-IN")}`;
+    const sizeText = i.selectedSize ? ` (Size: ${i.selectedSize})` : "";
+    const colorText = i.selectedColor ? ` (Color: ${i.selectedColor})` : "";
+    return `• ${i.name}${sizeText}${colorText} × ${i.qty} — ₹${(i.price * i.qty).toLocaleString("en-IN")}`;
   }).join("\n");
   const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const msg = encodeURIComponent(
@@ -553,12 +591,25 @@ function openModal(id) {
 
   // Reset selected product color
   window.selectedProductColor = null;
+  // Reset selected product size and price
+  window.selectedProductSize = null;
+  window.selectedProductPrice = null;
 
   // Scroll details modal to top on product change
   const modalEl = document.getElementById("productModal");
   if (modalEl) modalEl.scrollTop = 0;
 
   currentModalQty = 1; // Reset quantity to 1
+
+  const productSizes = parseProductSizes(p.sizes);
+  let displayPrice = p.price;
+  let hasOrigPrice = p.originalPrice > p.price;
+  if (productSizes.length > 0) {
+    window.selectedProductSize = productSizes[0].name;
+    window.selectedProductPrice = productSizes[0].price;
+    displayPrice = productSizes[0].price;
+    hasOrigPrice = false;
+  }
 
   const discount = p.originalPrice > p.price
     ? Math.round((1 - p.price / p.originalPrice) * 100) : 0;
@@ -638,6 +689,30 @@ function openModal(id) {
     `;
   }
 
+  // Variant Sizes Setup HTML
+  if (productSizes.length > 0) {
+    const swatches = productSizes.map(sz => {
+      const isSelected = sz.name === window.selectedProductSize;
+      return `
+        <button type="button" class="size-swatch-btn ${isSelected ? 'active' : ''}" 
+                onclick="selectProductSize('${sz.name.replace(/'/g, "\\'")}', ${sz.price})">
+          <span class="size-name">${sz.name}</span>
+          <span class="size-price">₹${sz.price.toLocaleString("en-IN")}</span>
+        </button>
+      `;
+    }).join("");
+    
+    sizeSelectorHTML = `
+      <div class="modal-size-selector">
+        <label class="size-label">Size: <span id="activeSizeName" style="font-weight:600; color: var(--gold-dark);">${window.selectedProductSize}</span></label>
+        <div class="size-swatches-grid">
+          ${swatches}
+        </div>
+      </div>
+    `;
+  }
+
+
   // Cross sell items ("Pairs well with")
   const crossSells = getCrossSellItems(p);
   const crossSellHTML = crossSells.length > 0 ? `
@@ -711,9 +786,9 @@ function openModal(id) {
         </div>
         
         <div class="modal-price">
-          ${p.originalPrice > p.price ? `<span class="price-original">₹${p.originalPrice.toLocaleString("en-IN")}</span>` : ""}
-          <span class="price-current">₹${p.price.toLocaleString("en-IN")}</span>
-          ${discount > 0 ? `<span class="price-discount-badge">Sale</span>` : ""}
+          ${hasOrigPrice ? `<span class="price-original">₹${p.originalPrice.toLocaleString("en-IN")}</span>` : ""}
+          <span class="price-current">₹${displayPrice.toLocaleString("en-IN")}</span>
+          ${(discount > 0 && !productSizes.length) ? `<span class="price-discount-badge">Sale</span>` : ""}
         </div>
         <div class="modal-tax-notice">Tax included.</div>
         
@@ -721,6 +796,9 @@ function openModal(id) {
         
         <!-- Color Selector Variant -->
         ${colorSelectorHTML}
+
+        <!-- Size Selector Variant -->
+        ${sizeSelectorHTML}
         
         <!-- Quantity Selector -->
         <div class="modal-qty-container">
@@ -1210,6 +1288,7 @@ function downloadInvoicePDF() {
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #eee;">
         <strong>${item.name}</strong>
+        ${item.selectedSize ? `<div style="font-size:11px;color:#666;">Size: ${item.selectedSize}</div>` : ""}
         ${item.selectedColor ? `<div style="font-size:11px;color:#666;">Color: ${item.selectedColor}</div>` : ""}
       </td>
       <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">₹${item.price.toLocaleString("en-IN")}</td>
@@ -1723,7 +1802,7 @@ async function confirmUpiPayment() {
     const orderData = {
       id: orderGroupId + idx,
       productId: item.id,
-      productName: item.name,
+      productName: item.name + (item.selectedSize ? ` (${item.selectedSize})` : "") + (item.selectedColor ? ` [${item.selectedColor}]` : ""),
       customer: name,
       phone: phone,
       address: address,
@@ -1761,8 +1840,9 @@ async function confirmUpiPayment() {
   // Setup success screen
   document.getElementById("successOrderId").textContent = `#${orderGroupId.toString().slice(-6)}`;
   const itemLines = pendingCart.map(i => {
-    const variantText = i.selectedColor ? ` (${i.selectedColor})` : "";
-    return `• ${i.name}${variantText} × ${i.qty} — ₹${(i.price * i.qty).toLocaleString("en-IN")}`;
+    const sizeText = i.selectedSize ? ` (${i.selectedSize})` : "";
+    const variantText = i.selectedColor ? ` (Color: ${i.selectedColor})` : "";
+    return `• ${i.name}${sizeText}${variantText} × ${i.qty} — ₹${(i.price * i.qty).toLocaleString("en-IN")}`;
   }).join("\n");
   const subtotal = pendingCart.reduce((s, i) => s + i.price * i.qty, 0);
   
@@ -2218,6 +2298,52 @@ function selectProductColor(color) {
     btn.classList.toggle("active", isThis);
   });
 }
+
+/* ─── Product Size Variant Swatches Helpers ───────────────── */
+window.selectedProductSize = null;
+window.selectedProductPrice = null;
+
+function parseProductSizes(sizesStr) {
+  if (!sizesStr || !sizesStr.trim()) return [];
+  return sizesStr.split(",").map(item => {
+    const parts = item.split(":");
+    if (parts.length < 2) return null;
+    const price = parseFloat(parts.pop().trim());
+    const name = parts.join(":").trim();
+    if (name && !isNaN(price)) {
+      return { name, price };
+    }
+    return null;
+  }).filter(Boolean);
+}
+
+function selectProductSize(sizeName, price) {
+  window.selectedProductSize = sizeName;
+  window.selectedProductPrice = price;
+  
+  // Update text label
+  const labelEl = document.getElementById("activeSizeName");
+  if (labelEl) labelEl.textContent = sizeName;
+  
+  // Update button active state classes
+  document.querySelectorAll(".size-swatch-btn").forEach(btn => {
+    const isThis = btn.querySelector(".size-name").textContent.trim() === sizeName;
+    btn.classList.toggle("active", isThis);
+  });
+  
+  // Update price in modal dynamically
+  const priceCurrentEl = document.querySelector("#productModal .price-current");
+  if (priceCurrentEl) {
+    priceCurrentEl.textContent = `₹${price.toLocaleString("en-IN")}`;
+  }
+  
+  // Hide original price and sale badge if size changes price
+  const priceOriginalEl = document.querySelector("#productModal .price-original");
+  const saleBadgeEl = document.querySelector("#productModal .price-discount-badge");
+  if (priceOriginalEl) priceOriginalEl.style.display = "none";
+  if (saleBadgeEl) saleBadgeEl.style.display = "none";
+}
+
 
 /* ─── Mobile Menu Drawer ────────────────────────────────── */
 function openMobileMenu() {

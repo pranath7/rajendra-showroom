@@ -933,6 +933,7 @@ async function saveProduct() {
   const desc      = document.getElementById("productDesc").value.trim();
   const featured  = document.getElementById("productFeatured").checked;
   const colorsStr = document.getElementById("productColors").value.trim();
+  const sizesStr  = document.getElementById("productSizes").value.trim();
 
   // Parse colors as a list of trimmed strings
   const colors = colorsStr ? colorsStr.split(",").map(c => c.trim()).filter(Boolean) : [];
@@ -947,7 +948,7 @@ async function saveProduct() {
     const original = products.find(p => p.id === editingId);
     if (!original) { showAdminToast("Product not found", "error"); return; }
     targetProduct = { ...original, name, category, price, originalPrice: origPrice, description: desc, featured,
-      images: productImages, image: productImages[0] || null, colors };
+      images: productImages, image: productImages[0] || null, colors, sizes: sizesStr };
   } else {
     const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
     
@@ -957,7 +958,7 @@ async function saveProduct() {
     
     targetProduct = { id: newId, name, category, price, originalPrice: origPrice,
       description: desc, images: productImages, image: productImages[0] || null, featured, inStock: true, 
-      rating: defaultRating, reviews: defaultReviews, colors };
+      rating: defaultRating, reviews: defaultReviews, colors, sizes: sizesStr };
   }
 
   // Images are already Firebase Storage URLs at this point — no compression needed
@@ -1040,6 +1041,7 @@ function editProduct(id) {
   document.getElementById("productDesc").value       = p.description || "";
   document.getElementById("productFeatured").checked = p.featured;
   document.getElementById("productColors").value     = p.colors ? p.colors.join(", ") : "";
+  document.getElementById("productSizes").value      = p.sizes || "";
   
   renderImagePreviews();
   
