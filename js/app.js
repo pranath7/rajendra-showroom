@@ -1627,7 +1627,7 @@ function openUpiModal(amount) {
   const vpaEl = document.getElementById("upiVpaDisplay");
   if (vpaEl) vpaEl.textContent = upiId;
   const qrEl = document.getElementById("upiQrImg");
-  if (qrEl) qrEl.src = `images/payment-qr.jpg?v=3.20`;
+  if (qrEl) qrEl.src = `images/payment-qr.jpg?v=3.21`;
   document.getElementById("upiScreen").style.display = "block";
   document.getElementById("upiProcessing").style.display = "none";
   document.getElementById("upiError").style.display = "none";

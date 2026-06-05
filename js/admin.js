@@ -298,7 +298,7 @@ function renderDashboard() {
         <div class="recent-order-row">
           <div class="ro-info">
             <div class="ro-name">${o.customer || "Walk-in"}</div>
-            <div class="ro-product">${o.productName} × ${o.qty}</div>
+            <div class="ro-product">${o.productName} × ${o.qty} (ID: #${o.productId || "N/A"})</div>
           </div>
           <div class="ro-right">
             <div class="ro-amount">₹${(o.total || o.price * o.qty).toLocaleString("en-IN")}</div>
@@ -525,7 +525,7 @@ function renderOrdersTable() {
       <td style="font-size:12px;color:var(--text-muted);">${formatDate(o.date)}</td>
       <td>
         <div class="table-product-name">${o.productName}</div>
-        <div class="table-product-id">Qty: ${o.qty} · ₹${o.price.toLocaleString("en-IN")} each</div>
+        <div class="table-product-id">ID: #${o.productId || "N/A"} · Qty: ${o.qty} · ₹${o.price.toLocaleString("en-IN")} each</div>
       </td>
       <td>
         <div style="font-size:13.5px;font-weight:500;">${o.customer}</div>
