@@ -300,6 +300,44 @@ window.db = {
     return { success: true, mode: useFirebase ? "firebase" : "local" };
   },
 
+  // --- Cloudinary ---
+  async getCloudinaryConfig() {
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        const doc = await withTimeout(firestoreDb.collection("settings").doc("cloudinary").get(), 4000);
+        if (doc.exists) {
+          const config = doc.data();
+          localStorage.setItem("rs_cloudinary_config", JSON.stringify(config));
+          return config;
+        }
+      } catch (e) {
+        console.error("Error fetching Cloudinary config from Firebase:", e);
+      }
+    }
+    try {
+      return JSON.parse(localStorage.getItem("rs_cloudinary_config") || "{}");
+    } catch (e) {
+      return {};
+    }
+  },
+
+  async saveCloudinaryConfig(config) {
+    let firebaseError = null;
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        await withTimeout(firestoreDb.collection("settings").doc("cloudinary").set(config), 4000);
+      } catch (e) {
+        console.error("Error saving Cloudinary config to Firebase:", e);
+        firebaseError = e.message || e;
+      }
+    }
+    localStorage.setItem("rs_cloudinary_config", JSON.stringify(config));
+    if (firebaseError) {
+      return { success: false, error: firebaseError, mode: "local_only" };
+    }
+    return { success: true, mode: useFirebase ? "firebase" : "local" };
+  },
+
   // --- Categories ---
   async getCategories() {
     if (useFirebase && isFirebaseResponsive) {

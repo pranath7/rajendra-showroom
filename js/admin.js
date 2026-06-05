@@ -99,7 +99,7 @@ async function showPanel() {
   await populateOrderProductDropdown();
   switchTab("dashboard");
   resetForm();
-  updateFirebaseStatusUI();
+  await updateFirebaseStatusUI();
 }
 
 /* ─── Storage ───────────────────────────────────────────── */
@@ -117,7 +117,7 @@ function saveOrders() {
   // no-op, DB updates are now document-based in real-time
 }
 
-function updateFirebaseStatusUI() {
+async function updateFirebaseStatusUI() {
   const badge = document.getElementById("dbConnectionStatus");
   const configText = document.getElementById("firebaseConfigStatus");
   
@@ -142,12 +142,12 @@ function updateFirebaseStatusUI() {
   }
 
   // Also update Cloudinary status
-  loadCloudinaryConfig();
+  await loadCloudinaryConfig();
 }
 
 /* ─── Cloudinary Image Storage Setup ────────────────────── */
-function loadCloudinaryConfig() {
-  const saved = JSON.parse(localStorage.getItem("rs_cloudinary_config") || "{}");
+async function loadCloudinaryConfig() {
+  const saved = await db.getCloudinaryConfig();
   const nameInput = document.getElementById("cloudNameInput");
   const presetInput = document.getElementById("cloudPresetInput");
   if (nameInput && saved.cloudName) nameInput.value = saved.cloudName;
@@ -190,7 +190,7 @@ function updateCloudinaryStatus() {
   }
 }
 
-function saveCloudinaryConfig() {
+async function saveCloudinaryConfig() {
   const nameInput = document.getElementById("cloudNameInput");
   const presetInput = document.getElementById("cloudPresetInput");
   const name = nameInput ? nameInput.value.trim() : "";
@@ -201,8 +201,10 @@ function saveCloudinaryConfig() {
     return;
   }
 
-  // Save to localStorage for persistence
-  localStorage.setItem("rs_cloudinary_config", JSON.stringify({ cloudName: name, uploadPreset: preset }));
+  showAdminToast("Saving Cloudinary config to database...", "info");
+
+  // Save to db (localStorage + Firebase Firestore settings document)
+  const res = await db.saveCloudinaryConfig({ cloudName: name, uploadPreset: preset });
 
   // Patch live config object immediately — no page reload needed
   if (typeof CLOUDINARY_CONFIG !== "undefined") {
@@ -211,7 +213,11 @@ function saveCloudinaryConfig() {
   }
 
   updateCloudinaryStatus();
-  showAdminToast("✅ Image storage configured! You can now upload product photos of any size.", "success");
+  if (res && res.success === false) {
+    showAdminToast("⚠️ Saved locally (failed to sync to cloud: " + (res.error || "connection error") + ")", "info");
+  } else {
+    showAdminToast("✅ Image storage configured & synced to cloud! You can now upload product photos of any size.", "success");
+  }
 }
 
 
