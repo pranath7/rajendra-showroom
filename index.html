@@ -84,7 +84,49 @@
   }
   </script>
 
-  <link rel="stylesheet" href="css/style.css?v=3.27">
+  <!-- ═══ JSON-LD FAQ Schema (For Google Rich Results & AI Search Engines) ═══ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Where is Rajendra Showroom located in Chennai?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Rajendra Showroom is located at Patni Plaza, Shop No. 3, NSC Bose Road, Chennai, Tamil Nadu 600001. We are Chennai's premium destination for luxury crockery, dinner sets, and gifting items."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What products are available at Rajendra Showroom?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We offer a wide range of premium dinnerware, including bone china dinner sets, porcelain tea sets, handcrafted coffee mugs, plates, bowls, serving platters, non-stick cookware, stainless steel water bottles, lunch boxes, and elegant flower vases."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do you provide home delivery in Chennai?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, we offer home delivery across Chennai. We provide free shipping on orders above ₹5,000. Customers can place orders directly on our website or inquire via WhatsApp."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is your crockery microwave and dishwasher safe?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Most of our stoneware and porcelain dinnerware is microwave and dishwasher safe. Fine bone china sets with metallic gold or platinum rims are not recommended for microwave use. Detailed care instructions are provided for each product."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="css/style.css?v=3.28">
 
   <!-- ═══ Meta Pixel ══════════════════════════════════════════ -->
   <script>
@@ -721,7 +763,7 @@
         <!-- Step 1: Pay -->
         <div class="utr-step-label">Step 1 — Scan & Pay</div>
         <div class="upi-qr-container">
-          <img src="images/payment-qr.jpg?v=3.27"
+          <img src="images/payment-qr.jpg?v=3.28"
                alt="Scan to Pay" class="upi-qr-img" id="upiQrImg">
           <div class="upi-qr-caption">Scan with any UPI app</div>
         </div>
@@ -926,10 +968,10 @@
   <!-- Firebase Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=3.27"></script>
-  <script src="js/db.js?v=3.27"></script>
+  <script src="js/firebase-config.js?v=3.28"></script>
+  <script src="js/db.js?v=3.28"></script>
   <script src="js/data.js?v=3.3"></script>
-  <script src="js/app.js?v=3.27"></script>
+  <script src="js/app.js?v=3.28"></script>
   <script>
     // View toggle
     function setView(v) {
