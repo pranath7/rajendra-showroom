@@ -884,6 +884,7 @@
       <div class="admin-tab" id="tab-orders"    onclick="switchTab('orders')">📋 Orders Log</div>
       <div class="admin-tab" id="tab-products"  onclick="switchTab('products')">📦 All Products</div>
       <div class="admin-tab" id="tab-add"        onclick="switchTab('add')">➕ Add Product</div>
+      <div class="admin-tab" id="tab-vouchers"   onclick="switchTab('vouchers')">🎫 Gift Vouchers</div>
       <div class="admin-tab" id="tab-settings"   onclick="switchTab('settings')">⚙ Settings</div>
     </div>
 
@@ -1328,6 +1329,62 @@
               <button type="button" class="btn-back" onclick="switchTab('products')">← Back to Products</button>
             </div>
           </form>
+        </div>
+      </div>
+
+      <!-- ──────────────────────────────────
+           TAB: VOUCHERS
+      ────────────────────────────────── -->
+      <div class="tab-panel" id="panel-vouchers">
+        <div style="background: var(--white); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1.5px solid var(--border-dark); padding: 30px; margin-bottom: 30px;">
+          <h2 style="font-family: var(--font-serif); font-size: 24px; margin-bottom: 6px;">🎫 E-Gift Vouchers & Promo Codes</h2>
+          <p style="font-size: 13px; color: var(--text-light); margin-bottom: 24px;">Generate, manage, and delete active gift cards and coupon discount codes.</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; margin-top: 20px;">
+            <!-- Generate Voucher Form -->
+            <div style="background: var(--bg-warm); border: 1.5px solid var(--border-dark); border-radius: 10px; padding: 20px; height: fit-content;">
+              <h3 style="font-family: var(--font-serif); font-size: 18px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid var(--border-dark); padding-bottom: 8px;">Create Voucher</h3>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                  <label style="font-size: 12px; font-weight: 700; color: #555; display: block; margin-bottom: 4px;">Voucher Code</label>
+                  <input type="text" id="voucherCodeInput" placeholder="e.g. GC-HAPPY-500" style="width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1.5px solid var(--border-dark); border-radius: 6px; font-size: 13px; text-transform: uppercase; outline:none;">
+                  <button type="button" onclick="generateRandomCode()" style="margin-top: 6px; font-size: 11px; background: none; border: none; color: var(--gold-dark); text-decoration: underline; cursor: pointer; padding: 0; font-weight: 700;">🎲 Generate Random Code</button>
+                </div>
+                <div>
+                  <label style="font-size: 12px; font-weight: 700; color: #555; display: block; margin-bottom: 4px;">Balance / Value (₹)</label>
+                  <input type="number" id="voucherValueInput" placeholder="e.g. 1000" style="width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1.5px solid var(--border-dark); border-radius: 6px; font-size: 13px; outline:none;">
+                </div>
+                <div>
+                  <label style="font-size: 12px; font-weight: 700; color: #555; display: block; margin-bottom: 4px;">Description / Note</label>
+                  <input type="text" id="voucherDescInput" placeholder="e.g. Housewarming gift for Maya" style="width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1.5px solid var(--border-dark); border-radius: 6px; font-size: 13px; outline:none;">
+                </div>
+                <button onclick="createVoucher()" style="width: 100%; padding: 11px; background: var(--text); color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 8px;">
+                  ➕ Generate Voucher Code
+                </button>
+              </div>
+            </div>
+            
+            <!-- Vouchers Table -->
+            <div>
+              <h3 style="font-family: var(--font-serif); font-size: 18px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid var(--border-dark); padding-bottom: 8px;">Active Vouchers</h3>
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Voucher Code</th>
+                      <th>Description</th>
+                      <th>Original Bal</th>
+                      <th>Remaining Bal</th>
+                      <th style="text-align: right; width: 80px;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="vouchersTableBody">
+                    <tr><td colspan="5" style="text-align:center;padding:30px;color:#bbb;">Loading vouchers...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

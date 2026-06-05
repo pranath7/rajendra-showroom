@@ -416,5 +416,152 @@ window.db = {
       return { success: false, error: firebaseError, mode: "local_only" };
     }
     return { success: true, mode: useFirebase ? "firebase" : "local" };
+  },
+
+  // --- Wishlists / Gift Registries ---
+  async saveWishlist(id, name, items) {
+    const docData = {
+      id,
+      name,
+      items,
+      createdAt: new Date().toISOString()
+    };
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        await withTimeout(firestoreDb.collection("wishlists").doc(id).set(docData), 4000);
+      } catch (e) {
+        console.error("Error saving wishlist to Firebase:", e);
+        return { success: false, error: e.message || e };
+      }
+    }
+    localStorage.setItem(`rs_shared_wishlist_${id}`, JSON.stringify(docData));
+    return { success: true, mode: useFirebase ? "firebase" : "local" };
+  },
+
+  async getWishlist(id) {
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        const doc = await withTimeout(firestoreDb.collection("wishlists").doc(id).get(), 4000);
+        if (doc.exists) {
+          return doc.data();
+        }
+      } catch (e) {
+        console.error("Error fetching wishlist from Firebase:", e);
+      }
+    }
+    const cached = localStorage.getItem(`rs_shared_wishlist_${id}`);
+    return cached ? JSON.parse(cached) : null;
+  },
+
+  // --- E-Gift Vouchers & Promo Codes ---
+  async getVouchers() {
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        const snapshot = await withTimeout(firestoreDb.collection("vouchers").get(), 4000);
+        const list = [];
+        snapshot.forEach(doc => {
+          list.push(doc.data());
+        });
+        localStorage.setItem("rs_vouchers", JSON.stringify(list));
+        return list;
+      } catch (e) {
+        console.error("Error fetching vouchers from Firebase:", e);
+      }
+    }
+    return JSON.parse(localStorage.getItem("rs_vouchers") || "[]");
+  },
+
+  async getVoucher(code) {
+    const cleanCode = (code || "").trim().toUpperCase();
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        const doc = await withTimeout(firestoreDb.collection("vouchers").doc(cleanCode).get(), 4000);
+        if (doc.exists) {
+          return doc.data();
+        }
+        return null;
+      } catch (e) {
+        console.error("Error fetching voucher from Firebase:", e);
+      }
+    }
+    const local = JSON.parse(localStorage.getItem("rs_vouchers") || "[]");
+    return local.find(v => v.code === cleanCode) || null;
+  },
+
+  async saveVoucher(code, balance, description = "") {
+    const cleanCode = (code || "").trim().toUpperCase();
+    const docData = {
+      code: cleanCode,
+      originalBalance: balance,
+      balance: balance,
+      description: description,
+      createdAt: new Date().toISOString()
+    };
+    let firebaseError = null;
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        await withTimeout(firestoreDb.collection("vouchers").doc(cleanCode).set(docData), 4000);
+      } catch (e) {
+        console.error("Error saving voucher to Firebase:", e);
+        firebaseError = e.message || e;
+      }
+    }
+    const local = JSON.parse(localStorage.getItem("rs_vouchers") || "[]");
+    const idx = local.findIndex(v => v.code === cleanCode);
+    if (idx >= 0) {
+      local[idx] = docData;
+    } else {
+      local.push(docData);
+    }
+    localStorage.setItem("rs_vouchers", JSON.stringify(local));
+
+    if (firebaseError) {
+      return { success: false, error: firebaseError, mode: "local_only" };
+    }
+    return { success: true, mode: useFirebase ? "firebase" : "local" };
+  },
+
+  async deleteVoucher(code) {
+    const cleanCode = (code || "").trim().toUpperCase();
+    let firebaseError = null;
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        await withTimeout(firestoreDb.collection("vouchers").doc(cleanCode).delete(), 4000);
+      } catch (e) {
+        console.error("Error deleting voucher from Firebase:", e);
+        firebaseError = e.message || e;
+      }
+    }
+    let local = JSON.parse(localStorage.getItem("rs_vouchers") || "[]");
+    local = local.filter(v => v.code !== cleanCode);
+    localStorage.setItem("rs_vouchers", JSON.stringify(local));
+
+    if (firebaseError) {
+      return { success: false, error: firebaseError, mode: "local_only" };
+    }
+    return { success: true, mode: useFirebase ? "firebase" : "local" };
+  },
+
+  async updateVoucherBalance(code, newBalance) {
+    const cleanCode = (code || "").trim().toUpperCase();
+    let firebaseError = null;
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        await withTimeout(firestoreDb.collection("vouchers").doc(cleanCode).update({ balance: newBalance }), 4000);
+      } catch (e) {
+        console.error("Error updating voucher balance in Firebase:", e);
+        firebaseError = e.message || e;
+      }
+    }
+    const local = JSON.parse(localStorage.getItem("rs_vouchers") || "[]");
+    const idx = local.findIndex(v => v.code === cleanCode);
+    if (idx >= 0) {
+      local[idx].balance = newBalance;
+      localStorage.setItem("rs_vouchers", JSON.stringify(local));
+    }
+    if (firebaseError) {
+      return { success: false, error: firebaseError, mode: "local_only" };
+    }
+    return { success: true, mode: useFirebase ? "firebase" : "local" };
   }
 };

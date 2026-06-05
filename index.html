@@ -135,6 +135,11 @@
         <a href="https://wa.me/916369142027" target="_blank" style="color:#25D366; font-weight:600; display: flex; align-items: center; gap: 4px;">
           <span>💬</span> <span class="action-text">WhatsApp</span>
         </a>
+        <button class="wishlist-trigger" id="wishlistTrigger" onclick="openWishlist()" style="display:flex; align-items:center; gap:5px; background:none; border:none; cursor:pointer; font-size:15px; color:var(--text); font-weight:600; padding:0; margin-right:10px;">
+          <span class="wishlist-icon" style="font-size:18px;">♡</span>
+          <span class="action-text">Wishlist</span>
+          <span class="cart-count-badge" id="wishlistCountBadge" style="display:none; margin-left: 3px; position:static;">0</span>
+        </button>
         <button class="cart-trigger" id="cartTrigger">
           <span class="cart-icon">🛒</span>
           <span class="action-text">Cart</span>
@@ -178,6 +183,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Shared Wishlist Banner -->
+  <div id="wishlistSharedBanner" class="wishlist-shared-banner" style="display:none;"></div>
 
   <!-- ═══ Main Content ══════════════════════════════════════ -->
   <div class="main-wrapper" id="products">
@@ -443,6 +451,36 @@
     </div>
   </div>
 
+  <!-- ═══ Wishlist Drawer ════════════════════════════════════ -->
+  <div class="wishlist-overlay" id="wishlistOverlay" onclick="closeWishlist()"></div>
+  <div class="wishlist-drawer" id="wishlistDrawer">
+    <div class="wishlist-head">
+      <h3>♡ &nbsp; Your Wishlist</h3>
+      <button class="wishlist-close-btn" onclick="closeWishlist()">✕</button>
+    </div>
+    <div class="wishlist-body" id="wishlistBody">
+      <div class="wishlist-empty">
+        <div class="empty-icon">♡</div>
+        <p>Your wishlist is empty.<br>Save your favorite items here!</p>
+      </div>
+    </div>
+    <div class="wishlist-foot">
+      <div class="wishlist-share-section" style="border-top: 1.5px dashed var(--border-dark); padding-top: 12px;">
+        <div style="font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text);">🎁 Share Gift Registry / Wishlist</div>
+        <div style="display:flex; gap: 8px;">
+          <input type="text" id="wishlistShareName" placeholder="e.g. My Wedding Registry" style="flex:1; box-sizing:border-box; padding:10px 12px; border:1.5px solid var(--border-dark); border-radius:8px; font-size:13px; outline:none;">
+          <button onclick="shareWishlistRegistry()" class="btn-share-wishlist" style="padding:10px 16px; background:var(--gold-dark); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">Create Link</button>
+        </div>
+        <div id="wishlistShareLinkWrap" style="display:none; margin-top: 12px; padding: 12px; background: var(--bg-warm); border: 1.5px dashed var(--gold); border-radius:8px; text-align: center;">
+          <div style="font-size: 11px; color: var(--text-light); margin-bottom: 6px; font-weight:600;">Shareable Registry URL:</div>
+          <input type="text" id="wishlistShareLinkInput" readonly style="width: 100%; box-sizing: border-box; padding: 8px; border: 1.5px solid var(--border-dark); border-radius: 6px; font-size: 12px; text-align: center; background: #fff; margin-bottom: 8px; outline:none;">
+          <button onclick="copyWishlistShareLink()" id="wishlistCopyBtn" style="padding: 6px 16px; background: var(--text); color: #fff; border: none; border-radius: 6px; font-size: 11.5px; font-weight: bold; cursor: pointer; transition: all 0.2s;">📋 Copy Link</button>
+        </div>
+      </div>
+      <button class="btn-continue-shopping" onclick="closeWishlist()" style="margin-top: 10px; width:100%;">← Continue Shopping</button>
+    </div>
+  </div>
+
   <!-- ═══ Product Modal ══════════════════════════════════════ -->
   <div class="modal-overlay" id="modalOverlay"></div>
   <div class="product-modal" id="productModal">
@@ -502,7 +540,31 @@
             </div>
           </div>
           
-          <div style="background: var(--bg-warm); padding: 14px; border-radius: 10px; margin-top: 10px; font-size: 13.5px;">
+          <!-- Gifting Wrap Option -->
+          <div class="checkout-gifting-wrap" style="margin-top: 10px; border-top: 1.5px dashed var(--border-dark); padding-top: 12px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">
+              <input type="checkbox" id="giftCheckbox" onchange="toggleGiftingSection(this)" style="width: 16px; height: 16px; accent-color: var(--gold-dark);">
+              🎁 Send as a Gift (+₹150 for Premium Wrapping & Greeting Card)
+            </label>
+            <div id="giftMessageWrap" style="display: none; margin-top: 10px;">
+              <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Greeting Card Message</label>
+              <textarea id="giftMessageInput" placeholder="Write your personalized message here..." rows="2"
+                        style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1.5px solid var(--border-dark); border-radius: 8px; font-size: 13.5px; outline: none; resize: none; font-family: var(--font-sans); transition: var(--transition);"></textarea>
+            </div>
+          </div>
+
+          <!-- Coupon / Gift Card Code Entry -->
+          <div class="checkout-coupon-wrap" style="margin-top: 10px; border-top: 1.5px dashed var(--border-dark); padding-top: 12px;">
+            <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Apply Gift Card or Promo Code</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="couponInput" placeholder="e.g. GC-ABCD-1234" 
+                     style="flex: 1; padding: 10px 14px; border: 1.5px solid var(--border-dark); border-radius: 8px; font-size: 13.5px; outline: none; transition: var(--transition); text-transform: uppercase;">
+              <button type="button" onclick="applyCouponCode()" style="padding: 10px 16px; background: var(--text); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13.5px; transition: var(--transition);">Apply</button>
+            </div>
+            <div id="couponStatusMessage" style="font-size: 12px; margin-top: 5px; font-weight: 600;"></div>
+          </div>
+          
+          <div style="background: var(--bg-warm); padding: 14px; border-radius: 10px; margin-top: 12px; font-size: 13.5px;">
             <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 6px;">
               <span>Subtotal</span>
               <span id="checkoutSubtotal">₹0</span>
@@ -510,6 +572,14 @@
             <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 6px; color: var(--text-light);">
               <span>Courier Charges <span id="shippingZoneText" style="font-size:10px; font-weight:normal; color:#888;">(Tamil Nadu)</span></span>
               <span id="checkoutShipping">₹0</span>
+            </div>
+            <div id="checkoutGiftRow" style="display: none; justify-content: space-between; font-weight: 600; margin-bottom: 6px; color: var(--text-light);">
+              <span>🎁 Gift Wrapping Fee</span>
+              <span>₹150</span>
+            </div>
+            <div id="checkoutDiscountRow" style="display: none; justify-content: space-between; font-weight: 600; margin-bottom: 6px; color: #27AE60;">
+              <span>🎫 Voucher / Promo Discount</span>
+              <span id="checkoutDiscountText">-₹0</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 6px;">
               <span>Total Items</span>
@@ -539,6 +609,9 @@
         <div style="display:flex; flex-direction:column; gap:8px;">
           <button class="btn-wa-lg" id="successWaBtn" style="width: 100%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; background: #25D366; color: white;">
             💬 &nbsp; Send WhatsApp Confirmation
+          </button>
+          <button class="btn-wa-lg" onclick="downloadInvoicePDF()" style="width: 100%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; background: var(--text); color: white;">
+            📄 &nbsp; Download Invoice (PDF)
           </button>
           <button class="btn-add-cart-lg" onclick="closeCheckoutSuccess()" style="width: 100%; border: none; cursor: pointer; background: var(--bg-warm); color: var(--text); font-weight: 600;">
             Close

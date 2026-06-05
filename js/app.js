@@ -9,17 +9,22 @@ const CART_KEY   = "rs_cart";
 /* ─── State ──────────────────────────────────────────────── */
 let allProducts      = [];
 let cart             = [];
+let wishlist         = [];
 let activeCategory   = "all";
 let currentSort      = "featured";
 let currentView      = "grid";
 let maxPriceFilter   = 100000;
 let searchQuery      = "";
 let cartOpen         = false;
+let wishlistOpen     = false;
 let modalOpen        = false;
+let sharedWishlistId = null;
+let appliedVoucher   = null;
 
 /* ─── Boot ───────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", () => {
   loadCart();
+  loadWishlist();
   
   // Stale-While-Revalidate caching: load cache instantly to render page
   const cachedProducts = localStorage.getItem(STORE_KEY);
@@ -36,6 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
   renderProducts();
   bindEvents();
   updateCartUI();
+  updateWishlistUI();
+  checkSharedWishlist();
 
   // Run background revalidation sync from Firebase
   triggerBackgroundSync();
@@ -140,6 +147,11 @@ function renderTopNavCategories() {
 function getFilteredProducts() {
   let list = [...allProducts];
 
+  // Shared Wishlist Registry filter
+  if (window.sharedWishlistItems && window.sharedWishlistItems.length > 0) {
+    list = list.filter(p => window.sharedWishlistItems.includes(p.id));
+  }
+
   // Category filter
   if (activeCategory !== "all") {
     list = list.filter(p => p.category === activeCategory);
@@ -232,7 +244,7 @@ function productCardHTML(p) {
       <div class="product-img-wrap">
         ${imgHTML}
         ${badgeHTML}
-        <button class="product-wishlist" onclick="event.stopPropagation(); addToWishlist(${p.id})">♡</button>
+        <button class="product-wishlist ${wishlist.includes(p.id) ? 'active' : ''}" onclick="event.stopPropagation(); toggleWishlist(${p.id})">${wishlist.includes(p.id) ? '♥' : '♡'}</button>
       </div>
       <div class="product-info">
         <div class="product-category">${p.category}</div>
@@ -359,7 +371,7 @@ function bindEvents() {
 
   // Escape key
   document.addEventListener("keydown", e => {
-    if (e.key === "Escape") { closeCart(); closeModal(); closeCheckoutModal(); closeUpiModal(); closeMobileMenu(); }
+    if (e.key === "Escape") { closeCart(); closeModal(); closeCheckoutModal(); closeUpiModal(); closeMobileMenu(); closeWishlist(); }
   });
 }
 
@@ -913,8 +925,427 @@ window.addEventListener("scroll", () => {
     : "0 2px 8px rgba(28,28,26,0.06)";
 });
 
-function addToWishlist(id) {
-  showToast("💛  Added to wishlist!", "info");
+// --- Wishlist / Registry Core Logic ---
+const WISHLIST_KEY = "rs_wishlist";
+
+function loadWishlist() {
+  const stored = localStorage.getItem(WISHLIST_KEY);
+  try {
+    wishlist = stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    wishlist = [];
+  }
+}
+
+function saveWishlistState() {
+  localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist));
+}
+
+function toggleWishlist(id) {
+  const idx = wishlist.indexOf(id);
+  if (idx >= 0) {
+    wishlist.splice(idx, 1);
+    showToast("💔 Removed from wishlist", "info");
+  } else {
+    wishlist.push(id);
+    showToast("💛 Added to wishlist!", "success");
+  }
+  saveWishlistState();
+  updateWishlistUI();
+  renderWishlistItems();
+  renderProducts();
+}
+
+function updateWishlistUI() {
+  const badge = document.getElementById("wishlistCountBadge");
+  if (badge) {
+    badge.textContent = wishlist.length;
+    badge.style.display = wishlist.length > 0 ? "flex" : "none";
+  }
+}
+
+function openWishlist() {
+  wishlistOpen = true;
+  renderWishlistItems();
+  const drawer = document.getElementById("wishlistDrawer");
+  const overlay = document.getElementById("wishlistOverlay");
+  if (drawer) drawer.classList.add("open");
+  if (overlay) overlay.classList.add("visible");
+  document.body.style.overflow = "hidden";
+  
+  const nameIn = document.getElementById("wishlistShareName");
+  if (nameIn) nameIn.value = "";
+  const wrap = document.getElementById("wishlistShareLinkWrap");
+  if (wrap) wrap.style.display = "none";
+}
+
+function closeWishlist() {
+  wishlistOpen = false;
+  const drawer = document.getElementById("wishlistDrawer");
+  const overlay = document.getElementById("wishlistOverlay");
+  if (drawer) drawer.classList.remove("open");
+  if (overlay) overlay.classList.remove("visible");
+  document.body.style.overflow = "";
+}
+
+function renderWishlistItems() {
+  const body = document.getElementById("wishlistBody");
+  if (!body) return;
+
+  if (wishlist.length === 0) {
+    body.innerHTML = `
+      <div class="wishlist-empty" style="text-align:center; padding:40px 20px; color:#bbb;">
+        <div class="empty-icon" style="font-size:48px; margin-bottom:12px;">♡</div>
+        <p style="font-size:13.5px; color:var(--text-light); line-height:1.5; margin:0;">Your wishlist is empty.<br>Save your favorite items here!</p>
+      </div>`;
+    return;
+  }
+
+  body.innerHTML = wishlist.map(id => {
+    const item = allProducts.find(p => p.id === id);
+    if (!item) return "";
+    return `
+      <div class="wishlist-item" style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--border-dark);">
+        <div style="display:flex; align-items:center; gap:10px; cursor:pointer; flex:1;" onclick="closeWishlist(); openModal(${item.id});">
+          <div style="width:50px; height:50px; border-radius:6px; overflow:hidden; background:var(--bg-warm); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            ${item.image ? `<img src="${item.image}" style="width:100%; height:100%; object-fit:cover;">` : "🍽"}
+          </div>
+          <div style="min-width:0;">
+            <div style="font-weight:600; font-size:13px; color:var(--text); line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</div>
+            <div style="font-weight:700; font-size:12.5px; color:var(--gold-dark); margin-top:2px;">₹${item.price.toLocaleString("en-IN")}</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+          <button onclick="addToCart(${item.id}); showToast('🛒 Added to Cart!', 'success');" style="padding:6px 10px; background:var(--text); color:#fff; border:none; border-radius:6px; font-size:11.5px; font-weight:700; cursor:pointer;">Add to Cart</button>
+          <button onclick="toggleWishlist(${item.id})" style="background:none; border:none; color:#ff4d4d; font-size:18px; cursor:pointer; padding:5px;">🗑</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function shareWishlistRegistry() {
+  const nameInput = document.getElementById("wishlistShareName");
+  const name = nameInput ? nameInput.value.trim() : "";
+  if (!name) {
+    showToast("Please enter a name for your registry", "error");
+    return;
+  }
+  
+  if (wishlist.length === 0) {
+    showToast("Your wishlist is empty!", "error");
+    return;
+  }
+  
+  showToast("Generating gift registry link...", "info");
+  
+  const randId = Math.random().toString(36).substring(2, 10).toUpperCase();
+  const res = await db.saveWishlist(randId, name, wishlist);
+  
+  if (res && res.success) {
+    const shareUrl = `${window.location.origin}${window.location.pathname}?wishlist=${randId}`;
+    document.getElementById("wishlistShareLinkInput").value = shareUrl;
+    document.getElementById("wishlistShareLinkWrap").style.display = "block";
+    showToast("🎁 Registry created successfully!", "success");
+  } else {
+    showToast("❌ Failed to create registry: " + (res.error || "connection error"), "error");
+  }
+}
+
+function copyWishlistShareLink() {
+  const input = document.getElementById("wishlistShareLinkInput");
+  if (!input) return;
+  input.select();
+  input.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(input.value).then(() => {
+    const btn = document.getElementById("wishlistCopyBtn");
+    if (btn) {
+      btn.textContent = "✔ Copied!";
+      setTimeout(() => btn.textContent = "📋 Copy Link", 2000);
+    }
+    showToast("✔ Link copied to clipboard", "success");
+  }).catch(() => {
+    showToast("Copy URL manually from the box", "info");
+  });
+}
+
+async function checkSharedWishlist() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const wishlistId = urlParams.get('wishlist');
+  if (wishlistId) {
+    sharedWishlistId = wishlistId;
+    const bannerEl = document.getElementById("wishlistSharedBanner");
+    if (bannerEl) {
+      bannerEl.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;background:#fdfaf2;border:1.5px solid var(--gold);border-radius:10px;margin-bottom:20px;color:var(--text);font-weight:600;font-size:13px;">
+        <span>🎁 Loading Shared Gift Registry...</span>
+      </div>`;
+      bannerEl.style.display = "block";
+    }
+    
+    try {
+      const data = await db.getWishlist(wishlistId);
+      if (data && data.items && data.items.length > 0) {
+        if (bannerEl) {
+          bannerEl.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px 20px;background:#fdfaf2;border:1.5px solid var(--gold);border-radius:10px;margin-bottom:20px;color:var(--text);box-shadow:0 4px 12px rgba(212,175,55,0.08);">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:20px;">🎁</span>
+                <div>
+                  <div style="font-weight:700;font-size:14.5px;">Viewing registry: "${data.name}"</div>
+                  <div style="font-size:11.5px;color:var(--text-light);font-weight:normal;">Created by a customer to share their favorite pieces.</div>
+                </div>
+              </div>
+              <button onclick="clearSharedWishlist()" style="padding:7px 14px;background:var(--text);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;">
+                Show All Products
+              </button>
+            </div>
+          `;
+        }
+        window.sharedWishlistItems = data.items;
+        renderProducts();
+      } else {
+        if (bannerEl) {
+          bannerEl.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#fff5f5;border:1.5px solid #feb2b2;border-radius:10px;margin-bottom:20px;color:#c53030;font-size:13px;font-weight:600;">
+              <span>⚠️ Gift registry not found or empty.</span>
+              <button onclick="clearSharedWishlist()" style="background:none;border:none;color:#c53030;text-decoration:underline;cursor:pointer;font-weight:700;">Back to Shop</button>
+            </div>
+          `;
+        }
+      }
+    } catch (e) {
+      console.error("Error loading registry:", e);
+      if (bannerEl) bannerEl.style.display = "none";
+    }
+  }
+}
+
+function clearSharedWishlist() {
+  window.sharedWishlistItems = null;
+  sharedWishlistId = null;
+  const bannerEl = document.getElementById("wishlistSharedBanner");
+  if (bannerEl) bannerEl.style.display = "none";
+  const url = new URL(window.location);
+  url.searchParams.delete('wishlist');
+  window.history.pushState({}, '', url);
+  renderProducts();
+}
+
+// --- Checkout Gifting Logic ---
+function toggleGiftingSection(cb) {
+  const wrap = document.getElementById("giftMessageWrap");
+  if (wrap) {
+    wrap.style.display = cb.checked ? "block" : "none";
+  }
+  calculateDynamicShipping();
+}
+
+// --- Voucher / Coupon Discount Logic ---
+async function applyCouponCode() {
+  const couponInput = document.getElementById("couponInput");
+  const code = couponInput ? couponInput.value.trim().toUpperCase() : "";
+  const statusEl = document.getElementById("couponStatusMessage");
+  
+  if (!code) {
+    showToast("Please enter a code", "error");
+    return;
+  }
+  
+  statusEl.textContent = "Validating code...";
+  statusEl.style.color = "var(--text-light)";
+  
+  try {
+    const voucher = await db.getVoucher(code);
+    if (!voucher) {
+      statusEl.textContent = "❌ Invalid gift card or promo code";
+      statusEl.style.color = "#C0392B";
+      appliedVoucher = null;
+      calculateDynamicShipping();
+      return;
+    }
+    
+    if (voucher.balance <= 0) {
+      statusEl.textContent = "❌ This voucher has a remaining balance of ₹0";
+      statusEl.style.color = "#C0392B";
+      appliedVoucher = null;
+      calculateDynamicShipping();
+      return;
+    }
+    
+    appliedVoucher = voucher;
+    statusEl.textContent = `✅ Applied! Balance available: ₹${voucher.balance.toLocaleString("en-IN")}`;
+    statusEl.style.color = "#27AE60";
+    showToast(`✔ Code applied: ₹${voucher.balance} discount!`, "success");
+    
+    calculateDynamicShipping();
+  } catch (e) {
+    console.error("Voucher error:", e);
+    statusEl.textContent = "❌ Error validating code. Try again.";
+    statusEl.style.color = "#C0392B";
+  }
+}
+
+// --- PDF Invoice Download Generator ---
+function downloadInvoicePDF() {
+  const orderData = _pendingOrderData || window.lastConfirmedOrder;
+  if (!orderData) {
+    showToast("No active order details to generate invoice.", "error");
+    return;
+  }
+
+  const { name, phone, address, cart: items, shippingCharge, gift, giftMessage, giftCharge, appliedVoucherCode, voucherDiscount, grand } = orderData;
+  const orderId = document.getElementById("successOrderId")?.textContent || `#${Date.now().toString().slice(-6)}`;
+  const dateStr = new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
+  
+  const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+  const finalTotal = grand !== undefined ? grand : (subtotal + shippingCharge + giftCharge - voucherDiscount);
+
+  const invoiceWindow = window.open("", "_blank");
+  if (!invoiceWindow) {
+    showToast("⚠️ Please allow popups to download your PDF invoice", "error");
+    return;
+  }
+
+  const itemsRows = items.map(item => `
+    <tr>
+      <td style="padding: 10px; border-bottom: 1px solid #eee;">
+        <strong>${item.name}</strong>
+        ${item.selectedColor ? `<div style="font-size:11px;color:#666;">Color: ${item.selectedColor}</div>` : ""}
+      </td>
+      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">₹${item.price.toLocaleString("en-IN")}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.qty}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold;">₹${(item.price * item.qty).toLocaleString("en-IN")}</td>
+    </tr>
+  `).join("");
+
+  const content = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Invoice ${orderId} - Rajendra Showroom</title>
+      <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; margin: 0; padding: 40px; }
+        .invoice-box { max-width: 800px; margin: auto; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0, 0, 0, .15); padding: 30px; border-radius: 10px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #d4af37; padding-bottom: 20px; margin-bottom: 25px; }
+        .logo { height: 60px; }
+        .title { text-align: right; }
+        .title h1 { margin: 0; font-size: 26px; color: #1c1c1a; font-weight: 300; letter-spacing: 1px; }
+        .meta { display: flex; justify-content: space-between; margin-bottom: 30px; font-size: 13.5px; line-height: 1.6; }
+        .meta-col { flex: 1; }
+        .table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px; }
+        .table th { background: #f9f9f9; padding: 12px 10px; text-align: left; font-weight: bold; border-bottom: 2px solid #ddd; }
+        .totals { width: 100%; margin-top: 15px; font-size: 14px; line-height: 2; border-top: 2px solid #ddd; padding-top: 10px; }
+        .totals-row { display: flex; justify-content: space-between; padding: 2px 10px; }
+        .totals-row.grand { font-size: 17px; font-weight: bold; color: #d4af37; border-top: 1px double #ddd; padding-top: 6px; }
+        .footer { text-align: center; margin-top: 50px; font-size: 11px; color: #777; border-top: 1px solid #eee; padding-top: 20px; line-height: 1.5; }
+        @media print {
+          body { padding: 0; }
+          .invoice-box { border: none; box-shadow: none; padding: 0; }
+          .print-btn { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div style="max-width: 800px; margin: 0 auto 15px auto; text-align: right;" class="print-btn">
+        <button onclick="window.print()" style="padding: 10px 20px; background: #d4af37; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">🖨️ Print / Save as PDF</button>
+      </div>
+      <div class="invoice-box">
+        <div class="header">
+          <img class="logo" src="${window.location.origin}/images/logo.png?v=3.13" alt="Rajendra Showroom Logo">
+          <div class="title">
+            <h1>INVOICE</h1>
+            <div style="font-size:12.5px;color:#777;margin-top:4px;">Order ID: ${orderId}</div>
+          </div>
+        </div>
+        
+        <div class="meta">
+          <div class="meta-col">
+            <strong>FROM:</strong><br>
+            <strong>Rajendra Showroom</strong><br>
+            Patni Plaza, Shop No. 3, NSC Bose Road<br>
+            Chennai - 600001, Tamil Nadu, India<br>
+            Phone: +91 63691 42027<br>
+            Email: pranathwork@gmail.com
+          </div>
+          <div class="meta-col" style="text-align: right;">
+            <strong>TO:</strong><br>
+            <strong>${name}</strong><br>
+            ${address}<br>
+            Phone: ${phone}<br><br>
+            <strong>DATE:</strong> ${dateStr}<br>
+            <strong>STATUS:</strong> Paid (UPI)
+          </div>
+        </div>
+        
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Product / Description</th>
+              <th style="text-align: center;">Price</th>
+              <th style="text-align: center;">Qty</th>
+              <th style="text-align: right;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsRows}
+          </tbody>
+        </table>
+        
+        <div style="display: flex; justify-content: flex-end;">
+          <div style="width: 300px;">
+            <div class="totals">
+              <div class="totals-row">
+                <span>Subtotal</span>
+                <span>₹${subtotal.toLocaleString("en-IN")}</span>
+              </div>
+              <div class="totals-row">
+                <span>Courier Charges</span>
+                <span>${shippingCharge === 0 ? "FREE" : "₹" + shippingCharge}</span>
+              </div>
+              ${gift ? `
+                <div class="totals-row">
+                  <span>Gift Wrapping</span>
+                  <span>₹${giftCharge}</span>
+                </div>
+              ` : ""}
+              ${appliedVoucherCode ? `
+                <div class="totals-row" style="color:#27AE60;">
+                  <span>Voucher Discount (${appliedVoucherCode})</span>
+                  <span>-₹${voucherDiscount.toLocaleString("en-IN")}</span>
+                </div>
+              ` : ""}
+              <div class="totals-row grand">
+                <span>Grand Total</span>
+                <span>₹${finalTotal.toLocaleString("en-IN")}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        ${gift ? `
+          <div style="margin-top:30px; padding:15px; background:#fdfaf2; border:1px solid #e8dec9; border-radius:6px;">
+            <strong style="color: #d4af37;">✉️ Gift Greeting Card Message:</strong>
+            <p style="margin:8px 0 0 0; font-style:italic; font-size:13px; line-height:1.45;">"${giftMessage}"</p>
+          </div>
+        ` : ""}
+        
+        <div class="footer">
+          Thank you for shopping at Rajendra Showroom!<br>
+          For exchange or return policy details, please visit our website or contact support.<br>
+          <em>This is a computer-generated document. No signature required.</em>
+        </div>
+      </div>
+      <script>
+        window.onload = function() {
+          setTimeout(function() { window.print(); }, 300);
+        }
+      </script>
+    </body>
+    </html>
+  `;
+  
+  invoiceWindow.document.write(content);
+  invoiceWindow.document.close();
 }
 
 /* ─── Online Checkout Functions ───────────────────────────── */
@@ -949,7 +1380,31 @@ function calculateDynamicShipping() {
   const pincode = document.getElementById("custPincode").value.trim();
   
   const delivery = getDynamicShippingRate(subtotal, state, pincode);
-  const grand = subtotal + delivery;
+
+  // Gift wrapping option
+  const giftCheckbox = document.getElementById("giftCheckbox");
+  const isGift = giftCheckbox ? giftCheckbox.checked : false;
+  const giftCharge = isGift ? 150 : 0;
+  
+  const giftRow = document.getElementById("checkoutGiftRow");
+  if (giftRow) giftRow.style.display = isGift ? "flex" : "none";
+
+  const totalBeforeDiscount = subtotal + delivery + giftCharge;
+  
+  // Voucher/Coupon discount
+  let discount = 0;
+  const discountRow = document.getElementById("checkoutDiscountRow");
+  const discountText = document.getElementById("checkoutDiscountText");
+  
+  if (appliedVoucher) {
+    discount = Math.min(appliedVoucher.balance, totalBeforeDiscount);
+    if (discountRow) discountRow.style.display = "flex";
+    if (discountText) discountText.textContent = `-₹${discount.toLocaleString("en-IN")}`;
+  } else {
+    if (discountRow) discountRow.style.display = "none";
+  }
+
+  const grand = Math.max(0, totalBeforeDiscount - discount);
   
   // Update UI Elements
   document.getElementById("checkoutSubtotal").textContent = `₹${subtotal.toLocaleString("en-IN")}`;
@@ -993,6 +1448,19 @@ function openCheckoutModal() {
   document.getElementById("custState").value = "Tamil Nadu";
   document.getElementById("custPincode").value = "";
 
+  // Reset Gifting Checkbox & Vouchers Inputs
+  const giftCheckbox = document.getElementById("giftCheckbox");
+  if (giftCheckbox) giftCheckbox.checked = false;
+  const giftMessageWrap = document.getElementById("giftMessageWrap");
+  if (giftMessageWrap) giftMessageWrap.style.display = "none";
+  const giftMessageInput = document.getElementById("giftMessageInput");
+  if (giftMessageInput) giftMessageInput.value = "";
+  const couponInput = document.getElementById("couponInput");
+  if (couponInput) couponInput.value = "";
+  const couponStatus = document.getElementById("couponStatusMessage");
+  if (couponStatus) couponStatus.textContent = "";
+  appliedVoucher = null;
+
   // Run initial calculation
   calculateDynamicShipping();
 
@@ -1034,7 +1502,16 @@ function submitOrderOnSite() {
   // Calculate total for UPI
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const delivery = getDynamicShippingRate(subtotal, state, pincode);
-  const grand = subtotal + delivery;
+
+  // Gifting wrap details
+  const giftCheckbox = document.getElementById("giftCheckbox");
+  const isGift = giftCheckbox ? giftCheckbox.checked : false;
+  const giftMessage = isGift ? (document.getElementById("giftMessageInput").value.trim() || "Yes (Premium wrapping)") : "";
+  const giftCharge = isGift ? 150 : 0;
+
+  const totalBeforeDiscount = subtotal + delivery + giftCharge;
+  const discount = appliedVoucher ? Math.min(appliedVoucher.balance, totalBeforeDiscount) : 0;
+  const grand = Math.max(0, totalBeforeDiscount - discount);
 
   const fullAddress = `${address}, ${state} - ${pincode}`;
 
@@ -1045,7 +1522,12 @@ function submitOrderOnSite() {
     address: fullAddress, 
     grand, 
     cart: [...cart],
-    shippingCharge: delivery
+    shippingCharge: delivery,
+    gift: isGift,
+    giftMessage: giftMessage,
+    giftCharge: giftCharge,
+    appliedVoucherCode: appliedVoucher ? appliedVoucher.code : null,
+    voucherDiscount: discount
   };
 
   // Close checkout modal and open UPI gateway
@@ -1215,7 +1697,22 @@ async function confirmUpiPayment() {
   }
   errEl.style.display = "none";
 
-  const { name, phone, address, cart: pendingCart, shippingCharge } = _pendingOrderData;
+  const { name, phone, address, cart: pendingCart, shippingCharge, gift, giftMessage, giftCharge, appliedVoucherCode, voucherDiscount } = _pendingOrderData;
+
+  // Save order details to window for Invoice downloads
+  window.lastConfirmedOrder = {
+    name,
+    phone,
+    address,
+    cart: pendingCart,
+    shippingCharge,
+    gift,
+    giftMessage,
+    giftCharge,
+    appliedVoucherCode,
+    voucherDiscount,
+    grand: _pendingOrderData.grand
+  };
 
   // Save order to DB (Firebase or LocalStorage)
   const orderGroupId = Date.now();
@@ -1234,15 +1731,32 @@ async function confirmUpiPayment() {
       qty: item.qty,
       total: item.price * item.qty,
       date: dateStr,
-      notes: `UPI Order | Shipping: Rs.${shippingCharge || 0} | UTR: ${utr} | Address: ${address}`,
+      notes: `UPI Order | Shipping: Rs.${shippingCharge || 0} | UTR: ${utr} | Address: ${address}` + 
+             (gift ? ` | Gift: Yes | Msg: ${giftMessage}` : "") +
+             (appliedVoucherCode ? ` | Voucher: ${appliedVoucherCode} | Discount: Rs.${voucherDiscount}` : ""),
       utr: utr,
       status: "paid",
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      gift: gift || false,
+      giftMessage: giftMessage || "",
+      giftCharge: giftCharge || 0,
+      appliedVoucherCode: appliedVoucherCode || null,
+      voucherDiscount: voucherDiscount || 0
     };
     savePromises.push(db.saveOrder(orderData));
   });
 
   await Promise.all(savePromises);
+
+  // Update voucher balance in Firebase Firestore if applied
+  if (appliedVoucherCode && voucherDiscount > 0) {
+    try {
+      const remainingBalance = Math.max(0, appliedVoucher.balance - voucherDiscount);
+      await db.updateVoucherBalance(appliedVoucherCode, remainingBalance);
+    } catch (e) {
+      console.error("Error updating voucher balance:", e);
+    }
+  }
 
   // Setup success screen
   document.getElementById("successOrderId").textContent = `#${orderGroupId.toString().slice(-6)}`;
@@ -1251,10 +1765,15 @@ async function confirmUpiPayment() {
     return `• ${i.name}${variantText} × ${i.qty} — ₹${(i.price * i.qty).toLocaleString("en-IN")}`;
   }).join("\n");
   const subtotal = pendingCart.reduce((s, i) => s + i.price * i.qty, 0);
-  const grand = subtotal + (shippingCharge || 0);
+  
+  // Grand total math including shipping + gift - voucher discount
+  const finalTotal = _pendingOrderData.grand;
   const shippingText = (shippingCharge || 0) === 0 ? "FREE" : `₹${shippingCharge}`;
+  const giftText = gift ? `\n*Gift Wrapping: Yes (+₹150)*\n*Greeting Message:* "${giftMessage}"` : "";
+  const voucherText = appliedVoucherCode ? `\n*Applied Voucher: ${appliedVoucherCode} (-₹${voucherDiscount})*` : "";
+
   const waMsg = encodeURIComponent(
-    `Hi! I just paid and placed an order on your site (Order ID: #${orderGroupId.toString().slice(-6)}):\n\nCustomer: ${name}\nPhone: ${phone}\n\nItems:\n${itemLines}\n\n*Subtotal: ₹${subtotal.toLocaleString("en-IN")}*\n*Courier Charges: ${shippingText}*\n*Grand Total Paid: ₹${grand.toLocaleString("en-IN")}*\n\nDelivery Address: ${address}\n\nPayment Mode: UPI\n*UPI Transaction Ref / UTR: ${utr}*\n\nPlease confirm and dispatch. Thank you!`
+    `Hi! I just paid and placed an order on your site (Order ID: #${orderGroupId.toString().slice(-6)}):\n\nCustomer: ${name}\nPhone: ${phone}\n\nItems:\n${itemLines}\n\n*Subtotal: ₹${subtotal.toLocaleString("en-IN")}*\n*Courier Charges: ${shippingText}*${giftText}${voucherText}\n*Grand Total Paid: ₹${finalTotal.toLocaleString("en-IN")}*\n\nDelivery Address: ${address}\n\nPayment Mode: UPI\n*UPI Transaction Ref / UTR: ${utr}*\n\nPlease confirm and dispatch. Thank you!`
   );
   document.getElementById("successWaBtn").onclick = () => {
     window.open(`https://wa.me/${WA_NUMBER}?text=${waMsg}`, "_blank");
@@ -1265,16 +1784,17 @@ async function confirmUpiPayment() {
     fbq('track', 'Purchase', {
       content_ids:  pendingCart.map(i => String(i.id)),
       content_type: 'product',
-      value:        grand,
+      value:        finalTotal,
       currency:     'INR',
       num_items:    pendingCart.reduce((s, i) => s + i.qty, 0)
     });
   }
 
-  // Clear cart
+  // Clear cart & voucher
   cart = [];
   saveCart();
   updateCartUI();
+  appliedVoucher = null;
   _pendingOrderData = null;
 
   // Close UPI modal, show checkout success

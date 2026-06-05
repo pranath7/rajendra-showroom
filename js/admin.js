@@ -231,6 +231,7 @@ function switchTab(tab) {
   if (tab === "dashboard") renderDashboard();
   if (tab === "orders")    renderOrdersTable();
   if (tab === "products")  renderProductTable();
+  if (tab === "vouchers")  loadAndRenderVouchers();
 }
 
 /* ─── DASHBOARD ─────────────────────────────────────────── */
@@ -474,6 +475,19 @@ function getOrderCustomerInfoHTML(o) {
     }
   }
 
+  // 4. Gifting details
+  if (o.gift) {
+    html += `<div style="font-size:11.5px;color:#d4af37;margin-top:4px;font-weight:700;display:flex;align-items:center;gap:4px;">🎁 Gift Wrapping Option</div>`;
+    if (o.giftMessage) {
+      html += `<div style="font-size:11px;color:#555;font-style:italic;margin-top:2px;max-width:220px;line-height:1.35;border-left:2px solid var(--gold);padding-left:6px;">"${o.giftMessage}"</div>`;
+    }
+  }
+
+  // 5. Voucher details
+  if (o.appliedVoucherCode) {
+    html += `<div style="font-size:11px;color:#27AE60;margin-top:2px;font-weight:600;">🎫 Voucher: ${o.appliedVoucherCode} (-₹${o.voucherDiscount || 0})</div>`;
+  }
+
   return html;
 }
 
@@ -532,6 +546,9 @@ function renderOrdersTable() {
              style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:#25D366;color:#fff;border-radius:7px;font-size:12px;font-weight:500;text-decoration:none;margin-bottom:4px;">
             💬 WhatsApp
           </a><br>` : ""}
+        ${o.gift && o.giftMessage ? `
+          <button class="btn-edit-row" style="padding:5px 10px;font-size:12px;margin-bottom:4px;background:#fdfaf2;border-color:var(--gold);color:var(--gold-dark);"
+                  onclick="printGiftCard('${o.customer.replace(/'/g, "\\'")}', '${o.giftMessage.replace(/'/g, "\\'")}')">✉️ Print Card</button><br>` : ""}
         <button class="btn-delete-row" style="padding:5px 10px;font-size:12px;"
                 onclick="deleteOrder(${o.id})">🗑 Delete</button>
       </td>
@@ -1330,4 +1347,139 @@ async function optimizeDatabaseImages() {
   }
 
   btn.disabled = false;
+}
+
+// --- Print Greeting Card Helper ---
+function printGiftCard(customer, message) {
+  const w = window.open("", "_blank");
+  if (!w) {
+    alert("Please allow popups to print greeting cards.");
+    return;
+  }
+  
+  const content = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Print Gift Card - Rajendra Showroom</title>
+      <style>
+        body { font-family: 'Georgia', serif; padding: 40px; text-align: center; color: #333; }
+        .card-box { max-width: 500px; margin: 50px auto; border: 2px solid #d4af37; padding: 40px; border-radius: 15px; background: #fffdf9; box-shadow: 0 4px 15px rgba(0,0,0,0.06); box-sizing: border-box; }
+        .header { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: #d4af37; margin-bottom: 30px; }
+        .msg { font-size: 18px; font-style: italic; line-height: 1.6; margin-bottom: 30px; color: #222; }
+        .footer { font-size: 13px; font-weight: bold; color: #555; }
+        @media print {
+          .print-btn { display: none; }
+          body { padding: 0; }
+          .card-box { border: 2px solid #d4af37; box-shadow: none; margin: 20px auto; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="print-btn" style="margin-bottom: 20px;">
+        <button onclick="window.print()" style="padding: 8px 18px; background: #d4af37; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">🖨️ Print Greeting Card</button>
+      </div>
+      <div class="card-box">
+        <div class="header">✦ A Special Gift For You ✦</div>
+        <div class="msg">"${message}"</div>
+        <div class="footer">Warm regards, <br>${customer}</div>
+      </div>
+      <script>
+        window.onload = function() {
+          setTimeout(function() { window.print(); }, 200);
+        }
+      </script>
+    </body>
+    </html>
+  `;
+  w.document.write(content);
+  w.document.close();
+}
+
+// --- Vouchers Management Logic ---
+let vouchers = [];
+
+async function loadAndRenderVouchers() {
+  vouchers = await db.getVouchers();
+  renderVouchersTable();
+}
+
+function renderVouchersTable() {
+  const tbody = document.getElementById("vouchersTableBody");
+  if (!tbody) return;
+  
+  if (vouchers.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center;padding:30px;color:#bbb;">
+          No active vouchers. Create one on the left panel!
+        </td>
+      </tr>`;
+    return;
+  }
+  
+  tbody.innerHTML = vouchers.map(v => `
+    <tr class="product-row">
+      <td style="font-weight: 700; font-family: monospace; font-size: 14px; color: var(--text);">${v.code}</td>
+      <td style="font-size: 13px; color: var(--text-light);">${v.description || "—"}</td>
+      <td style="font-weight: 600;">₹${v.originalBalance.toLocaleString("en-IN")}</td>
+      <td style="font-weight: 700; color: ${v.balance > 0 ? '#27AE60' : '#c0392b'};">₹${v.balance.toLocaleString("en-IN")}</td>
+      <td style="text-align: right;">
+        <button class="btn-delete-row" style="padding: 5px 10px; font-size: 12px;" onclick="deleteVoucherCode('${v.code}')">🗑 Delete</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function generateRandomCode() {
+  const codeIn = document.getElementById("voucherCodeInput");
+  if (!codeIn) return;
+  const rand = Math.random().toString(36).substring(2, 6).toUpperCase() + "-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+  codeIn.value = `GC-${rand}`;
+}
+
+async function createVoucher() {
+  const codeIn = document.getElementById("voucherCodeInput");
+  const valIn = document.getElementById("voucherValueInput");
+  const descIn = document.getElementById("voucherDescInput");
+  
+  const code = codeIn ? codeIn.value.trim().toUpperCase() : "";
+  const val = valIn ? parseFloat(valIn.value) : 0;
+  const desc = descIn ? descIn.value.trim() : "";
+  
+  if (!code || !code.startsWith("GC-")) {
+    showAdminToast("Voucher code must start with 'GC-' (e.g. GC-HAPPY-500)", "error");
+    return;
+  }
+  
+  if (isNaN(val) || val <= 0) {
+    showAdminToast("Please enter a valid balance value (> 0)", "error");
+    return;
+  }
+  
+  showAdminToast("Creating voucher in database...", "info");
+  
+  const res = await db.saveVoucher(code, val, desc);
+  if (res && res.success) {
+    showAdminToast("✅ Gift card code generated & synced!", "success");
+    if (codeIn) codeIn.value = "";
+    if (valIn) valIn.value = "";
+    if (descIn) descIn.value = "";
+    await loadAndRenderVouchers();
+  } else {
+    showAdminToast("❌ Failed to save voucher: " + (res.error || "connection error"), "error");
+  }
+}
+
+async function deleteVoucherCode(code) {
+  if (!confirm(`Delete voucher "${code}" permanently? This cannot be undone.`)) return;
+  
+  showAdminToast("Deleting voucher...", "info");
+  const res = await db.deleteVoucher(code);
+  if (res && res.success) {
+    showAdminToast(`🗑 Voucher "${code}" deleted.`, "info");
+    await loadAndRenderVouchers();
+  } else {
+    showAdminToast("❌ Failed to delete voucher: " + (res.error || "connection error"), "error");
+  }
 }

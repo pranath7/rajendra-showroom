@@ -1419,6 +1419,7 @@ input, select, textarea { font-family: inherit; }
   .modal-main-img-wrap { height: 380px; }
   .footer-top { grid-template-columns: 1fr 1fr; }
   .cart-drawer { width: 100%; }
+  .wishlist-drawer { width: 100%; }
 }
 @media (max-width: 480px) {
   .features-inner { gap: 24px; }
@@ -2992,5 +2993,106 @@ input, select, textarea { font-family: inherit; }
   }
   .google-review-heading {
     font-size: 22px;
+  }
+}
+
+/* ─── Wishlist / Registry Drawer & Banner ─── */
+.wishlist-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+.wishlist-overlay.visible { opacity: 1; pointer-events: all; }
+.wishlist-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 100vh;
+  background: var(--white);
+  z-index: 1010;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.32,0,0.67,0);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 40px rgba(0,0,0,0.15);
+}
+.wishlist-drawer.open { transform: translateX(0); }
+
+.wishlist-head {
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.wishlist-head h3 {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+}
+.wishlist-close-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--bg-warm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--text-light);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.wishlist-close-btn:hover { background: var(--border); color: var(--text); }
+
+.wishlist-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+.wishlist-foot {
+  padding: 20px 22px;
+  background: #fdfdfd;
+  border-top: 1px solid var(--border);
+}
+
+.wishlist-shared-banner {
+  max-width: 1200px;
+  margin: 20px auto 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+.product-wishlist.active {
+  background: #fff !important;
+  color: #ff4d4d !important;
+  border-color: #ff4d4d !important;
+  font-size: 20px !important;
+}
+
+/* Coupon status styles */
+#couponStatusMessage {
+  transition: all 0.2s ease;
+}
+
+/* Invoice print specific styling */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .invoice-box, .invoice-box * {
+    visibility: visible;
+  }
+  .invoice-box {
+    position: absolute;
+    left: 0;
+    top: 0;
   }
 }
