@@ -920,7 +920,7 @@ function openModal(id) {
 
 
 function setModalMainImg(el, productId, imgIdx) {
-  const p = allProducts.find(x => x.id === productId);
+  const p = allProducts.find(x => String(x.id) === String(productId));
   if (!p) return;
   const productImages = p.images || (p.image ? [p.image] : []);
   const src = productImages[imgIdx];
@@ -968,7 +968,7 @@ function setModalMainVideo(el, videoSrc) {
 }
 
 function whatsappBulkOrder(id) {
-  const p = allProducts.find(x => x.id === id);
+  const p = allProducts.find(x => String(x.id) === String(id));
   if (!p) return;
   const msg = encodeURIComponent(
     `Hi! I would like to inquire about a *bulk order* for:\n\n*${p.name}*\nProduct ID: #${p.id}\n\nPlease share wholesale pricing, minimum order quantity (MOQ) and availability details.\n\nThank you!`
@@ -1083,7 +1083,7 @@ function renderWishlistItems() {
   }
 
   body.innerHTML = wishlist.map(id => {
-    const item = allProducts.find(p => p.id === id);
+    const item = allProducts.find(p => String(p.id) === String(id));
     if (!item) return "";
     return `
       <div class="wishlist-item" style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--border-dark);">
@@ -1923,7 +1923,7 @@ function buyItNow(productId) {
 }
 
 function whatsappExpressShipping(id) {
-  const p = allProducts.find(x => x.id === id);
+  const p = allProducts.find(x => String(x.id) === String(id));
   if (!p) return;
   const msg = encodeURIComponent(
     `Hi! I'm interested in *express shipping* for:\n\n*${p.name}*\nProduct ID: #${p.id}\n\nCould you please let me know the express shipping charges and delivery timeline for my location?\n\nThank you!`
