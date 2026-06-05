@@ -924,6 +924,13 @@ function renderImagePreviews() {
   grid.innerHTML = html;
 }
 
+function toggleSizeFields(show) {
+  const container = document.getElementById("sizeFieldsContainer");
+  if (container) {
+    container.style.display = show ? "block" : "none";
+  }
+}
+
 /* ─── Add / Edit / Delete Product ───────────────────────── */
 async function saveProduct() {
   const name      = document.getElementById("productName").value.trim();
@@ -933,7 +940,20 @@ async function saveProduct() {
   const desc      = document.getElementById("productDesc").value.trim();
   const featured  = document.getElementById("productFeatured").checked;
   const colorsStr = document.getElementById("productColors").value.trim();
-  const sizesStr  = document.getElementById("productSizes").value.trim();
+
+  const enableSizes = document.getElementById("enableSizesToggle").checked;
+  let sizesStr = "";
+  if (enableSizes) {
+    const priceSmall = document.getElementById("sizePriceSmall").value.trim();
+    const priceBig = document.getElementById("sizePriceBig").value.trim();
+    if (priceSmall && priceBig) {
+      sizesStr = `Small (150ml): ${priceSmall}, Big (300ml): ${priceBig}`;
+    } else if (priceSmall) {
+      sizesStr = `Small (150ml): ${priceSmall}`;
+    } else if (priceBig) {
+      sizesStr = `Big (300ml): ${priceBig}`;
+    }
+  }
 
   // Parse colors as a list of trimmed strings
   const colors = colorsStr ? colorsStr.split(",").map(c => c.trim()).filter(Boolean) : [];
@@ -1041,7 +1061,36 @@ function editProduct(id) {
   document.getElementById("productDesc").value       = p.description || "";
   document.getElementById("productFeatured").checked = p.featured;
   document.getElementById("productColors").value     = p.colors ? p.colors.join(", ") : "";
-  document.getElementById("productSizes").value      = p.sizes || "";
+  const sizesStr = p.sizes || "";
+  const hasSizes = !!sizesStr.trim();
+  const toggleEl = document.getElementById("enableSizesToggle");
+  if (toggleEl) {
+    toggleEl.checked = hasSizes;
+    toggleSizeFields(hasSizes);
+  }
+  const smallEl = document.getElementById("sizePriceSmall");
+  const bigEl = document.getElementById("sizePriceBig");
+  if (smallEl) smallEl.value = "";
+  if (bigEl) bigEl.value = "";
+  
+  if (hasSizes) {
+    const parts = sizesStr.split(",");
+    parts.forEach(part => {
+      const sub = part.split(":");
+      if (sub.length >= 2) {
+        const name = sub[0].trim().toLowerCase();
+        const val = sub[1].trim();
+        if (name.includes("small") && smallEl) {
+          smallEl.value = val;
+        } else if (name.includes("big") && bigEl) {
+          bigEl.value = val;
+        }
+      }
+    });
+  }
+  const hiddenSizesEl = document.getElementById("productSizes");
+  if (hiddenSizesEl) hiddenSizesEl.value = sizesStr;
+  
   
   renderImagePreviews();
   
@@ -1105,6 +1154,16 @@ function resetForm() {
   var radioUp = document.querySelector('input[name="videoSourceType"][value="upload"]');
   if (radioUp) radioUp.checked = true;
   toggleVideoSourceMode("upload");
+
+  const toggleEl = document.getElementById("enableSizesToggle");
+  if (toggleEl) {
+    toggleEl.checked = false;
+    toggleSizeFields(false);
+  }
+  const smallEl = document.getElementById("sizePriceSmall");
+  const bigEl = document.getElementById("sizePriceBig");
+  if (smallEl) smallEl.value = "";
+  if (bigEl) bigEl.value = "";
 
   renderImagePreviews();
 }
