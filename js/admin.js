@@ -958,8 +958,10 @@ function toggleSizeFields(show) {
 async function saveProduct() {
   const name      = document.getElementById("productName").value.trim();
   const category  = document.getElementById("productCategory").value;
-  const price     = parseFloat(document.getElementById("productPrice").value);
-  const origPrice = parseFloat(document.getElementById("productOrigPrice").value) || price;
+  const priceVal  = document.getElementById("productPrice").value.trim();
+  const price     = priceVal ? (parseFloat(priceVal) || 0) : 0;
+  const origPriceVal = document.getElementById("productOrigPrice").value.trim();
+  const origPrice = origPriceVal ? (parseFloat(origPriceVal) || price) : price;
   const desc      = document.getElementById("productDesc").value.trim();
   const featured  = document.getElementById("productFeatured").checked;
   const colorsStr = document.getElementById("productColors").value.trim();
@@ -983,7 +985,6 @@ async function saveProduct() {
   const colors = colorsStr ? colorsStr.split(",").map(c => c.trim()).filter(Boolean) : [];
 
   if (!name)            { showAdminToast("Please enter a product name", "error"); return; }
-  if (!price || price <= 0) { showAdminToast("Please enter a valid price", "error"); return; }
 
   let targetProduct = null;
   let isEdit = (editingId !== null);

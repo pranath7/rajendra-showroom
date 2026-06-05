@@ -208,7 +208,8 @@ function productCardHTML(p) {
   const rating = p.rating || parseFloat((4.5 + ((p.id * 7) % 5) * 0.1).toFixed(1));
   const reviews = p.reviews || ((p.id * 13) % 100) + 40;
   
-  const discount = p.originalPrice > p.price
+  const isPriceOnRequest = !p.price || p.price <= 0;
+  const discount = (p.originalPrice > p.price && !isPriceOnRequest)
     ? Math.round((1 - p.price / p.originalPrice) * 100)
     : 0;
   const stars = renderStars(rating);
@@ -235,7 +236,7 @@ function productCardHTML(p) {
       </div>`;
   }
 
-  const badgeHTML = discount > 0
+  const badgeHTML = (discount > 0 && !isPriceOnRequest)
     ? `<span class="product-badge badge-sale">−${discount}%</span>`
     : `<span class="product-badge badge-new">New</span>`;
 
@@ -255,9 +256,9 @@ function productCardHTML(p) {
           <span class="rating-count">(${reviews})</span>
         </div>
         <div class="product-price">
-          <span class="price-current">₹${p.price.toLocaleString("en-IN")}</span>
-          ${p.originalPrice > p.price ? `<span class="price-original">₹${p.originalPrice.toLocaleString("en-IN")}</span>` : ""}
-          ${discount > 0 ? `<span class="price-discount">Save ${discount}%</span>` : ""}
+          <span class="price-current">${isPriceOnRequest ? 'Price on Request' : '₹' + p.price.toLocaleString("en-IN")}</span>
+          ${(p.originalPrice > p.price && !isPriceOnRequest) ? `<span class="price-original">₹${p.originalPrice.toLocaleString("en-IN")}</span>` : ""}
+          ${(discount > 0 && !isPriceOnRequest) ? `<span class="price-discount">Save ${discount}%</span>` : ""}
         </div>
       </div>
     </div>`;
@@ -487,7 +488,7 @@ function renderCartItems() {
         <div class="cart-item-name">${item.name}</div>
         ${item.selectedSize ? `<div class="cart-item-variant" style="font-size:11.5px; color:var(--text-light); margin-top:2px;">Size: ${item.selectedSize}</div>` : ""}
         ${item.selectedColor ? `<div class="cart-item-variant" style="font-size:11.5px; color:var(--text-light); margin-top:2px;">Color: ${item.selectedColor}</div>` : ""}
-        <div class="cart-item-price">₹${item.price.toLocaleString("en-IN")}</div>
+        <div class="cart-item-price">${item.price > 0 ? '₹' + item.price.toLocaleString("en-IN") : 'Price on Request'}</div>
         <div class="cart-item-controls">
           <button class="qty-btn" onclick="changeQty(${item.id}, ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'}, -1)">−</button>
           <span class="qty-val">${item.qty}</span>
@@ -726,7 +727,7 @@ function openModal(id) {
             </div>
             <div class="cross-sell-info">
               <div class="cross-sell-name">${item.name}</div>
-              <div class="cross-sell-price">₹${item.price.toLocaleString("en-IN")}</div>
+              <div class="cross-sell-price">${item.price > 0 ? '₹' + item.price.toLocaleString("en-IN") : 'Price on Request'}</div>
             </div>
           </div>
         `).join("")}
@@ -744,11 +745,11 @@ function openModal(id) {
           <div class="related-card" onclick="openModal(${item.id})">
             <div class="related-card-img">
               ${item.image ? `<img src="${item.image}" alt="${item.name}">` : `<div style="font-size:36px;opacity:0.25;text-align:center;padding-top:25%;">🍽</div>`}
-              ${item.originalPrice > item.price ? `<span class="related-card-badge">Sale</span>` : ""}
+              ${(item.originalPrice > item.price && item.price > 0) ? `<span class="related-card-badge">Sale</span>` : ""}
             </div>
             <div class="related-card-info">
               <div class="related-card-name">${item.name}</div>
-              <div class="related-card-price">₹${item.price.toLocaleString("en-IN")}</div>
+              <div class="related-card-price">${item.price > 0 ? '₹' + item.price.toLocaleString("en-IN") : 'Price on Request'}</div>
             </div>
           </div>
         `).join("")}
@@ -786,9 +787,9 @@ function openModal(id) {
         </div>
         
         <div class="modal-price">
-          ${hasOrigPrice ? `<span class="price-original">₹${p.originalPrice.toLocaleString("en-IN")}</span>` : ""}
-          <span class="price-current">₹${displayPrice.toLocaleString("en-IN")}</span>
-          ${(discount > 0 && !productSizes.length) ? `<span class="price-discount-badge">Sale</span>` : ""}
+          ${(hasOrigPrice && displayPrice > 0) ? `<span class="price-original">₹${p.originalPrice.toLocaleString("en-IN")}</span>` : ""}
+          <span class="price-current">${displayPrice > 0 ? '₹' + displayPrice.toLocaleString("en-IN") : 'Price on Request'}</span>
+          ${(discount > 0 && !productSizes.length && displayPrice > 0) ? `<span class="price-discount-badge">Sale</span>` : ""}
         </div>
         <div class="modal-tax-notice">Tax included.</div>
         
@@ -1090,7 +1091,7 @@ function renderWishlistItems() {
           </div>
           <div style="min-width:0;">
             <div style="font-weight:600; font-size:13px; color:var(--text); line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</div>
-            <div style="font-weight:700; font-size:12.5px; color:var(--gold-dark); margin-top:2px;">₹${item.price.toLocaleString("en-IN")}</div>
+            <div style="font-weight:700; font-size:12.5px; color:var(--gold-dark); margin-top:2px;">${item.price > 0 ? '₹' + item.price.toLocaleString("en-IN") : 'Price on Request'}</div>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
@@ -1291,9 +1292,9 @@ function downloadInvoicePDF() {
         ${item.selectedSize ? `<div style="font-size:11px;color:#666;">Size: ${item.selectedSize}</div>` : ""}
         ${item.selectedColor ? `<div style="font-size:11px;color:#666;">Color: ${item.selectedColor}</div>` : ""}
       </td>
-      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">₹${item.price.toLocaleString("en-IN")}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.price > 0 ? '₹' + item.price.toLocaleString("en-IN") : 'Price on Request'}</td>
       <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.qty}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold;">₹${(item.price * item.qty).toLocaleString("en-IN")}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold;">${item.price > 0 ? '₹' + (item.price * item.qty).toLocaleString("en-IN") : 'Price on Request'}</td>
     </tr>
   `).join("");
 
@@ -1627,7 +1628,7 @@ function openUpiModal(amount) {
   const vpaEl = document.getElementById("upiVpaDisplay");
   if (vpaEl) vpaEl.textContent = upiId;
   const qrEl = document.getElementById("upiQrImg");
-  if (qrEl) qrEl.src = `images/payment-qr.jpg?v=3.21`;
+  if (qrEl) qrEl.src = `images/payment-qr.jpg?v=3.22`;
   document.getElementById("upiScreen").style.display = "block";
   document.getElementById("upiProcessing").style.display = "none";
   document.getElementById("upiError").style.display = "none";
@@ -2335,7 +2336,7 @@ function selectProductSize(sizeName, price) {
   // Update price in modal dynamically
   const priceCurrentEl = document.querySelector("#productModal .price-current");
   if (priceCurrentEl) {
-    priceCurrentEl.textContent = `₹${price.toLocaleString("en-IN")}`;
+    priceCurrentEl.textContent = price > 0 ? `₹${price.toLocaleString("en-IN")}` : "Price on Request";
   }
   
   // Hide original price and sale badge if size changes price
