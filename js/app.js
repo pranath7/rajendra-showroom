@@ -149,7 +149,7 @@ function getFilteredProducts() {
 
   // Shared Wishlist Registry filter
   if (window.sharedWishlistItems && window.sharedWishlistItems.length > 0) {
-    list = list.filter(p => window.sharedWishlistItems.includes(p.id));
+    list = list.filter(p => window.sharedWishlistItems.map(String).includes(String(p.id)));
   }
 
   // Category filter
@@ -239,11 +239,22 @@ function productCardHTML(p) {
   const badgeHTML = (discount > 0 && !isPriceOnRequest)
     ? `<span class="product-badge badge-sale">−${discount}%</span>`
     : "";
+
+  let fomoBadgeHTML = "";
+  if (p.badge) {
+    let badgeClass = "";
+    if (p.badge === "Best Seller") badgeClass = "badge-bestseller";
+    else if (p.badge === "New Arrival") badgeClass = "badge-new";
+    else if (p.badge === "Low Stock") badgeClass = "badge-lowstock";
+    fomoBadgeHTML = `<span class="product-badge-fomo ${badgeClass}">${p.badge}</span>`;
+  }
+
   const isWishlisted = wishlist.some(x => String(x) === String(p.id));
 
   return `
     <div class="product-card" onclick="openModal('${p.id}')">
       <div class="product-img-wrap">
+        ${fomoBadgeHTML}
         ${imgHTML}
         ${badgeHTML}
         <button class="product-wishlist ${isWishlisted ? 'active' : ''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${isWishlisted ? '♥' : '♡'}</button>
@@ -291,10 +302,52 @@ function updateHeading() {
 function bindEvents() {
   // Search
   const searchInput = document.getElementById("searchInput");
-  if (searchInput) {
+  const suggestions = document.getElementById("searchSuggestions");
+  if (searchInput && suggestions) {
     searchInput.addEventListener("input", e => {
-      searchQuery = e.target.value;
+      const query = e.target.value.trim();
+      searchQuery = query;
       renderProducts();
+      
+      if (query.length < 2) {
+        suggestions.innerHTML = "";
+        suggestions.style.display = "none";
+        return;
+      }
+      
+      const q = query.toLowerCase();
+      const matches = allProducts.filter(p => 
+        p.name.toLowerCase().includes(q) || 
+        p.category.toLowerCase().includes(q) || 
+        (p.description && p.description.toLowerCase().includes(q))
+      ).slice(0, 6);
+      
+      if (matches.length === 0) {
+        suggestions.innerHTML = `<div class="ss-no-results">No results found for "${query}"</div>`;
+        suggestions.style.display = "block";
+        return;
+      }
+      
+      suggestions.innerHTML = matches.map(p => {
+        const isPriceOnRequest = !p.price || p.price <= 0;
+        const priceText = isPriceOnRequest ? "Price on Request" : `₹${p.price.toLocaleString("en-IN")}`;
+        const imgUrl = p.image || (p.images && p.images[0]) || "";
+        const imgHTML = imgUrl 
+          ? `<img class="ss-img" src="${imgUrl}" alt="${p.name}">` 
+          : `<div class="ss-img" style="display:flex;align-items:center;justify-content:center;font-size:18px;">🍽</div>`;
+        
+        return `
+          <div class="search-suggestion-item" onclick="openProductFromSearch('${p.id}')">
+            ${imgHTML}
+            <div class="ss-info">
+              <div class="ss-name">${p.name}</div>
+              <div class="ss-cat">${p.category}</div>
+            </div>
+            <div class="ss-price">${priceText}</div>
+          </div>
+        `;
+      }).join("");
+      suggestions.style.display = "flex";
     });
   }
 
@@ -373,8 +426,263 @@ function bindEvents() {
 
   // Escape key
   document.addEventListener("keydown", e => {
-    if (e.key === "Escape") { closeCart(); closeModal(); closeCheckoutModal(); closeUpiModal(); closeMobileMenu(); closeWishlist(); }
+    if (e.key === "Escape") { 
+      closeCart(); 
+      closeModal(); 
+      closeCheckoutModal(); 
+      closeUpiModal(); 
+      closeMobileMenu(); 
+      closeWishlist(); 
+      const suggestions = document.getElementById("searchSuggestions");
+      if (suggestions) suggestions.style.display = "none";
+    }
   });
+
+  // Checkout inputs dynamic capture for Abandoned Carts
+  const custName = document.getElementById("custName");
+  const custPhone = document.getElementById("custPhone");
+  const custAddress = document.getElementById("custAddress");
+  const custState = document.getElementById("custState");
+  const custPincode = document.getElementById("custPincode");
+
+  if (custName) custName.addEventListener("input", trackAbandonedCart);
+  if (custPhone) custPhone.addEventListener("input", trackAbandonedCart);
+  if (custAddress) custAddress.addEventListener("input", trackAbandonedCart);
+  if (custState) custState.addEventListener("change", trackAbandonedCart);
+  if (custPincode) custPincode.addEventListener("input", trackAbandonedCart);
+
+  // Close search suggestions on click outside
+  document.addEventListener("click", e => {
+    const wrap = document.querySelector(".search-wrap");
+    const suggestions = document.getElementById("searchSuggestions");
+    if (suggestions && wrap && !wrap.contains(e.target)) {
+      suggestions.style.display = "none";
+    }
+  });
+}
+
+/* ─── E-commerce Storefront Upgrades Helpers ─────────────── */
+let abandonedCartTimer = null;
+function trackAbandonedCart() {
+  if (abandonedCartTimer) clearTimeout(abandonedCartTimer);
+  abandonedCartTimer = setTimeout(async () => {
+    const name = document.getElementById("custName") ? document.getElementById("custName").value.trim() : "";
+    const phone = document.getElementById("custPhone") ? document.getElementById("custPhone").value.trim() : "";
+    const address = document.getElementById("custAddress") ? document.getElementById("custAddress").value.trim() : "";
+    const state = document.getElementById("custState") ? document.getElementById("custState").value : "";
+    const pincode = document.getElementById("custPincode") ? document.getElementById("custPincode").value.trim() : "";
+
+    if (!phone || cart.length === 0) return;
+
+    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const delivery = getDynamicShippingRate(subtotal, state, pincode);
+    const giftCheckbox = document.getElementById("giftCheckbox");
+    const isGift = giftCheckbox ? giftCheckbox.checked : false;
+    const giftCharge = isGift ? 150 : 0;
+    const giftMessage = isGift ? (document.getElementById("giftMessageInput").value.trim() || "Yes (Premium wrapping)") : "";
+
+    const totalBeforeDiscount = subtotal + delivery + giftCharge;
+    const discount = appliedVoucher ? Math.min(appliedVoucher.balance, totalBeforeDiscount) : 0;
+    const grand = Math.max(0, totalBeforeDiscount - discount);
+
+    const cartData = {
+      id: phone,
+      name,
+      phone,
+      address,
+      state,
+      pincode,
+      cart: cart.map(i => ({
+        id: i.id,
+        name: i.name,
+        price: i.price,
+        qty: i.qty,
+        selectedColor: i.selectedColor || null,
+        selectedSize: i.selectedSize || null,
+        img: i.image || ""
+      })),
+      shippingCharge: delivery,
+      gift: isGift,
+      giftMessage: giftMessage,
+      giftCharge: giftCharge,
+      appliedVoucherCode: appliedVoucher ? appliedVoucher.code : null,
+      voucherDiscount: discount,
+      grand: grand,
+      timestamp: new Date().toISOString()
+    };
+
+    try {
+      if (typeof db !== "undefined" && db.saveAbandonedCart) {
+        await db.saveAbandonedCart(cartData);
+      }
+    } catch (e) {
+      console.error("Failed to save abandoned cart:", e);
+    }
+  }, 1000);
+}
+
+function openProductFromSearch(id) {
+  const suggestions = document.getElementById("searchSuggestions");
+  if (suggestions) suggestions.style.display = "none";
+  
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) searchInput.value = "";
+  
+  searchQuery = "";
+  renderProducts();
+  openModal(id);
+}
+
+function toggleWaWidget() {
+  const card = document.getElementById("waWidgetCard");
+  const badge = document.querySelector(".wa-bubble-badge");
+  if (!card) return;
+  if (card.style.display === "none") {
+    card.style.display = "flex";
+    if (badge) badge.style.display = "none";
+  } else {
+    card.style.display = "none";
+  }
+}
+
+function sendWaWidgetMessage() {
+  const input = document.getElementById("waWidgetInput");
+  const query = input ? input.value.trim() : "";
+  const text = query || "Hi! I am interested in dinnerware / products from your showroom.";
+  const waMsg = encodeURIComponent(text);
+  window.open(`https://wa.me/${WA_NUMBER}?text=${waMsg}`, "_blank");
+  
+  const card = document.getElementById("waWidgetCard");
+  if (card) card.style.display = "none";
+  if (input) input.value = "";
+}
+
+function updateBundlePriceDisplay(mainPrice, secondPrice) {
+  const secondCheckbox = document.getElementById("fbtSecondCheckbox");
+  const isSecondChecked = secondCheckbox ? secondCheckbox.checked : false;
+  const priceDisplay = document.getElementById("fbtPriceDisplay");
+  const btn = document.querySelector(".btn-add-bundle");
+  
+  if (isSecondChecked) {
+    const origTotal = mainPrice + secondPrice;
+    const discount = Math.round(origTotal * 0.05);
+    const finalTotal = origTotal - discount;
+    if (priceDisplay) {
+      priceDisplay.innerHTML = `
+        <span class="original">₹${origTotal.toLocaleString("en-IN")}</span>
+        <span class="discounted">₹${finalTotal.toLocaleString("en-IN")}</span>
+      `;
+    }
+    if (btn) btn.textContent = "Add Bundle to Cart (Save 5%)";
+  } else {
+    if (priceDisplay) {
+      priceDisplay.innerHTML = `
+        <span class="discounted">₹${mainPrice.toLocaleString("en-IN")}</span>
+      `;
+    }
+    if (btn) btn.textContent = "Add Item to Cart";
+  }
+}
+
+function addBundleToCart(mainId, secondId) {
+  const secondCheckbox = document.getElementById("fbtSecondCheckbox");
+  const isSecondChecked = secondCheckbox ? secondCheckbox.checked : false;
+  
+  const qtyInput = document.getElementById("modalQtyVal");
+  const qty = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
+  
+  const mainProduct = allProducts.find(p => String(p.id) === String(mainId));
+  if (!mainProduct) return;
+  
+  let mainColor = window.selectedProductColor;
+  let mainSize = window.selectedProductSize;
+  let mainPrice = mainProduct.price;
+  if (mainSize) {
+    mainPrice = window.selectedProductPrice;
+  } else {
+    const productSizes = parseProductSizes(mainProduct.sizes);
+    if (productSizes.length > 0) {
+      mainSize = productSizes[0].name;
+      mainPrice = productSizes[0].price;
+    }
+  }
+  if (!mainColor) {
+    const productColors = Array.isArray(mainProduct.colors) ? mainProduct.colors : (mainProduct.colors ? mainProduct.colors.split(",").map(c => c.trim()).filter(Boolean) : []);
+    if (productColors.length > 0) mainColor = productColors[0];
+  }
+
+  if (isSecondChecked) {
+    const secondProduct = allProducts.find(p => String(p.id) === String(secondId));
+    if (!secondProduct) return;
+    
+    let secondColor = null;
+    let secondSize = null;
+    let secondPrice = secondProduct.price;
+    const secondSizes = parseProductSizes(secondProduct.sizes);
+    if (secondSizes.length > 0) {
+      secondSize = secondSizes[0].name;
+      secondPrice = secondSizes[0].price;
+    }
+    const secondColors = Array.isArray(secondProduct.colors) ? secondProduct.colors : (secondProduct.colors ? secondProduct.colors.split(",").map(c => c.trim()).filter(Boolean) : []);
+    if (secondColors.length > 0) secondColor = secondColors[0];
+
+    const discountedMainPrice = Math.round(mainPrice * 0.95);
+    const discountedSecondPrice = Math.round(secondPrice * 0.95);
+
+    const existingMain = cart.find(i => String(i.id) === String(mainId) && i.selectedColor === mainColor && i.selectedSize === mainSize);
+    if (existingMain) {
+      existingMain.qty += qty;
+      existingMain.price = discountedMainPrice;
+    } else {
+      cart.push({
+        id: mainProduct.id,
+        name: mainProduct.name + " (Bundle Discount)",
+        price: discountedMainPrice,
+        image: mainProduct.image || (mainProduct.images && mainProduct.images[0]) || "",
+        qty: qty,
+        selectedColor: mainColor,
+        selectedSize: mainSize
+      });
+    }
+
+    const existingSecond = cart.find(i => String(i.id) === String(secondId) && i.selectedColor === secondColor && i.selectedSize === secondSize);
+    if (existingSecond) {
+      existingSecond.qty += 1;
+      existingSecond.price = discountedSecondPrice;
+    } else {
+      cart.push({
+        id: secondProduct.id,
+        name: secondProduct.name + " (Bundle Discount)",
+        price: discountedSecondPrice,
+        image: secondProduct.image || (secondProduct.images && secondProduct.images[0]) || "",
+        qty: 1,
+        selectedColor: secondColor,
+        selectedSize: secondSize
+      });
+    }
+    showToast("FBT Bundle added to cart with 5% discount!", "success");
+  } else {
+    const existingMain = cart.find(i => String(i.id) === String(mainId) && i.selectedColor === mainColor && i.selectedSize === mainSize);
+    if (existingMain) {
+      existingMain.qty += qty;
+    } else {
+      cart.push({
+        id: mainProduct.id,
+        name: mainProduct.name,
+        price: mainPrice,
+        image: mainProduct.image || (mainProduct.images && mainProduct.images[0]) || "",
+        qty: qty,
+        selectedColor: mainColor,
+        selectedSize: mainSize
+      });
+    }
+    showToast("Item added to cart.", "success");
+  }
+
+  saveCart();
+  updateCartUI();
+  closeModal();
+  openCart();
 }
 
 /* ─── Cart Functions ─────────────────────────────────────── */
@@ -616,6 +924,57 @@ function openModal(id) {
   const discount = p.originalPrice > p.price
     ? Math.round((1 - p.price / p.originalPrice) * 100) : 0;
 
+  // Resolve FOMO Badge for details modal
+  let modalBadgeHTML = "";
+  if (p.badge) {
+    let badgeClass = "";
+    if (p.badge === "Best Seller") badgeClass = "badge-bestseller";
+    else if (p.badge === "New Arrival") badgeClass = "badge-new";
+    else if (p.badge === "Low Stock") badgeClass = "badge-lowstock";
+    modalBadgeHTML = `<span class="modal-badge-fomo ${badgeClass}">${p.badge}</span>`;
+  }
+
+  // Resolve Frequently Bought Together (FBT)
+  const crossSells = getCrossSellItems(p);
+  const fbtItem = crossSells[0];
+  let fbtHTML = "";
+  if (fbtItem) {
+    const origTotal = displayPrice + fbtItem.price;
+    const bundleDiscount = Math.round(origTotal * 0.05);
+    const bundleTotal = origTotal - bundleDiscount;
+    fbtHTML = `
+      <div class="modal-bundle-container">
+        <h3 class="modal-bundle-title">Frequently Bought Together</h3>
+        <div class="modal-bundle-items-list">
+          <div class="modal-bundle-row">
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="fbtMainCheckbox" checked disabled>
+              <span>This Item: <strong class="modal-bundle-item-name">${p.name}</strong> (<span class="modal-bundle-item-price">₹${displayPrice.toLocaleString("en-IN")}</span>)</span>
+            </label>
+          </div>
+          <div class="modal-bundle-row">
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="fbtSecondCheckbox" checked onchange="updateBundlePriceDisplay(${displayPrice}, ${fbtItem.price})">
+              <span>Add: <strong class="modal-bundle-item-name">${fbtItem.name}</strong> (<span class="modal-bundle-item-price">₹${fbtItem.price.toLocaleString("en-IN")}</span>)</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-bundle-footer">
+          <div class="modal-bundle-total-price">
+            Total Price: 
+            <span id="fbtPriceDisplay">
+              <span class="original">₹${origTotal.toLocaleString("en-IN")}</span>
+              <span class="discounted">₹${bundleTotal.toLocaleString("en-IN")}</span>
+            </span>
+          </div>
+          <button type="button" class="btn-add-bundle" onclick="addBundleToCart('${p.id}', '${fbtItem.id}')">
+            Add Bundle to Cart (Save 5%)
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
   const productImages = p.images || (p.image ? [p.image] : []);
   const productVideo  = p.video || null;
   let imgHTML = "";
@@ -717,7 +1076,6 @@ function openModal(id) {
 
 
   // Cross sell items ("Pairs well with")
-  const crossSells = getCrossSellItems(p);
   const crossSellHTML = crossSells.length > 0 ? `
     <div class="cross-sell-section">
       <h3 class="cross-sell-title">Pairs well with</h3>
@@ -782,7 +1140,7 @@ function openModal(id) {
       
       <div class="modal-info">
         <div class="modal-cat">${p.category}</div>
-        <h2 class="modal-name">${p.name}</h2>
+        <h2 class="modal-name">${p.name}${modalBadgeHTML}</h2>
         <div class="modal-rating">
           <span class="stars">${renderStars(rating)}</span>
           <span class="rating-val" style="margin-left:6px;font-size:13px;">${rating.toFixed(1)} · ${reviews} reviews</span>
@@ -812,6 +1170,9 @@ function openModal(id) {
             <button type="button" class="qty-adjust-btn" onclick="changeModalQty(1)">+</button>
           </div>
         </div>
+
+        <!-- Frequently Bought Together Bundle -->
+        ${fbtHTML}
 
         <!-- Express Shipping Notice -->
         <div class="express-shipping-notice">
@@ -1830,6 +2191,15 @@ async function confirmUpiPayment() {
   });
 
   await Promise.all(savePromises);
+
+  // Clear abandoned cart draft
+  try {
+    if (typeof db !== "undefined" && db.deleteAbandonedCart) {
+      await db.deleteAbandonedCart(phone);
+    }
+  } catch (err) {
+    console.error("Error deleting abandoned cart:", err);
+  }
 
   // Update voucher balance in Firebase Firestore if applied
   if (appliedVoucherCode && voucherDiscount > 0) {

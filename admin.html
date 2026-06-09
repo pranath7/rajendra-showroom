@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="images/logo.png?v=3.13">
+  <link rel="icon" type="image/png" href="images/logo.png?v=3.30">
+  <link rel="apple-touch-icon" href="images/logo.png?v=3.30">
   <title>Admin Panel — Rajendra Showroom</title>
-  <link rel="stylesheet" href="css/style.css?v=3.28">
+  <link rel="stylesheet" href="css/style.css?v=3.30">
   <style>
     /* ━━━ Base overrides ━━━ */
     body { background: #F0EDE8; }
@@ -882,6 +883,7 @@
     <div class="admin-tabs">
       <div class="admin-tab" id="tab-dashboard" onclick="switchTab('dashboard')">📊 Dashboard</div>
       <div class="admin-tab" id="tab-orders"    onclick="switchTab('orders')">📋 Orders Log</div>
+      <div class="admin-tab" id="tab-abandoned" onclick="switchTab('abandoned')">🛒 Abandoned Carts</div>
       <div class="admin-tab" id="tab-products"  onclick="switchTab('products')">📦 All Products</div>
       <div class="admin-tab" id="tab-add"        onclick="switchTab('add')">➕ Add Product</div>
       <div class="admin-tab" id="tab-bulk"       onclick="switchTab('bulk')">⚡ Bulk Posting</div>
@@ -1038,6 +1040,38 @@
               </thead>
               <tbody id="ordersTableBody">
                 <tr><td colspan="6" style="text-align:center;padding:50px;color:#bbb;">Loading orders...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────────────────────────────────
+           TAB: ABANDONED CARTS
+      ────────────────────────────────── -->
+      <div class="tab-panel" id="panel-abandoned">
+        <div class="table-toolbar">
+          <input type="text" class="admin-search" id="abandonedSearch"
+                 placeholder="Search by customer name, phone, or items..."
+                 oninput="renderAbandonedTable()">
+          <div style="margin-left: auto; font-size: 13.5px; font-weight: 600;" id="abandonedSummaryBar">
+            0 carts · Total Potential Value: ₹0
+          </div>
+        </div>
+        <div class="products-table-card">
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:140px;">Timestamp</th>
+                  <th>Customer Details</th>
+                  <th>Items in Cart</th>
+                  <th>Total Value</th>
+                  <th style="width:200px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="abandonedTableBody">
+                <tr><td colspan="5" style="text-align:center;padding:50px;color:#bbb;">Loading abandoned carts...</td></tr>
               </tbody>
             </table>
           </div>
@@ -1219,6 +1253,18 @@
                 <input type="text" id="productColors" class="form-input"
                        placeholder="e.g., Green, Pink, Yellow, Blue">
                 <span class="form-hint">Available color variants for this item</span>
+              </div>
+
+              <!-- Product Tag (FOMO Badge) -->
+              <div class="form-group">
+                <label class="form-label">Urgency Tag (Storefront Badge)</label>
+                <select id="productBadge" class="form-input" style="background: #fff; height: auto; padding: 10px;">
+                  <option value="">None (No Badge)</option>
+                  <option value="Best Seller">🏆 Best Seller</option>
+                  <option value="New Arrival">✨ New Arrival</option>
+                  <option value="Low Stock">🔥 Low Stock</option>
+                </select>
+                <span class="form-hint">Renders a highlighted colored badge on the product card</span>
               </div>
 
               <!-- Product Sizes Toggle & Fields -->
@@ -1407,6 +1453,18 @@
                 <label class="form-label">Product Colors (Comma-separated)</label>
                 <input type="text" id="bulkProductColors" class="form-input"
                        placeholder="e.g., Blue, Green, Red">
+              </div>
+
+              <!-- Bulk Product Tag (FOMO Badge) -->
+              <div class="form-group">
+                <label class="form-label">Urgency Tag (Storefront Badge)</label>
+                <select id="bulkProductBadge" class="form-input" style="background: #fff; height: auto; padding: 10px;">
+                  <option value="">None (No Badge)</option>
+                  <option value="Best Seller">🏆 Best Seller</option>
+                  <option value="New Arrival">✨ New Arrival</option>
+                  <option value="Low Stock">🔥 Low Stock</option>
+                </select>
+                <span class="form-hint">Renders a highlighted colored badge on bulk posted product cards</span>
               </div>
 
               <!-- Sizing Toggle -->
@@ -1657,9 +1715,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-  <script src="js/firebase-config.js?v=3.28"></script>
-  <script src="js/db.js?v=3.28"></script>
-  <script src="js/data.js?v=3.0"></script>
-  <script src="js/admin.js?v=3.28"></script>
+  <script src="js/firebase-config.js?v=3.30"></script>
+  <script src="js/db.js?v=3.30"></script>
+  <script src="js/data.js?v=3.30"></script>
+  <script src="js/admin.js?v=3.30"></script>
 </body>
 </html>

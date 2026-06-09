@@ -563,5 +563,69 @@ window.db = {
       return { success: false, error: firebaseError, mode: "local_only" };
     }
     return { success: true, mode: useFirebase ? "firebase" : "local" };
+  },
+
+  // --- Abandoned Carts ---
+  async getAbandonedCarts() {
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        const snapshot = await withTimeout(firestoreDb.collection("abandoned_carts").get(), 4000);
+        const list = [];
+        snapshot.forEach(doc => {
+          list.push(doc.data());
+        });
+        const sorted = list.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        localStorage.setItem("rs_abandoned_carts", JSON.stringify(sorted));
+        return sorted;
+      } catch (e) {
+        console.error("Error fetching abandoned carts from Firebase, falling back to local storage:", e);
+      }
+    }
+    return JSON.parse(localStorage.getItem("rs_abandoned_carts") || "[]");
+  },
+
+  async saveAbandonedCart(c) {
+    let firebaseError = null;
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        await withTimeout(firestoreDb.collection("abandoned_carts").doc(String(c.id)).set(c), 4000);
+      } catch (e) {
+        console.error("Error saving abandoned cart to Firebase:", e);
+        firebaseError = e.message || e;
+      }
+    }
+    const local = JSON.parse(localStorage.getItem("rs_abandoned_carts") || "[]");
+    const idx = local.findIndex(x => x.id === c.id);
+    if (idx >= 0) {
+      local[idx] = c;
+    } else {
+      local.unshift(c);
+    }
+    localStorage.setItem("rs_abandoned_carts", JSON.stringify(local));
+
+    if (firebaseError) {
+      return { success: false, error: firebaseError, mode: "local_only" };
+    }
+    return { success: true, mode: useFirebase ? "firebase" : "local" };
+  },
+
+  async deleteAbandonedCart(id) {
+    let firebaseError = null;
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        await withTimeout(firestoreDb.collection("abandoned_carts").doc(String(id)).delete(), 4000);
+      } catch (e) {
+        console.error("Error deleting abandoned cart from Firebase:", e);
+        firebaseError = e.message || e;
+      }
+    }
+    let local = JSON.parse(localStorage.getItem("rs_abandoned_carts") || "[]");
+    local = local.filter(x => x.id !== id);
+    localStorage.setItem("rs_abandoned_carts", JSON.stringify(local));
+
+    if (firebaseError) {
+      return { success: false, error: firebaseError, mode: "local_only" };
+    }
+    return { success: true, mode: useFirebase ? "firebase" : "local" };
   }
 };

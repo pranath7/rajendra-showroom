@@ -3349,4 +3349,397 @@ input, select, textarea { font-family: inherit; }
   }
 }
 
+/* ─── Instant Search Autocomplete ─── */
+.search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 350px;
+  overflow-y: auto;
+  background: var(--white);
+  border: 1px solid var(--border-dark);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  box-shadow: var(--shadow-lg);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+}
+.search-suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid var(--border);
+}
+.search-suggestion-item:last-child {
+  border-bottom: none;
+}
+.search-suggestion-item:hover,
+.search-suggestion-item.selected {
+  background: var(--bg-warm);
+}
+.ss-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--bg-warm);
+}
+.ss-info {
+  flex: 1;
+  min-width: 0;
+}
+.ss-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ss-cat {
+  font-size: 10.5px;
+  color: var(--text-light);
+  margin-top: 1px;
+}
+.ss-price {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--gold-dark);
+}
+.ss-no-results {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-light);
+  font-size: 13px;
+}
+
+/* ─── Premium Floating WhatsApp Support Widget ─── */
+.wa-floating-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+  font-family: var(--font-sans);
+}
+.wa-floating-bubble {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #25D366;
+  border: none;
+  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.wa-floating-bubble:hover {
+  transform: scale(1.06);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+}
+.wa-bubble-icon {
+  font-size: 28px;
+  color: #fff;
+}
+.wa-bubble-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #E74C3C;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 3px 6px;
+  border-radius: 10px;
+  border: 1.5px solid #fff;
+  animation: pulseBadge 2s infinite;
+}
+@keyframes pulseBadge {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.wa-widget-card {
+  width: 330px;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  transform-origin: bottom right;
+  animation: slideUpWa 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideUpWa {
+  from { opacity: 0; transform: scale(0.9) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.wa-widget-header {
+  background: #075E54;
+  color: #fff;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+.wa-widget-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+.wa-widget-status-info {
+  flex: 1;
+}
+.wa-widget-name {
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+}
+.wa-widget-status {
+  font-size: 11px;
+  opacity: 0.85;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.wa-widget-status::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: #25D366;
+  border-radius: 50%;
+}
+.wa-widget-close {
+  background: none;
+  border: none;
+  color: #fff;
+  opacity: 0.7;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.15s ease;
+}
+.wa-widget-close:hover { opacity: 1; }
+.wa-widget-body {
+  padding: 16px;
+  background: #E5DDD5;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.wa-widget-welcome {
+  background: var(--white);
+  padding: 12px 14px;
+  border-radius: 0 10px 10px 10px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text);
+  margin: 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  position: relative;
+}
+.wa-widget-welcome::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -8px;
+  border-style: solid;
+  border-width: 0 8px 8px 0;
+  border-color: transparent var(--white) transparent transparent;
+}
+.wa-widget-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  outline: none;
+  resize: none;
+  height: 64px;
+  font-family: var(--font-sans);
+}
+.wa-widget-footer {
+  padding: 12px 16px;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+}
+.wa-widget-send-btn {
+  background: #25D366;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 6px rgba(37, 211, 102, 0.2);
+  transition: background 0.15s ease;
+}
+.wa-widget-send-btn:hover {
+  background: #20BA5A;
+}
+
+/* ─── Frequently Bought Together Smart Bundles ─── */
+.modal-bundle-container {
+  margin-top: 24px;
+  background: var(--bg-warm);
+  border: 1.5px solid var(--border-dark);
+  border-radius: 8px;
+  padding: 18px;
+  text-align: left;
+}
+.modal-bundle-title {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 14px;
+  letter-spacing: 0.3px;
+}
+.modal-bundle-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.modal-bundle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.modal-bundle-row label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+.modal-bundle-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--gold-dark);
+}
+.modal-bundle-item-name {
+  font-weight: 600;
+}
+.modal-bundle-item-price {
+  color: var(--gold-dark);
+  font-weight: 700;
+}
+.modal-bundle-footer {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-dark);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.modal-bundle-total-price {
+  font-size: 14px;
+  font-weight: 700;
+}
+.modal-bundle-total-price .discounted {
+  color: #27AE60;
+  font-size: 16px;
+}
+.modal-bundle-total-price .original {
+  text-decoration: line-through;
+  color: var(--text-light);
+  font-size: 12px;
+  margin-right: 6px;
+}
+.btn-add-bundle {
+  padding: 8px 16px;
+  background: var(--text);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn-add-bundle:hover {
+  background: var(--gold-dark);
+}
+
+/* ─── Urgency & FOMO Badges ─── */
+.product-badge-fomo {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #fff;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.badge-bestseller {
+  background: #bf953f;
+  background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
+  color: #000;
+  text-shadow: 0 0.5px 0 rgba(255,255,255,0.4);
+}
+.badge-new {
+  background: #27AE60;
+}
+.badge-lowstock {
+  background: #E67E22;
+}
+
+/* Modal specific badge styles */
+.modal-badge-fomo {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #fff;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+@media (max-width: 640px) {
+  .wa-floating-container {
+    bottom: 16px;
+    right: 16px;
+  }
+  .wa-widget-card {
+    width: 290px;
+  }
+}
+
 

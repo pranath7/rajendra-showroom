@@ -13,6 +13,7 @@ let orders    = [];
 let editingId = null;
 let productImages = [];
 let bulkProductImages = [];
+let abandonedCarts = [];
 
 /* ─── Boot ─────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", () => {
@@ -237,6 +238,7 @@ function switchTab(tab) {
 
   if (tab === "dashboard") renderDashboard();
   if (tab === "orders")    renderOrdersTable();
+  if (tab === "abandoned") loadAbandonedCarts();
   if (tab === "products")  renderProductTable();
   if (tab === "vouchers")  loadAndRenderVouchers();
 }
@@ -1026,6 +1028,9 @@ async function saveProduct() {
   targetProduct.image = productImages[0] || null;
   var videoUrlEl = document.getElementById("productVideoUrl");
   targetProduct.video = videoUrlEl ? (videoUrlEl.value || "").trim() || null : null;
+  
+  const productBadgeEl = document.getElementById("productBadge");
+  targetProduct.badge = productBadgeEl ? (productBadgeEl.value || null) : null;
 
   showAdminToast("Saving product to cloud database...", "info");
 
@@ -1101,6 +1106,8 @@ function editProduct(id) {
   document.getElementById("productDesc").value       = p.description || "";
   document.getElementById("productFeatured").checked = p.featured;
   document.getElementById("productColors").value     = p.colors ? p.colors.join(", ") : "";
+  const productBadgeEl = document.getElementById("productBadge");
+  if (productBadgeEl) productBadgeEl.value = p.badge || "";
   const sizesStr = p.sizes || "";
   const hasSizes = !!sizesStr.trim();
   const toggleEl = document.getElementById("enableSizesToggle");
@@ -1746,6 +1753,9 @@ async function saveBulkProducts() {
     const defaultRating = parseFloat((4.4 + Math.random() * 0.5).toFixed(1));
     const defaultReviews = Math.floor(Math.random() * 100) + 35;
     
+    const bulkBadgeEl = document.getElementById("bulkProductBadge");
+    const bulkBadge = bulkBadgeEl ? bulkBadgeEl.value : "";
+
     const newProduct = {
       id: newId,
       name: commonName,
@@ -1762,6 +1772,7 @@ async function saveBulkProducts() {
       rating: defaultRating,
       reviews: defaultReviews,
       video: null,
+      badge: bulkBadge || null,
       createdAt: new Date().toISOString()
     };
 
@@ -1798,4 +1809,119 @@ function resetBulkForm() {
   if (sizesList) sizesList.innerHTML = "";
   const sizesToggle = document.getElementById("bulkEnableSizesToggle");
   if (sizesToggle) sizesToggle.checked = false;
+}
+
+/* ─── Abandoned Carts Recovery ──────────────────────────── */
+async function loadAbandonedCarts() {
+  const container = document.getElementById("abandonedTableBody");
+  if (container) {
+    container.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:50px;color:#bbb;">Loading abandoned carts...</td></tr>`;
+  }
+  try {
+    if (typeof db !== "undefined" && db.getAbandonedCarts) {
+      abandonedCarts = await db.getAbandonedCarts();
+    } else {
+      abandonedCarts = [];
+    }
+    renderAbandonedTable();
+  } catch (e) {
+    console.error("Failed to load abandoned carts:", e);
+    if (container) {
+      container.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:50px;color:red;">Error loading abandoned carts: ${e.message || e}</td></tr>`;
+    }
+  }
+}
+
+function renderAbandonedTable() {
+  const container = document.getElementById("abandonedTableBody");
+  const summaryBar = document.getElementById("abandonedSummaryBar");
+  const searchInput = document.getElementById("abandonedSearch");
+  const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
+
+  if (!container) return;
+
+  const filtered = abandonedCarts.filter(c => {
+    if (!query) return true;
+    const nameMatch = c.name && c.name.toLowerCase().includes(query);
+    const phoneMatch = c.phone && c.phone.toLowerCase().includes(query);
+    const addressMatch = c.address && c.address.toLowerCase().includes(query);
+    const itemsMatch = c.cart && c.cart.some(item => item.name && item.name.toLowerCase().includes(query));
+    return nameMatch || phoneMatch || addressMatch || itemsMatch;
+  });
+
+  const totalValue = filtered.reduce((s, c) => s + (c.grand || 0), 0);
+  if (summaryBar) {
+    summaryBar.textContent = `${filtered.length} cart(s) · Total Potential Value: ₹${totalValue.toLocaleString("en-IN")}`;
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:50px;color:#bbb;">No abandoned carts found.</td></tr>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(c => {
+    const timestamp = c.timestamp ? new Date(c.timestamp).toLocaleString("en-IN") : "N/A";
+    const custDetails = `
+      <div style="font-weight:600;color:var(--text);">${c.name || 'Anonymous'}</div>
+      <div style="font-size:12px;color:var(--text-light);margin-top:2px;">
+        📞 <a href="tel:${c.phone}" style="color:inherit;text-decoration:underline;">${c.phone}</a>
+      </div>
+      ${c.address ? `<div style="font-size:11px;color:var(--text-light);margin-top:2px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${c.address}">${c.address}</div>` : ''}
+    `;
+
+    const itemsHTML = c.cart ? c.cart.map(item => {
+      const colorText = item.selectedColor ? ` [${item.selectedColor}]` : "";
+      const sizeText = item.selectedSize ? ` (${item.selectedSize})` : "";
+      return `<div style="font-size:12px;line-height:1.4;">• ${item.name}${sizeText}${colorText} × ${item.qty}</div>`;
+    }).join("") : "No items";
+
+    const valueHTML = `<div style="font-weight:700;color:var(--gold-dark);">₹${(c.grand || 0).toLocaleString("en-IN")}</div>`;
+
+    const cleanPhone = c.phone.replace(/\D/g, "");
+    const waMsg = encodeURIComponent(
+      `Hi ${c.name || ''}! We noticed you left some beautiful items in your shopping cart at Rajendra Showroom. 😊\n\n` +
+      `Items in your cart:\n` +
+      (c.cart ? c.cart.map(item => `• ${item.name} × ${item.qty}`).join("\n") : "") +
+      `\n\nWould you like us to assist you in completing your order, or send you real-time showroom photos of these items on WhatsApp? Let us know! We offer fast delivery across India.`
+    );
+
+    const actionsHTML = `
+      <div style="display:flex;gap:8px;">
+        <a class="btn-action edit" href="https://wa.me/91${cleanPhone}?text=${waMsg}" target="_blank" style="background:#25D366;border-color:#25D366;color:#fff;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;height:30px;padding:0 10px;font-size:12px;border-radius:4px;font-weight:600;">
+          📲 Recover
+        </a>
+        <button class="btn-action delete" onclick="deleteAbandonedCart('${c.id}')" style="height:30px;padding:0 10px;font-size:12px;border-radius:4px;font-weight:600;">
+          🗑 Delete
+        </button>
+      </div>
+    `;
+
+    return `
+      <tr>
+        <td style="font-size:12.5px;color:var(--text-light);">${timestamp}</td>
+        <td>${custDetails}</td>
+        <td>${itemsHTML}</td>
+        <td>${valueHTML}</td>
+        <td>${actionsHTML}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+async function deleteAbandonedCart(id) {
+  if (!confirm("Are you sure you want to delete this abandoned cart draft?")) return;
+  try {
+    if (typeof db !== "undefined" && db.deleteAbandonedCart) {
+      const res = await db.deleteAbandonedCart(id);
+      if (res.success) {
+        showAdminToast("Abandoned cart deleted successfully.");
+        loadAbandonedCarts();
+      } else {
+        showAdminToast("Failed to delete cart: " + res.error, "error");
+      }
+    }
+  } catch (e) {
+    console.error(e);
+    showAdminToast("Error: " + e.message, "error");
+  }
 }
