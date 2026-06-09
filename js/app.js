@@ -739,6 +739,20 @@ function addToCart(id, qty = 1) {
       currency:     'INR'
     });
   }
+
+  // ── Google Analytics: add_to_cart ──────────────────────────
+  if (typeof gtag === 'function') {
+    gtag('event', 'add_to_cart', {
+      currency: 'INR',
+      value: price * qty,
+      items: [{
+        item_id: String(product.id),
+        item_name: product.name,
+        price: price,
+        quantity: qty
+      }]
+    });
+  }
   renderCartItems();
 }
 
@@ -892,6 +906,19 @@ function openModal(id) {
       content_type: 'product',
       value:        p.price,
       currency:     'INR'
+    });
+  }
+
+  // ── Google Analytics: view_item ────────────────────────────
+  if (typeof gtag === 'function') {
+    gtag('event', 'view_item', {
+      currency: 'INR',
+      value: p.price,
+      items: [{
+        item_id: String(p.id),
+        item_name: p.name,
+        price: p.price
+      }]
     });
   }
 
@@ -2241,6 +2268,21 @@ async function confirmUpiPayment() {
       value:        finalTotal,
       currency:     'INR',
       num_items:    pendingCart.reduce((s, i) => s + i.qty, 0)
+    });
+  }
+
+  // ── Google Analytics: Purchase ─────────────────────────────
+  if (typeof gtag === 'function') {
+    gtag('event', 'purchase', {
+      transaction_id: String(orderGroupId),
+      value: finalTotal,
+      currency: 'INR',
+      items: pendingCart.map(i => ({
+        item_id: String(i.id),
+        item_name: i.name,
+        price: i.price,
+        quantity: i.qty
+      }))
     });
   }
 
