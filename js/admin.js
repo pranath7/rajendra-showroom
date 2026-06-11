@@ -1980,3 +1980,49 @@ function setupDiscountCalculator(priceId, origPriceId, discountId) {
   discountInput.addEventListener("input", updatePriceFromDiscount);
   priceInput.addEventListener("input", updateDiscountFromPrice);
 }
+
+// --- Customer Photos Management ---
+async function loadCustomerPhotosAdmin() {
+  const grid = document.getElementById("customerPhotosAdminGrid");
+  if (!grid) return;
+  grid.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);">Loading photos...</div>';
+  const photos = await db.getCustomerPhotos();
+  if (!photos || photos.length === 0) {
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);"><div style="font-size:36px;margin-bottom:12px;">📸</div>No customer photos submitted yet.</div>';
+    return;
+  }
+  grid.innerHTML = photos.map(p => `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+      <img src="${p.image}" style="width:100%;height:160px;object-fit:cover;" alt="${p.caption || ''}">
+      <div style="padding:12px;">
+        <div style="font-weight:600;font-size:13px;">${p.name || 'Anonymous'}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin:4px 0;">${p.caption || ''}</div>
+        <div style="font-size:10px;color:var(--text-muted);">${new Date(p.createdAt).toLocaleDateString()}</div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          ${p.approved ? 
+            '<span style="color:var(--green);font-size:12px;font-weight:600;">✅ Approved</span>' :
+            '<button class="btn-edit-row" style="padding:5px 12px;font-size:11px;" onclick="approveCustomerPhoto(\'' + p.id + '\')">✅ Approve</button>'
+          }
+          <button class="btn-delete-row" style="padding:5px 12px;font-size:11px;" onclick="rejectCustomerPhoto('${p.id}')">🗑 Delete</button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function approveCustomerPhoto(id) {
+  const photos = await db.getCustomerPhotos();
+  const photo = photos.find(p => String(p.id) === String(id));
+  if (!photo) return;
+  photo.approved = true;
+  await db.saveCustomerPhoto(photo);
+  showAdminToast("Photo approved! It will now appear on the storefront.", "success");
+  loadCustomerPhotosAdmin();
+}
+
+async function rejectCustomerPhoto(id) {
+  if (!confirm("Delete this customer photo?")) return;
+  await db.deleteCustomerPhoto(id);
+  showAdminToast("Photo deleted.", "success");
+  loadCustomerPhotosAdmin();
+}

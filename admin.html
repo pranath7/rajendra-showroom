@@ -6,7 +6,7 @@
   <link rel="icon" type="image/png" href="images/logo.png?v=3.30">
   <link rel="apple-touch-icon" href="images/logo.png?v=3.30">
   <title>Admin Panel — Rajendra Showroom</title>
-  <link rel="stylesheet" href="css/style.css?v=3.34">
+  <link rel="stylesheet" href="css/style.css?v=4.00">
   <style>
     /* ━━━ Base overrides ━━━ */
     body { background: #F0EDE8; }
@@ -887,7 +887,8 @@
       <div class="admin-tab" id="tab-products"  onclick="switchTab('products')">📦 All Products</div>
       <div class="admin-tab" id="tab-add"        onclick="switchTab('add')">➕ Add Product</div>
       <div class="admin-tab" id="tab-bulk"       onclick="switchTab('bulk')">⚡ Bulk Posting</div>
-      <div class="admin-tab" id="tab-vouchers"   onclick="switchTab('vouchers')">🎫 Gift Vouchers</div>
+      <div class="admin-tab" id="tab-vouchers"   onclick="switchTab('vouchers')">🎁 Gift Vouchers</div>
+      <div class="admin-tab" id="tab-photos"     onclick="switchTab('photos')">📸 Customer Photos</div>
       <div class="admin-tab" id="tab-settings"   onclick="switchTab('settings')">⚙ Settings</div>
     </div>
 
@@ -1721,6 +1722,17 @@
         </div>
       </div>
 
+      <!-- ──────────────────────────────────
+           TAB: CUSTOMER PHOTOS
+      ────────────────────────────────── -->
+      <div class="tab-panel" id="panel-photos">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <h2 style="font-family:var(--font-serif);font-size:22px;">📸 Customer Photos</h2>
+          <button class="btn-edit-row" onclick="loadCustomerPhotosAdmin()" style="padding:8px 16px;font-size:13px;">🔄 Refresh</button>
+        </div>
+        <div id="customerPhotosAdminGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;"></div>
+      </div>
+
     </div><!-- /admin-content -->
   </div><!-- /adminPanel -->
 
@@ -1731,9 +1743,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-  <script src="js/firebase-config.js?v=3.34"></script>
-  <script src="js/db.js?v=3.34"></script>
-  <script src="js/data.js?v=3.34"></script>
-  <script src="js/admin.js?v=3.34"></script>
+  <script src="js/firebase-config.js?v=4.00"></script>
+  <script src="js/db.js?v=4.00"></script>
+  <script src="js/data.js?v=4.00"></script>
+  <script src="js/admin.js?v=4.00"></script>
 </body>
 </html>

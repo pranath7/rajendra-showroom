@@ -690,6 +690,80 @@ window.db = {
     if (firebaseError) {
       return { success: false, error: firebaseError, mode: "local_only" };
     }
+  },
+
+  async getOrdersByPhone(phone) {
+    const cleanPhone = (phone || "").replace(/\D/g, "").slice(-10);
+    if (!cleanPhone) return [];
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        const snapshot = await withTimeout(firestoreDb.collection("orders").get(), 4000);
+        const list = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const orderPhone = (data.phone || "").replace(/\D/g, "").slice(-10);
+          if (orderPhone === cleanPhone) list.push(data);
+        });
+        return list.sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
+      } catch (e) {
+        console.error("Error fetching orders by phone:", e);
+      }
+    }
+    const local = JSON.parse(localStorage.getItem("rs_orders") || "[]");
+    return local.filter(o => {
+      const orderPhone = (o.phone || "").replace(/\D/g, "").slice(-10);
+      return orderPhone === cleanPhone;
+    }).sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
+  },
+
+  async getCustomerPhotos() {
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        const snapshot = await withTimeout(firestoreDb.collection("customer_photos").get(), 4000);
+        const list = [];
+        snapshot.forEach(doc => list.push(doc.data()));
+        const sorted = list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        localStorage.setItem("rs_customer_photos", JSON.stringify(sorted));
+        return sorted;
+      } catch (e) {
+        console.error("Error fetching customer photos:", e);
+      }
+    }
+    return JSON.parse(localStorage.getItem("rs_customer_photos") || "[]");
+  },
+
+  async saveCustomerPhoto(photo) {
+    let firebaseError = null;
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        await withTimeout(firestoreDb.collection("customer_photos").doc(String(photo.id)).set(photo), 4000);
+      } catch (e) {
+        console.error("Error saving customer photo:", e);
+        firebaseError = e.message || e;
+      }
+    }
+    const local = JSON.parse(localStorage.getItem("rs_customer_photos") || "[]");
+    const idx = local.findIndex(x => x.id === photo.id);
+    if (idx >= 0) { local[idx] = photo; } else { local.unshift(photo); }
+    localStorage.setItem("rs_customer_photos", JSON.stringify(local));
+    if (firebaseError) return { success: false, error: firebaseError };
+    return { success: true, mode: useFirebase ? "firebase" : "local" };
+  },
+
+  async deleteCustomerPhoto(id) {
+    let firebaseError = null;
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        await withTimeout(firestoreDb.collection("customer_photos").doc(String(id)).delete(), 4000);
+      } catch (e) {
+        console.error("Error deleting customer photo:", e);
+        firebaseError = e.message || e;
+      }
+    }
+    let local = JSON.parse(localStorage.getItem("rs_customer_photos") || "[]");
+    local = local.filter(x => x.id !== id);
+    localStorage.setItem("rs_customer_photos", JSON.stringify(local));
+    if (firebaseError) return { success: false, error: firebaseError };
     return { success: true, mode: useFirebase ? "firebase" : "local" };
   }
 };

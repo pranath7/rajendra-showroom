@@ -127,7 +127,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="css/style.css?v=3.34">
+  <link rel="stylesheet" href="css/style.css?v=4.00">
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-PDL2THFP8Z"></script>
@@ -186,6 +186,12 @@
 
       <!-- Actions -->
       <div class="header-actions">
+        <button class="dark-mode-toggle" onclick="toggleDarkMode()" aria-label="Toggle Dark Mode">
+          <span class="toggle-icon">🌙</span>
+        </button>
+        <button onclick="openOrderTracker()" style="display:flex; align-items:center; gap:5px; background:none; border:none; cursor:pointer; font-size:15px; color:var(--text); font-weight:600; padding:0; margin-right:10px;">
+          <span>📦</span> <span class="action-text">Track Order</span>
+        </button>
         <a href="https://wa.me/916369142027" target="_blank" style="color:#25D366; font-weight:600; display: flex; align-items: center; gap: 4px;">
           <span>💬</span> <span class="action-text">WhatsApp</span>
         </a>
@@ -394,6 +400,21 @@
     </div>
   </section>
 
+  <!-- ═══ Customer Photo Gallery Section ═════════════════════ -->
+  <section class="customer-gallery-section" id="customerGallery">
+    <div class="customer-gallery-inner">
+      <div class="customer-gallery-header">
+        <span class="gallery-eyebrow">✦ &nbsp; Showroom in Your Home &nbsp; ✦</span>
+        <h2>Customer Photo Gallery</h2>
+        <p>See how our premium collections look in real homes. Have a photo to share? Upload your setup to inspire others!</p>
+        <button class="gallery-upload-btn" onclick="openPhotoUploadModal()">📷 Share Your Setup</button>
+      </div>
+      <div class="customer-photo-grid" id="customerPhotoGrid">
+        <!-- Loaded dynamically via JS -->
+      </div>
+    </div>
+  </section>
+
   <!-- ═══ Static SEO Curated Collections Section ════════════ -->
   <section class="seo-collections-section">
     <div class="seo-collections-inner">
@@ -453,6 +474,7 @@
             <a href="#" onclick="setCategory('Cookware')">Cookware</a>
             <a href="#" onclick="setCategory('Gift Sets')">Gift Sets</a>
             <a href="#" onclick="openGiftCardModal(); return false;" style="color: var(--gold-light); font-weight: 600;">🎫 Buy Gift Card</a>
+            <a href="#" onclick="openBalanceChecker(); return false;">💳 Check Balance</a>
           </div>
         </div>
 
@@ -1001,13 +1023,102 @@
     </button>
   </div>
 
+  <!-- ═══ Order Tracker Modal ════════════════════════════════ -->
+  <div class="tracker-modal-overlay" id="orderTrackerModal" onclick="if(event.target===this) closeOrderTracker()">
+    <div class="tracker-modal">
+      <div class="tracker-modal-header">
+        <h2>📦 Track Your Order</h2>
+        <span class="close-btn" onclick="closeOrderTracker()">✕</span>
+      </div>
+      <div class="tracker-modal-body">
+        <div class="tracker-search-row">
+          <input type="tel" id="trackerPhoneInput" placeholder="Enter your 10-digit phone number">
+          <button onclick="trackOrder()">Track</button>
+        </div>
+        <div class="tracker-results" id="trackerResults">
+          <div style="text-align:center;color:var(--text-muted);font-size:13px;padding:20px;">
+            Enter your phone number to check the live status of your recent orders.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Table Planner Overlay ══════════════════════════════ -->
+  <div class="table-planner-overlay" id="tablePlannerOverlay">
+    <div class="table-planner-container">
+      <div class="table-planner-topbar">
+        <h3>🍽️ Virtual Table Setting</h3>
+        <span class="tp-close" onclick="closeTablePlanner()">✕</span>
+      </div>
+      <div class="table-selector">
+        <button class="table-selector-btn active" onclick="setTableSurface('marble', this)">Marble</button>
+        <button class="table-selector-btn" onclick="setTableSurface('oak', this)">Oak Wood</button>
+        <button class="table-selector-btn" onclick="setTableSurface('linen', this)">Dark Linen</button>
+      </div>
+      <div class="table-surface" id="tableSurface">
+        <!-- Draggable items added here -->
+      </div>
+      <div class="table-planner-actions">
+        <button class="tp-btn-add" onclick="showAddMoreModal()">+ Add more items</button>
+        <button class="tp-btn-save" onclick="saveTablePreview()">📸 Save Preview</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Customer Photo Upload Modal ════════════════════════ -->
+  <div class="photo-upload-modal" id="photoUploadModal" onclick="if(event.target===this) closePhotoUploadModal()">
+    <div class="photo-upload-card">
+      <h3>📷 Share Your Setup</h3>
+      <p style="font-size:13px;color:var(--text-muted);">Upload a photo of your purchased items in your home.</p>
+      
+      <label>Your Name</label>
+      <input type="text" id="puName" placeholder="e.g. Pooja K.">
+      
+      <label>Caption / Note</label>
+      <textarea id="puCaption" placeholder="Tell us about this setup..."></textarea>
+      
+      <label>Photo</label>
+      <input type="file" id="puFile" accept="image/*" onchange="handlePhotoUploadSelect(event)">
+      <div class="photo-upload-preview" id="puPreview"></div>
+      
+      <div class="photo-upload-actions">
+        <button class="pu-btn-cancel" onclick="closePhotoUploadModal()">Cancel</button>
+        <button class="pu-btn-submit" onclick="submitCustomerPhoto()">Submit Photo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Gift Card Balance Checker Modal ════════════════════ -->
+  <div class="balance-checker-overlay" id="balanceCheckerModal" onclick="if(event.target===this) closeBalanceChecker()">
+    <div class="balance-checker-card">
+      <div class="balance-checker-header">
+        <div class="bc-icon">💳</div>
+        <h3>Check Gift Card Balance</h3>
+        <p>Enter your voucher code to check the remaining balance.</p>
+      </div>
+      <div class="balance-checker-body">
+        <div class="bc-input-row">
+          <input type="text" id="bcCodeInput" placeholder="e.g. GC-HAPPY-500">
+          <button onclick="checkGiftCardBalance()">Check</button>
+        </div>
+        <div class="bc-result" id="bcResult">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+      <div class="balance-checker-footer">
+        <button onclick="closeBalanceChecker()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Firebase Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=3.34"></script>
-  <script src="js/db.js?v=3.34"></script>
-  <script src="js/data.js?v=3.34"></script>
-  <script src="js/app.js?v=3.34"></script>
+  <script src="js/firebase-config.js?v=4.00"></script>
+  <script src="js/db.js?v=4.00"></script>
+  <script src="js/data.js?v=4.00"></script>
+  <script src="js/app.js?v=4.00"></script>
   <script>
     // View toggle
     function setView(v) {

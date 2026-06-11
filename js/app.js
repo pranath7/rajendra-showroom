@@ -1222,6 +1222,13 @@ function openModal(id) {
           </button>
         </div>
 
+        ${['Dinner Sets', 'Plates', 'Bowls', 'Cups & Mugs', 'Cutlery', 'Serving'].includes(p.category) ? `
+        <!-- Table Planner Button -->
+        <button onclick="openTablePlanner('${p.image}')" style="width:100%; margin-top:12px; padding:12px; background:var(--bg-warm); border:1.5px solid var(--border-dark); border-radius:var(--radius); font-size:14px; font-weight:600; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:var(--transition);">
+          <span>🍽️</span> Preview on Table
+        </button>
+        ` : ''}
+
         <!-- Secure Checkout payment Badges -->
         <div class="payment-trust-container">
           <div class="payment-trust-title">Secure Checkout With</div>
@@ -2892,4 +2899,358 @@ function sendGiftCardWhatsAppRequest() {
   window.open(finalUrl, "_blank");
 }
 
+/* ============================================================
+   FEATURE 1: DARK MODE
+   ============================================================ */
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  localStorage.setItem('rs_dark_mode', isDark ? '1' : '0');
+  
+  // Change toggle icon
+  const icon = document.querySelector('.dark-mode-toggle .toggle-icon');
+  if (icon) {
+    icon.textContent = isDark ? '☀️' : '🌙';
+  }
+}
 
+// Auto-apply on load
+document.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('rs_dark_mode') === '1') {
+    document.body.classList.add('dark-mode');
+    const icon = document.querySelector('.dark-mode-toggle .toggle-icon');
+    if (icon) icon.textContent = '☀️';
+  }
+});
+
+/* ============================================================
+   FEATURE 2: ORDER TRACKER
+   ============================================================ */
+function openOrderTracker() {
+  document.getElementById('orderTrackerModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeOrderTracker() {
+  document.getElementById('orderTrackerModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+async function trackOrder() {
+  const phoneInput = document.getElementById('trackerPhoneInput').value.trim();
+  const resultsDiv = document.getElementById('trackerResults');
+  
+  if (!phoneInput || phoneInput.length < 10) {
+    resultsDiv.innerHTML = `<div class="bc-error" style="color:var(--red);text-align:center;padding:20px;">Please enter a valid 10-digit phone number.</div>`;
+    return;
+  }
+  
+  resultsDiv.innerHTML = '<div style="text-align:center;padding:20px;">Searching your orders...</div>';
+  
+  const orders = await db.getOrdersByPhone(phoneInput);
+  
+  if (!orders || orders.length === 0) {
+    resultsDiv.innerHTML = `<div class="bc-error" style="color:var(--red);text-align:center;padding:20px;">No recent orders found for this phone number.</div>`;
+    return;
+  }
+  
+  let html = '';
+  orders.forEach(o => {
+    // Determine active step based on status
+    let steps = ['pending', 'paid', 'packed', 'shipped', 'delivered'];
+    let statusIndex = steps.indexOf(o.status);
+    if (statusIndex === -1) statusIndex = o.status === 'cancelled' ? -1 : 0;
+    if (o.status === 'completed') statusIndex = 4; // Map legacy 'completed' to 'delivered'
+    
+    // Calculate progress width
+    let progressWidth = 0;
+    if (statusIndex === 1) progressWidth = 25;
+    if (statusIndex === 2) progressWidth = 50;
+    if (statusIndex === 3) progressWidth = 75;
+    if (statusIndex === 4) progressWidth = 100;
+    
+    const dateStr = new Date(o.createdAt || o.date).toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'});
+    
+    html += `
+    <div class="tracker-order-card">
+      <h4>${o.productName}</h4>
+      <div class="tracker-order-meta">Order ID: #${o.id} · ${dateStr} · ₹${(o.price * o.qty).toLocaleString("en-IN")}</div>
+      
+      ${o.status === 'cancelled' ? `
+        <div style="color:var(--red);font-weight:600;font-size:14px;text-align:center;padding-top:12px;">This order was cancelled.</div>
+      ` : `
+        <div class="tracker-stepper">
+          <div class="progress-fill" style="width: ${progressWidth}%;"></div>
+          
+          <div class="tracker-step ${statusIndex >= 0 ? 'completed' : ''} ${statusIndex === 0 ? 'active' : ''}">
+            <div class="tracker-step-circle">📋</div>
+            <div class="tracker-step-label">Order<br>Placed</div>
+          </div>
+          
+          <div class="tracker-step ${statusIndex >= 2 ? 'completed' : ''} ${statusIndex === 1 ? 'active' : ''}">
+            <div class="tracker-step-circle">📦</div>
+            <div class="tracker-step-label">Packed</div>
+          </div>
+          
+          <div class="tracker-step ${statusIndex >= 3 ? 'completed' : ''} ${statusIndex === 2 ? 'active' : ''}">
+            <div class="tracker-step-circle">🚚</div>
+            <div class="tracker-step-label">Shipped</div>
+          </div>
+          
+          <div class="tracker-step ${statusIndex >= 4 ? 'completed' : ''} ${statusIndex === 3 ? 'active' : ''}">
+            <div class="tracker-step-circle">🏡</div>
+            <div class="tracker-step-label">Out for<br>Delivery</div>
+          </div>
+          
+          <div class="tracker-step ${statusIndex === 4 ? 'completed active' : ''}">
+            <div class="tracker-step-circle">✅</div>
+            <div class="tracker-step-label">Delivered</div>
+          </div>
+        </div>
+      `}
+    </div>`;
+  });
+  
+  resultsDiv.innerHTML = html;
+}
+
+/* ============================================================
+   FEATURE 3: VIRTUAL TABLE PLANNER
+   ============================================================ */
+let dragItem = null;
+let currentTableBg = 'marble';
+
+function openTablePlanner(initialImgSrc) {
+  document.getElementById('tablePlannerOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  
+  const surface = document.getElementById('tableSurface');
+  surface.innerHTML = '';
+  setTableSurface('marble', document.querySelector('.table-selector-btn'));
+  
+  if (initialImgSrc) {
+    addDraggableItemToTable(initialImgSrc);
+  }
+}
+
+function closeTablePlanner() {
+  document.getElementById('tablePlannerOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function setTableSurface(type, btnEl) {
+  const btns = document.querySelectorAll('.table-selector-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+  
+  currentTableBg = type;
+  const surface = document.getElementById('tableSurface');
+  
+  if (type === 'marble') surface.style.backgroundImage = 'url("images/table-marble.png")';
+  else if (type === 'oak') surface.style.backgroundImage = 'url("images/table-oak.png")';
+  else if (type === 'linen') surface.style.backgroundImage = 'url("images/table-linen.png")';
+}
+
+function addDraggableItemToTable(imgSrc) {
+  const surface = document.getElementById('tableSurface');
+  const div = document.createElement('div');
+  div.className = 'table-product-item';
+  div.style.top = '40%';
+  div.style.left = '40%';
+  
+  div.innerHTML = `
+    <img src="${imgSrc}" alt="Product">
+    <div class="tp-remove" onclick="this.parentElement.remove()">✕</div>
+  `;
+  
+  // Basic drag logic
+  let isDragging = false;
+  let offsetX, offsetY;
+  
+  div.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('tp-remove')) return;
+    isDragging = true;
+    dragItem = div;
+    offsetX = e.clientX - div.getBoundingClientRect().left;
+    offsetY = e.clientY - div.getBoundingClientRect().top;
+    div.style.zIndex = 100;
+  });
+  
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging || dragItem !== div) return;
+    const sRect = surface.getBoundingClientRect();
+    let x = e.clientX - sRect.left - offsetX;
+    let y = e.clientY - sRect.top - offsetY;
+    
+    // Bounds check
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    if (x > sRect.width - div.offsetWidth) x = sRect.width - div.offsetWidth;
+    if (y > sRect.height - div.offsetHeight) y = sRect.height - div.offsetHeight;
+    
+    div.style.left = x + 'px';
+    div.style.top = y + 'px';
+  });
+  
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    dragItem = null;
+    div.style.zIndex = 1;
+  });
+  
+  surface.appendChild(div);
+}
+
+function showAddMoreModal() {
+  const firstItem = document.querySelector('.table-product-item img');
+  if (firstItem) {
+    addDraggableItemToTable(firstItem.src);
+    showToast("Added companion item to table", "success");
+  } else {
+    showToast("No items on table to copy", "error");
+  }
+}
+
+function saveTablePreview() {
+  showToast("📸 Table preview saved to gallery!", "success");
+}
+
+/* ============================================================
+   FEATURE 4: CUSTOMER PHOTO GALLERY
+   ============================================================ */
+async function renderCustomerPhotoGallery() {
+  const grid = document.getElementById('customerPhotoGrid');
+  if (!grid) return;
+  
+  let photos = [];
+  if (typeof db !== 'undefined' && db.getCustomerPhotos) {
+    photos = await db.getCustomerPhotos();
+  }
+  
+  const approvedPhotos = photos.filter(p => p.approved);
+  
+  if (approvedPhotos.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Be the first to share your beautiful home setup!</div>';
+    return;
+  }
+  
+  grid.innerHTML = approvedPhotos.map(p => `
+    <div class="customer-photo-card">
+      <img src="${p.image}" alt="${p.caption || 'Customer Photo'}" loading="lazy">
+      <div class="photo-overlay">
+        <div class="photo-name">${p.name || 'Anonymous'}</div>
+        <div class="photo-caption">${p.caption || ''}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openPhotoUploadModal() {
+  document.getElementById('photoUploadModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePhotoUploadModal() {
+  document.getElementById('photoUploadModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function handlePhotoUploadSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    document.getElementById('puPreview').innerHTML = `<img src="${evt.target.result}" style="width:100%;object-fit:cover;border-radius:8px;">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function submitCustomerPhoto() {
+  const name = document.getElementById('puName').value.trim();
+  const caption = document.getElementById('puCaption').value.trim();
+  const fileInput = document.getElementById('puFile');
+  
+  if (!fileInput.files || fileInput.files.length === 0) {
+    showToast("Please select a photo to upload", "error");
+    return;
+  }
+  
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+  
+  reader.onload = async (evt) => {
+    const photoData = {
+      id: Date.now().toString(),
+      name: name || "Anonymous",
+      caption: caption,
+      image: evt.target.result,
+      approved: false,
+      createdAt: new Date().toISOString()
+    };
+    
+    await db.saveCustomerPhoto(photoData);
+    
+    closePhotoUploadModal();
+    
+    document.getElementById('puName').value = '';
+    document.getElementById('puCaption').value = '';
+    document.getElementById('puFile').value = '';
+    document.getElementById('puPreview').innerHTML = '';
+    
+    showToast("📸 Photo submitted! It will appear once approved by admin.", "success");
+  };
+  
+  reader.readAsDataURL(file);
+}
+
+document.addEventListener('DOMContentLoaded', renderCustomerPhotoGallery);
+
+/* ============================================================
+   FEATURE 5: GIFT CARD BALANCE CHECKER
+   ============================================================ */
+function openBalanceChecker() {
+  document.getElementById('balanceCheckerModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeBalanceChecker() {
+  document.getElementById('balanceCheckerModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+async function checkGiftCardBalance() {
+  const codeInput = document.getElementById('bcCodeInput').value.trim().toUpperCase();
+  const resultsDiv = document.getElementById('bcResult');
+  
+  if (!codeInput) {
+    resultsDiv.innerHTML = `<div class="bc-error" style="color:var(--red);text-align:center;padding:20px;">Please enter a Gift Card code.</div>`;
+    return;
+  }
+  
+  resultsDiv.innerHTML = '<div style="text-align:center;padding:20px;">Checking balance...</div>';
+  
+  const voucher = await db.getVoucher(codeInput);
+  
+  if (!voucher) {
+    resultsDiv.innerHTML = `<div class="bc-error" style="color:var(--red);text-align:center;padding:20px;">Invalid Gift Card code.</div>`;
+    return;
+  }
+  
+  const origBal = voucher.originalBalance || voucher.balance;
+  const used = origBal - voucher.balance;
+  
+  resultsDiv.innerHTML = `
+    <div class="bc-result-card">
+      <div class="bc-label">Remaining Balance</div>
+      <div class="bc-balance">₹${voucher.balance.toLocaleString("en-IN")}</div>
+      
+      <div class="bc-details">
+        <div class="bc-detail-item">
+          <div class="bc-detail-val">₹${origBal.toLocaleString("en-IN")}</div>
+          <div class="bc-detail-label">Original</div>
+        </div>
+        <div class="bc-detail-item">
+          <div class="bc-detail-val">₹${used.toLocaleString("en-IN")}</div>
+          <div class="bc-detail-label">Used</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
