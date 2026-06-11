@@ -6,7 +6,7 @@
   <link rel="icon" type="image/png" href="images/logo.png?v=3.30">
   <link rel="apple-touch-icon" href="images/logo.png?v=3.30">
   <title>Admin Panel — Rajendra Showroom</title>
-  <link rel="stylesheet" href="css/style.css?v=3.30">
+  <link rel="stylesheet" href="css/style.css?v=3.32">
   <style>
     /* ━━━ Base overrides ━━━ */
     body { background: #F0EDE8; }
@@ -1247,6 +1247,14 @@
                 <span class="form-hint">Used to show the "Save X%" badge</span>
               </div>
 
+              <!-- Discount (%) -->
+              <div class="form-group">
+                <label class="form-label">Discount (%)</label>
+                <input type="number" id="productDiscount" class="form-input"
+                       placeholder="e.g., 20 — auto-calculates Selling Price" min="0" max="100" step="1">
+                <span class="form-hint">Enter discount percentage to auto-fill the Selling Price</span>
+              </div>
+
               <!-- Product Colors -->
               <div class="form-group">
                 <label class="form-label">Product Colors (Comma-separated)</label>
@@ -1446,6 +1454,14 @@
                 <label class="form-label">Original / MRP (₹)</label>
                 <input type="number" id="bulkProductOrigPrice" class="form-input"
                        placeholder="e.g., 699 (Optional)">
+              </div>
+
+              <!-- Discount (%) -->
+              <div class="form-group">
+                <label class="form-label">Discount (%)</label>
+                <input type="number" id="bulkProductDiscount" class="form-input"
+                       placeholder="e.g., 20 — auto-calculates Selling Price" min="0" max="100" step="1">
+                <span class="form-hint">Enter discount percentage to auto-fill the Selling Price</span>
               </div>
 
               <!-- Product Colors -->
@@ -1715,9 +1731,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-  <script src="js/firebase-config.js?v=3.30"></script>
-  <script src="js/db.js?v=3.30"></script>
-  <script src="js/data.js?v=3.30"></script>
-  <script src="js/admin.js?v=3.30"></script>
+  <script src="js/firebase-config.js?v=3.32"></script>
+  <script src="js/db.js?v=3.32"></script>
+  <script src="js/data.js?v=3.32"></script>
+  <script src="js/admin.js?v=3.32"></script>
 </body>
 </html>

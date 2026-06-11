@@ -363,7 +363,25 @@ window.db = {
         
         const list = [];
         snapshot.forEach(doc => {
-          list.push(doc.data());
+          let data = doc.data();
+          let needsUpdate = false;
+          if (data.id === "Plates" && data.icon === "🫙") {
+            data.icon = "🍽️";
+            needsUpdate = true;
+          }
+          if (data.id === "Serving" && data.icon === "🫕") {
+            data.icon = "🍲";
+            needsUpdate = true;
+          }
+          if (data.id === "Cookware" && data.icon === "🍲") {
+            data.icon = "🍳";
+            needsUpdate = true;
+          }
+          
+          if (needsUpdate) {
+            firestoreDb.collection("categories").doc(data.id).set(data).catch(console.error);
+          }
+          list.push(data);
         });
         
         // Preserve default sorting based on the order of items in CATEGORIES
@@ -387,7 +405,17 @@ window.db = {
     // LocalStorage Fallback
     const stored = localStorage.getItem("rs_categories");
     if (stored) {
-      return JSON.parse(stored);
+      let list = JSON.parse(stored);
+      let upgraded = false;
+      list.forEach(c => {
+        if (c.id === "Plates" && c.icon === "🫙") { c.icon = "🍽️"; upgraded = true; }
+        if (c.id === "Serving" && c.icon === "🫕") { c.icon = "🍲"; upgraded = true; }
+        if (c.id === "Cookware" && c.icon === "🍲") { c.icon = "🍳"; upgraded = true; }
+      });
+      if (upgraded) {
+        localStorage.setItem("rs_categories", JSON.stringify(list));
+      }
+      return list;
     }
     localStorage.setItem("rs_categories", JSON.stringify(CATEGORIES));
     return CATEGORIES.map(c => ({ ...c }));

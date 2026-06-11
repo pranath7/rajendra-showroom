@@ -65,6 +65,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (bulkCatSel) {
     bulkCatSel.addEventListener("change", (e) => handleCategorySelectionChange(e, bulkCatSel));
   }
+
+  // Bind Auto-Discount calculators
+  setupDiscountCalculator("productPrice", "productOrigPrice", "productDiscount");
+  setupDiscountCalculator("bulkProductPrice", "bulkProductOrigPrice", "bulkProductDiscount");
 });
 
 async function checkAuth() {
@@ -1103,6 +1107,15 @@ function editProduct(id) {
   document.getElementById("productCategory").value   = p.category;
   document.getElementById("productPrice").value      = p.price;
   document.getElementById("productOrigPrice").value  = p.originalPrice || "";
+  
+  const productDiscountEl = document.getElementById("productDiscount");
+  if (productDiscountEl) {
+    if (p.originalPrice && p.price && p.originalPrice > p.price) {
+      productDiscountEl.value = Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100);
+    } else {
+      productDiscountEl.value = "";
+    }
+  }
   document.getElementById("productDesc").value       = p.description || "";
   document.getElementById("productFeatured").checked = p.featured;
   document.getElementById("productColors").value     = p.colors ? p.colors.join(", ") : "";
@@ -1924,4 +1937,45 @@ async function deleteAbandonedCart(id) {
     console.error(e);
     showAdminToast("Error: " + e.message, "error");
   }
+}
+
+function setupDiscountCalculator(priceId, origPriceId, discountId) {
+  const priceInput = document.getElementById(priceId);
+  const origPriceInput = document.getElementById(origPriceId);
+  const discountInput = document.getElementById(discountId);
+
+  if (!priceInput || !origPriceInput || !discountInput) return;
+
+  const updatePriceFromDiscount = () => {
+    const mrp = parseFloat(origPriceInput.value) || 0;
+    const pct = parseFloat(discountInput.value) || 0;
+    if (mrp > 0) {
+      if (pct >= 0 && pct <= 100) {
+        const sellingPrice = Math.round(mrp * (1 - pct / 100));
+        priceInput.value = sellingPrice;
+      }
+    }
+  };
+
+  const updateDiscountFromPrice = () => {
+    const mrp = parseFloat(origPriceInput.value) || 0;
+    const sellingPrice = parseFloat(priceInput.value) || 0;
+    if (mrp > 0 && sellingPrice > 0 && sellingPrice <= mrp) {
+      const pct = Math.round(((mrp - sellingPrice) / mrp) * 100);
+      discountInput.value = pct;
+    } else {
+      discountInput.value = "";
+    }
+  };
+
+  origPriceInput.addEventListener("input", () => {
+    if (discountInput.value !== "") {
+      updatePriceFromDiscount();
+    } else if (priceInput.value !== "") {
+      updateDiscountFromPrice();
+    }
+  });
+
+  discountInput.addEventListener("input", updatePriceFromDiscount);
+  priceInput.addEventListener("input", updateDiscountFromPrice);
 }
