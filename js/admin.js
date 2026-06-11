@@ -35,8 +35,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Request optional emoji icon
-        const icon = prompt("Enter an emoji/icon for the category (or leave blank for a default package 📦):");
-        const cleanIcon = icon && icon.trim() ? icon.trim() : "📦";
+        const defaultEmoji = window.db.getEmojiForCategoryName(cleanName);
+        const icon = prompt(`Enter an emoji/icon for the category (or leave blank for default ${defaultEmoji}):`);
+        const cleanIcon = icon && icon.trim() ? icon.trim() : defaultEmoji;
 
         const newCat = {
           id: cleanName,

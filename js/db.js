@@ -47,6 +47,24 @@ function withTimeout(promise, ms = 3000) {
 
 // Global DB adapter
 window.db = {
+  getEmojiForCategoryName(name) {
+    const cleanName = (name || "").trim().toLowerCase();
+    if (cleanName.includes("dry fruit")) return "🥜";
+    if (cleanName.includes("flask") || cleanName.includes("thermos")) return "🏺";
+    if (cleanName.includes("glass bottle")) return "🍾";
+    if (cleanName.includes("lunch box") || cleanName.includes("lunchbox")) return "🍱";
+    if (cleanName.includes("plater set") || cleanName.includes("platter")) return "🍽️";
+    if (cleanName.includes("snack")) return "🥨";
+    if (cleanName.includes("stanley")) return "🥤";
+    if (cleanName.includes("tawa")) return "🍳";
+    if (cleanName.includes("vase")) return "🏺";
+    if (cleanName.includes("water bottle") || cleanName.includes("bottle")) return "🥤";
+    if (cleanName.includes("plates")) return "🍽️";
+    if (cleanName.includes("serving")) return "🍲";
+    if (cleanName.includes("cookware")) return "🍳";
+    return "📦";
+  },
+
   isFirebaseActive() {
     return useFirebase && isFirebaseResponsive;
   },
@@ -377,6 +395,15 @@ window.db = {
             data.icon = "🍳";
             needsUpdate = true;
           }
+
+          // Custom user-defined category emojis automatically resolved by name
+          if (data.icon === "📦" || !data.icon) {
+            const mappedEmoji = window.db.getEmojiForCategoryName(data.id);
+            if (mappedEmoji !== "📦") {
+              data.icon = mappedEmoji;
+              needsUpdate = true;
+            }
+          }
           
           if (needsUpdate) {
             firestoreDb.collection("categories").doc(data.id).set(data).catch(console.error);
@@ -411,6 +438,15 @@ window.db = {
         if (c.id === "Plates" && c.icon === "🫙") { c.icon = "🍽️"; upgraded = true; }
         if (c.id === "Serving" && c.icon === "🫕") { c.icon = "🍲"; upgraded = true; }
         if (c.id === "Cookware" && c.icon === "🍲") { c.icon = "🍳"; upgraded = true; }
+
+        // Custom user-defined category emojis automatically resolved by name
+        if (c.icon === "📦" || !c.icon) {
+          const mappedEmoji = window.db.getEmojiForCategoryName(c.id);
+          if (mappedEmoji !== "📦") {
+            c.icon = mappedEmoji;
+            upgraded = true;
+          }
+        }
       });
       if (upgraded) {
         localStorage.setItem("rs_categories", JSON.stringify(list));
