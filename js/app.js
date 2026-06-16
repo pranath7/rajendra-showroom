@@ -3093,9 +3093,9 @@ function setTableSurface(type, btnEl) {
   currentTableBg = type;
   const surface = document.getElementById('tableSurface');
   
-  if (type === 'marble') surface.style.backgroundImage = 'url("images/table-marble.png")';
-  else if (type === 'oak') surface.style.backgroundImage = 'url("images/table-oak.png")';
-  else if (type === 'linen') surface.style.backgroundImage = 'url("images/table-linen.png")';
+  if (type === 'marble') surface.style.backgroundImage = 'url("images/table-marble.jpg")';
+  else if (type === 'oak') surface.style.backgroundImage = 'url("images/table-oak.jpg")';
+  else if (type === 'linen') surface.style.backgroundImage = 'url("images/table-linen.jpg")';
 }
 
 function addDraggableItemToTable(imgSrc) {
