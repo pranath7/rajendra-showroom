@@ -2,12 +2,18 @@
   "name": "Rajendra Showroom",
   "short_name": "Rajendra Showroom",
   "description": "Premium dinner sets, tea sets, glassware & luxury gifting in Chennai.",
+  "id": "rajendra-showroom-pwa",
   "start_url": "index.html",
   "display": "standalone",
+  "display_override": ["standalone", "window-controls-overlay"],
   "background_color": "#FAFAF7",
   "theme_color": "#1C1C1A",
   "orientation": "portrait-primary",
   "scope": "./",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["shopping", "home-decor"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "images/icon-192.png",
@@ -30,6 +36,38 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "View Cart",
+      "short_name": "Cart",
+      "description": "Open your shopping cart",
+      "url": "index.html?open=cart",
+      "icons": [{ "src": "images/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Track Order",
+      "short_name": "Track",
+      "description": "Track your order status",
+      "url": "index.html?open=tracker",
+      "icons": [{ "src": "images/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "images/hero.jpg",
+      "sizes": "1024x1024",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Rajendra Showroom Storefront"
+    },
+    {
+      "src": "images/hero.jpg",
+      "sizes": "1024x1024",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Premium Crockery Catalog"
     }
   ]
 }

@@ -46,6 +46,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Run background revalidation sync from Firebase
   triggerBackgroundSync();
+
+  // Handle PWA Shortcut routing
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('open') === 'cart') {
+    setTimeout(openCart, 300);
+  } else if (params.get('open') === 'tracker') {
+    setTimeout(openOrderTracker, 300);
+  }
 });
 
 /* ─── Storage ────────────────────────────────────────────── */
