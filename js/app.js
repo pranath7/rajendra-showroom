@@ -1213,12 +1213,13 @@ function openModal(id) {
           <a href="#" onclick="whatsappBulkOrder('${p.id}'); return false;">Click here</a>
         </div>
 
-        <div class="modal-actions">
-          <button class="btn-add-cart-lg" onclick="addToCart('${p.id}', currentModalQty); closeModal(); openCart();">
+        <div class="modal-actions" style="display: flex; gap: 10px;">
+          <button class="btn-add-cart-lg" onclick="addToCart('${p.id}', currentModalQty); closeModal(); openCart();" style="flex: 1;">
             Add to cart
           </button>
-          <button class="btn-wa-lg" onclick="buyItNow('${p.id}')">
-            Buy It Now
+          <button class="btn-wa-lg" onclick="whatsappProduct('${p.id}')" style="flex: 1; background: #25D366; border-color: #25D366; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:middle;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.99 2C6.477 2 2 6.477 2 11.99c0 1.72.454 3.33 1.24 4.73L2 22l5.47-1.22A9.957 9.957 0 0011.99 22C17.51 22 22 17.52 22 11.99 22 6.477 17.51 2 11.99 2zm0 18.18c-1.65 0-3.19-.44-4.52-1.21l-.32-.19-3.37.75.8-3.28-.21-.34A8.17 8.17 0 013.82 12c0-4.51 3.67-8.18 8.17-8.18 4.51 0 8.18 3.67 8.18 8.18 0 4.51-3.67 8.18-8.18 8.18z"/></svg>
+            Enquire on WhatsApp
           </button>
         </div>
 
@@ -2336,9 +2337,7 @@ function changeModalQty(delta) {
 }
 
 function buyItNow(productId) {
-  addToCart(productId, currentModalQty);
-  closeModal();
-  openCheckoutModal();
+  whatsappProduct(productId);
 }
 
 function whatsappExpressShipping(id) {
@@ -2645,16 +2644,58 @@ function openInfoModal(type) {
   } else if (type === "privacy") {
     title = "Privacy Policy";
     bodyHTML = `
-      <div style="font-family:var(--font-serif); font-size:24px; font-weight:500; margin-bottom:16px; color:var(--text);">${title}</div>
-      <p style="font-size:14px; line-height:1.75; color:var(--text-light); margin-bottom:14px;">
-        At Rajendra Showroom, we value the trust you place in us. We only collect essential customer details like Name, Phone Number, and Delivery Address to successfully process and ship your crockery orders.
-      </p>
-      <p style="font-size:14px; line-height:1.75; color:var(--text-light); margin-bottom:14px;">
-        Your transaction and billing parameters are secured using standard UPI gateway end-to-end encryption. We never store credit cards, bank accounts, or UPI pins on our database.
-      </p>
-      <p style="font-size:14px; line-height:1.75; color:var(--text-light);">
-        We guarantee that your personal contact details are kept confidential and are never shared or sold to any third-party marketing agencies.
-      </p>
+      <div style="font-family:var(--font-serif); font-size:26px; font-weight:500; margin-bottom:18px; color:var(--text);">${title}</div>
+      <div style="max-height:400px; overflow-y:auto; padding-right:10px; font-size:13.5px; line-height:1.7; color:var(--text-light); text-align:left; border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding-top:14px; padding-bottom:14px; margin-bottom:14px;">
+        <p style="margin-bottom:12px;"><strong>Last Updated: June 16, 2026</strong></p>
+        <p style="margin-bottom:14px;">
+          Welcome to Rajendra Showroom. We respect your privacy and are committed to protecting your personal data. This Privacy Policy details how we collect, handle, secure, and use your information when you visit our storefront website, use our catalog, complete purchases, or communicate with us.
+        </p>
+        
+        <h4 style="color:var(--text); font-weight:600; font-size:15px; margin:16px 0 8px 0; border-bottom:1px dashed var(--border-dark); padding-bottom:4px;">1. Information We Collect</h4>
+        <p style="margin-bottom:10px;">We gather specific categories of information to provide you with seamless retail, delivery, and support services:</p>
+        <ul style="padding-left:18px; margin-bottom:14px; list-style-type:disc;">
+          <li style="margin-bottom:6px;"><strong>Identity & Contact Data:</strong> Includes your name, telephone/mobile number, email address, physical delivery address, state, and pincode.</li>
+          <li style="margin-bottom:6px;"><strong>Transaction & Payment Data:</strong> Includes transaction IDs, order group IDs, purchase histories, and UPI Transaction Reference numbers (UTR). <em>Note: We never collect, process, or store credit card numbers, bank PINs, or UPI access codes on our systems.</em></li>
+          <li style="margin-bottom:6px;"><strong>Technical & Analytics Data:</strong> Details of your website interaction, browser type, device details, IP address, and clickstream events, tracked via Google Analytics 4 (GA4) and Meta Pixel integrations.</li>
+          <li style="margin-bottom:6px;"><strong>User Generated Content:</strong> Photos and setups you explicitly choose to upload to our Customer Gallery.</li>
+        </ul>
+
+        <h4 style="color:var(--text); font-weight:600; font-size:15px; margin:16px 0 8px 0; border-bottom:1px dashed var(--border-dark); padding-bottom:4px;">2. How We Use Your Data</h4>
+        <p style="margin-bottom:10px;">Your personal details are used exclusively for legitimate business and transactional activities:</p>
+        <ul style="padding-left:18px; margin-bottom:14px; list-style-type:disc;">
+          <li style="margin-bottom:6px;">Processing, assembling, and routing your crockery, dinnerware, or gift set orders.</li>
+          <li style="margin-bottom:6px;">Generating pre-filled checkout links and routing custom queries or invoices via WhatsApp.</li>
+          <li style="margin-bottom:6px;">Improving our site navigation and tailoring our collections based on aggregated analytics trends.</li>
+          <li style="margin-bottom:6px;">Re-establishing connection regarding abandoned carts to assist you in completing interrupted checkouts.</li>
+        </ul>
+
+        <h4 style="color:var(--text); font-weight:600; font-size:15px; margin:16px 0 8px 0; border-bottom:1px dashed var(--border-dark); padding-bottom:4px;">3. Data Security & Hosting</h4>
+        <p style="margin-bottom:12px;">
+          All client profiles, order records, and gallery assets are securely hosted on <strong>Google Firebase (Firestore & Cloud Storage)</strong>, leveraging enterprise-grade access control and authentication protocols. Administrative dashboards are restricted to authorized showroom personnel only.
+        </p>
+
+        <h4 style="color:var(--text); font-weight:600; font-size:15px; margin:16px 0 8px 0; border-bottom:1px dashed var(--border-dark); padding-bottom:4px;">4. Third-Party Integrations</h4>
+        <p style="margin-bottom:12px;">
+          We utilize standard tracking networks including **Google Analytics (G-PDL2THFP8Z)** and **Meta Pixel (1289866506386688)** to record e-commerce actions (<code>view_item</code>, <code>add_to_cart</code>, <code>purchase</code>). These platforms collect cookies to gauge customer behavior. You can disable cookies in your browser settings to opt-out.
+        </p>
+
+        <h4 style="color:var(--text); font-weight:600; font-size:15px; margin:16px 0 8px 0; border-bottom:1px dashed var(--border-dark); padding-bottom:4px;">5. Sharing Your Information</h4>
+        <p style="margin-bottom:12px;">
+          We do not sell, rent, or trade your personal data. We only share contact and shipment details with vetted shipping/courier partners to coordinate safe parcel delivery to your address.
+        </p>
+
+        <h4 style="color:var(--text); font-weight:600; font-size:15px; margin:16px 0 8px 0; border-bottom:1px dashed var(--border-dark); padding-bottom:4px;">6. Your Control & Rights</h4>
+        <p style="margin-bottom:12px;">
+          You reserve the right to request the deletion or correction of your phone number, order logs, or gallery pictures from our system at any time. Simply write to us or message our helpline.
+        </p>
+
+        <h4 style="color:var(--text); font-weight:600; font-size:15px; margin:16px 0 8px 0; border-bottom:1px dashed var(--border-dark); padding-bottom:4px;">7. Contact Information</h4>
+        <p style="margin-bottom:4px;">For any concerns regarding this policy, feel free to visit or reach out to us:</p>
+        <p style="margin-bottom:2px;"><strong>Rajendra Showroom</strong></p>
+        <p style="margin-bottom:2px;">Patni Plaza, Shop No. 3, NSC Bose Road, Chennai, 600001</p>
+        <p style="margin-bottom:2px;">Helpline: +91 63691 42027</p>
+        <p>Email: pranathwork@gmail.com</p>
+      </div>
     `;
   }
   

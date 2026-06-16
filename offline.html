@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline – Rajendra Showroom</title>
+  <style>
+    :root {
+      --bg: #FAFAF7;
+      --text: #1C1C1A;
+      --text-light: #706F68;
+      --gold: #BFA06A;
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'Jost', system-ui, sans-serif;
+    }
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap');
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+    .container {
+      max-width: 420px;
+      padding: 24px;
+    }
+    .icon {
+      font-size: 54px;
+      margin-bottom: 18px;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: 32px;
+      font-weight: 400;
+      margin: 0 0 12px 0;
+    }
+    p {
+      font-size: 14.5px;
+      color: var(--text-light);
+      line-height: 1.6;
+      margin: 0 0 28px 0;
+    }
+    button {
+      padding: 12px 32px;
+      background: var(--text);
+      color: #FFF;
+      border: none;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      background: var(--gold);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">📡</div>
+    <h1>Connection Lost</h1>
+    <p>It seems you are currently offline. Check your internet connection and try reloading the catalog.</p>
+    <button onclick="window.location.reload()">Retry Connection</button>
+  </div>
+</body>
+</html>

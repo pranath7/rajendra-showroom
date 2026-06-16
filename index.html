@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="images/logo.png?v=3.30">
   <link rel="apple-touch-icon" href="images/logo.png?v=3.30">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Mobile web app meta tags -->
+  <meta name="theme-color" content="#1C1C1A">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Rajendra Showroom">
 
   <!-- ═══ Primary SEO Tags ════════════════════════════════ -->
   <title>Rajendra Showroom – Premium Crockery, Dinner Sets & Gift Items in Chennai | NSC Bose Road</title>
@@ -551,9 +559,6 @@
         </div>
       </div>
       <div style="display: flex; flex-direction: column; gap: 8px;">
-        <button class="btn-whatsapp-checkout" onclick="openCheckoutModal()" style="background: var(--bg-dark); color: #fff;">
-          🛒 &nbsp; Checkout on Site
-        </button>
         <button class="btn-whatsapp-checkout" onclick="whatsappCart()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.99 2C6.477 2 2 6.477 2 11.99c0 1.72.454 3.33 1.24 4.73L2 22l5.47-1.22A9.957 9.957 0 0011.99 22C17.51 22 22 17.52 22 11.99 22 6.477 17.51 2 11.99 2zm0 18.18c-1.65 0-3.19-.44-4.52-1.21l-.32-.19-3.37.75.8-3.28-.21-.34A8.17 8.17 0 013.82 12c0-4.51 3.67-8.18 8.17-8.18 4.51 0 8.18 3.67 8.18 8.18 0 4.51-3.67 8.18-8.18 8.18z"/></svg>
           Inquire via WhatsApp
@@ -1126,6 +1131,15 @@
       document.getElementById("gridViewBtn").classList.toggle("active", v === "grid");
       document.getElementById("listViewBtn").classList.toggle("active", v === "list");
       renderProducts();
+    }
+
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('[PWA] Service Worker registered with scope:', reg.scope))
+          .catch(err => console.error('[PWA] Service Worker registration failed:', err));
+      });
     }
   </script>
 </body>
