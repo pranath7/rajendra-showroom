@@ -15,8 +15,8 @@
   <meta name="apple-mobile-web-app-title" content="Rajendra Showroom">
 
   <!-- ═══ Primary SEO Tags ════════════════════════════════ -->
-  <title>Rajendra Showroom – Premium Crockery, Dinner Sets & Gift Items in Chennai | NSC Bose Road</title>
-  <meta name="description" content="Buy premium crockery, dinner sets, tea sets, glassware, cutlery & luxury gifting items at Rajendra Showroom, Chennai. Best quality bone china, porcelain & stoneware. Shop online or visit us at Patni Plaza, NSC Bose Road.">
+  <title>Rajendra Showroom | Premium Crockery & Dinner Sets, Chennai</title>
+  <meta name="description" content="Shop premium crockery, luxury dinner sets, tea sets & glassware at Rajendra Showroom, Chennai. Visit our store on NSC Bose Road or order online.">
   <meta name="keywords" content="crockery shop Chennai, dinner set Chennai, gifting items Chennai, luxury crockery Chennai, bone china dinner set, tea set Chennai, glassware Chennai, cutlery set Chennai, crockery gift set, porcelain dinnerware Chennai, NSC Bose Road shop, Rajendra Showroom, crockery store near me, wedding gifts Chennai, housewarming gifts Chennai">
   <meta name="author" content="Rajendra Showroom">
   <meta name="robots" content="index, follow">
@@ -172,7 +172,8 @@
   <!-- ═══ End Meta Pixel ══════════════════════════════════════ -->
 
 </head>
-<body>
+<body style="position: relative;">
+  <h1 style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Rajendra Showroom – Premium Crockery & Dinnerware in Chennai</h1>
 
   <!-- ═══ Announcement Bar ════════════════════════════════ -->
   <div class="announcement-bar">
@@ -226,7 +227,11 @@
     <!-- Nav -->
     <nav class="site-nav">
       <div class="nav-inner" id="topNavInner">
-        <!-- Rendered dynamically by JS -->
+        <a href="#products" onclick="setCategory('Dinner Sets')">Dinner Sets</a>
+        <a href="#products" onclick="setCategory('Tea Sets')">Tea Sets</a>
+        <a href="#products" onclick="setCategory('Glassware')">Glassware</a>
+        <a href="#products" onclick="setCategory('Cookware')">Cookware</a>
+        <a href="#products" onclick="setCategory('Gift Sets')">Gift Sets</a>
       </div>
     </nav>
   </header>
@@ -237,7 +242,7 @@
     <div class="hero-overlay">
       <div class="hero-content">
         <span class="hero-eyebrow">✦ &nbsp; Rajendra Showroom, Chennai</span>
-        <h1 class="hero-title">Every Piece<br><em>Tells a Story</em></h1>
+        <h2 class="hero-title">Every Piece<br><em>Tells a Story</em></h2>
         <p class="hero-subtitle">Discover our curated collection of luxury crockery — crafted for those who believe dining is an experience, not just a meal.</p>
 
       </div>
@@ -269,10 +274,15 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <h2 class="sidebar-title">Categories</h2>
+        <h2 class="sidebar-title">Shop by Category</h2>
       </div>
       <ul class="category-list" id="categoryList">
-        <!-- Rendered by JS -->
+        <li><a href="#products" onclick="setCategory('all')">All Products</a></li>
+        <li><a href="#products" onclick="setCategory('Dinner Sets')">Dinner Sets</a></li>
+        <li><a href="#products" onclick="setCategory('Tea Sets')">Tea Sets</a></li>
+        <li><a href="#products" onclick="setCategory('Glassware')">Glassware</a></li>
+        <li><a href="#products" onclick="setCategory('Cookware')">Cookware</a></li>
+        <li><a href="#products" onclick="setCategory('Gift Sets')">Gift Sets</a></li>
       </ul>
 
       <!-- Price Filter -->
@@ -816,7 +826,7 @@
           <span class="upi-vpa-text" id="upiVpaDisplay">Q17629536@ybl</span>
           <button class="upi-copy-btn" onclick="copyUpiId()" id="upiCopyBtn">📋 Copy</button>
         </div>
-        <div class="upi-amount-reminder">Pay exactly <strong id="upiAmtReminder"></strong></div>
+        <div class="upi-amount-reminder">Pay exactly <strong id="upiAmtReminder">₹0</strong></div>
 
         <!-- Step 2: Enter UTR -->
         <div class="utr-step-label" style="margin-top:20px;">Step 2 — Enter Transaction ID</div>
@@ -967,9 +977,14 @@
     <div class="mm-body">
       <!-- Categories List -->
       <div class="mm-section">
-        <h4 class="mm-section-title">Categories</h4>
+        <h4 class="mm-section-title">Product Categories</h4>
         <ul class="mm-category-list" id="mobileCategoryList">
-          <!-- Populated by JS -->
+          <li><a href="#products" onclick="setCategory('all'); closeMobileMenu();">All Products</a></li>
+          <li><a href="#products" onclick="setCategory('Dinner Sets'); closeMobileMenu();">Dinner Sets</a></li>
+          <li><a href="#products" onclick="setCategory('Tea Sets'); closeMobileMenu();">Tea Sets</a></li>
+          <li><a href="#products" onclick="setCategory('Glassware'); closeMobileMenu();">Glassware</a></li>
+          <li><a href="#products" onclick="setCategory('Cookware'); closeMobileMenu();">Cookware</a></li>
+          <li><a href="#products" onclick="setCategory('Gift Sets'); closeMobileMenu();">Gift Sets</a></li>
         </ul>
       </div>
       
