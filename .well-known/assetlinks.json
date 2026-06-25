@@ -5,9 +5,9 @@
     ],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.rajendrashowroom.twa",
+      "package_name": "store.rajendrashowroom.twa",
       "sha256_cert_fingerprints": [
-        "XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX"
+        "F1:03:36:E1:78:FF:F6:1C:26:F8:3D:7D:48:8D:87:B8:EF:65:42:27:66:83:D9:54:31:7D:2A:B1:39:53:24:97"
       ]
     }
   }
