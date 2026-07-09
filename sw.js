@@ -1,9 +1,9 @@
-const CACHE_NAME = 'rajendra-showroom-cache-v4';
+const CACHE_NAME = 'rajendra-showroom-cache-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './offline.html',
-  './css/style.min.css',
+  './css/style.css',
   './js/app.js',
   './js/data.js',
   './js/db.js',
