@@ -6,6 +6,41 @@ const WA_NUMBER = "916369142027";
 const STORE_KEY  = "rs_products";
 const CART_KEY   = "rs_cart";
 
+function getCategorySvg(catId) {
+  const icons = {
+    "all": `<svg class="svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>`,
+    
+    "Dinner Sets": `<svg class="svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1"></circle></svg>`,
+    
+    "Tea Sets": `<svg class="svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 17h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2z"></path><path d="M6 10H4c-1.1 0-2 .9-2 2v1c0 1.1.9 2 2 2h2"></path><path d="M20 11h2c1.1 0 2 .9 2 2v0c0 1.1-.9 2-2 2h-2"></path><path d="M10 7V4c0-.6-.4-1-1-1H7"></path><path d="M6 20h12"></path></svg>`,
+    
+    "Cups & Mugs": `<svg class="svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"></path><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="2" x2="6" y2="4"></line><line x1="10" y1="2" x2="10" y2="4"></line><line x1="14" y1="2" x2="14" y2="4"></line></svg>`,
+    
+    "Plates": `<svg class="svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="6"></circle></svg>`,
+    
+    "Bowls": `<svg class="svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10a10 10 0 0 0 20 0H2z"></path><path d="M6 20h12"></path></svg>`,
+    
+    "Glassware": `<svg class="svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 22H2"></path><path d="M5 2h14v10a7 7 0 0 1-14 0V2z"></path><path d="M12 12v10"></path></svg>`,
+    
+    "Serving": `<svg class="svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19h18"></path><path d="M5 16h14a1 1 0 0 0 1-1V9a7 7 0 0 0-16 0v6a1 1 0 0 0 1 1z"></path><path d="M12 2v2"></path></svg>`,
+    
+    "Cookware": `<svg class="svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17A6 6 0 1 0 5 11"></path><path d="M22 3l-8.5 8.5"></path><circle cx="11" cy="11" r="6"></circle></svg>`,
+    
+    "Cutlery": `<svg class="svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 2 1.5 3.5 3.5 3.5H7V22h2v-9.5h.5C11.5 12.5 13 11 13 9V2h-2v5H9V2H7v5H5V2H3z"></path><path d="M19 2v10h-2v10h2V12c3 0 3-10 3-10h-3z"></path></svg>`,
+    
+    "Gift Sets": `<svg class="svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M12 8v13"></path><path d="M3 12h18"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5C9 3 10.5 5.5 12 8c1.5-2.5 3-5 4.5-5a2.5 2.5 0 0 1 0 5H12"></path></svg>`
+  };
+  return icons[catId] || icons["all"];
+}
+
+function getOptimizedImageUrl(url, width = 450) {
+  if (!url) return url;
+  if (url.includes("res.cloudinary.com") && url.includes("/image/upload/")) {
+    return url.replace("/image/upload/", `/image/upload/f_auto,q_auto,w_${width}/`);
+  }
+  return url;
+}
+
 /* ─── State ──────────────────────────────────────────────── */
 let allProducts      = [];
 let cart             = [];
@@ -108,7 +143,7 @@ function renderCategories() {
         <li class="cat-item ${isActive ? "active" : ""}"
             data-cat="${cat.id}"
             onclick="setCategory('${cat.id}')">
-          <span class="cat-icon">${cat.icon}</span>
+          <span class="cat-icon">${getCategorySvg(cat.id)}</span>
           <span>${cat.label}</span>
           <span class="cat-count">${count}</span>
         </li>`,
@@ -116,7 +151,7 @@ function renderCategories() {
         <li class="mm-cat-item ${isActive ? "active" : ""}"
             data-cat="${cat.id}"
             onclick="setCategory('${cat.id}'); closeMobileMenu();">
-          <span class="cat-icon">${cat.icon}</span>
+          <span class="cat-icon">${getCategorySvg(cat.id)}</span>
           <span>${cat.label}</span>
           <span class="cat-count" style="margin-left:auto; font-size:11px; color:var(--text-muted);">${count}</span>
         </li>`
@@ -201,7 +236,13 @@ function renderProducts() {
   if (filtered.length === 0) {
     grid.innerHTML = `
       <div class="no-products">
-        <div class="no-icon">🫙</div>
+        <div class="no-icon" style="color:var(--text-muted);display:flex;justify-content:center;margin-bottom:12px;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </div>
         <h3>No products found</h3>
         <p>Try a different category or clear your search.</p>
       </div>`;
@@ -209,10 +250,10 @@ function renderProducts() {
   }
 
   grid.className = `products-grid ${currentView === "list" ? "list-view" : ""}`;
-  grid.innerHTML = filtered.map(p => productCardHTML(p)).join("");
+  grid.innerHTML = filtered.map((p, idx) => productCardHTML(p, idx)).join("");
 }
 
-function productCardHTML(p) {
+function productCardHTML(p, idx = 4) {
   const rating = p.rating || parseFloat((4.5 + ((p.id * 7) % 5) * 0.1).toFixed(1));
   const reviews = p.reviews || ((p.id * 13) % 100) + 40;
   
@@ -224,23 +265,29 @@ function productCardHTML(p) {
 
   let imgHTML = "";
   if (p.image) {
-    imgHTML = `<img class="product-img" src="${p.image}" alt="${p.name}" loading="lazy">`;
+    const optimizedSrc = getOptimizedImageUrl(p.image, 400);
+    const loadingAttr = idx < 4 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
+    imgHTML = `<img class="product-img" src="${optimizedSrc}" alt="${p.name}" ${loadingAttr}>`;
   } else if (p.video) {
     const isEmbed = p.video.includes("youtube.com/embed/") || p.video.includes("drive.google.com/file/d/");
     if (isEmbed) {
       imgHTML = `
-        <div class="product-placeholder" style="background:#111;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-          <div class="placeholder-icon" style="font-size:36px;color:#d4af37;margin-bottom:6px;">🎬</div>
-          <div class="placeholder-text" style="color:#d4af37;font-weight:600;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Watch Video</div>
+        <div class="product-placeholder" style="background:#1C1C1A;color:var(--gold-light);display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <div class="placeholder-icon" style="margin-bottom:8px;color:var(--gold);display:flex;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+          </div>
+          <div class="placeholder-text" style="color:var(--gold-light);font-weight:500;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;">Watch Video</div>
         </div>`;
     } else {
       imgHTML = `<video class="product-img" src="${p.video}" muted loop autoplay playsinline style="object-fit:cover;width:100%;height:100%;background:#000;display:block;"></video>`;
     }
   } else {
     imgHTML = `
-      <div class="product-placeholder">
-        <div class="placeholder-icon">🍽</div>
-        <div class="placeholder-text">Photo coming soon</div>
+      <div class="product-placeholder" style="background:var(--bg-warm);display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        <div class="placeholder-icon" style="margin-bottom:8px;color:var(--text-muted);display:flex;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+        </div>
+        <div class="placeholder-text" style="color:var(--text-light);font-size:12px;font-weight:400;">Photo coming soon</div>
       </div>`;
   }
 
@@ -341,8 +388,8 @@ function bindEvents() {
         const priceText = isPriceOnRequest ? "Price on Request" : `₹${p.price.toLocaleString("en-IN")}`;
         const imgUrl = p.image || (p.images && p.images[0]) || "";
         const imgHTML = imgUrl 
-          ? `<img class="ss-img" src="${imgUrl}" alt="${p.name}">` 
-          : `<div class="ss-img" style="display:flex;align-items:center;justify-content:center;font-size:18px;">🍽</div>`;
+          ? `<img class="ss-img" src="${getOptimizedImageUrl(imgUrl, 80)}" alt="${p.name}">` 
+          : `<div class="ss-img" style="display:flex;align-items:center;justify-content:center;background:var(--bg-warm);color:var(--text-muted);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle></svg></div>`;
         
         return `
           <div class="search-suggestion-item" onclick="openProductFromSearch('${p.id}')">
@@ -798,9 +845,11 @@ function renderCartItems() {
 
   if (cart.length === 0) {
     body.innerHTML = `
-      <div class="cart-empty">
-        <div class="empty-icon">🛒</div>
-        <p>Your cart is empty.<br>Add some beautiful pieces!</p>
+      <div class="cart-empty" style="text-align:center;padding:40px 20px;color:var(--text-light);">
+        <div class="empty-icon" style="margin-bottom:12px;color:var(--text-muted);display:flex;justify-content:center;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+        </div>
+        <p style="font-size:14px;line-height:1.5;">Your cart is empty.<br>Add some beautiful pieces!</p>
       </div>`;
     document.getElementById("cartGrandTotal").textContent = "₹0";
     return;
@@ -812,8 +861,8 @@ function renderCartItems() {
 
   body.innerHTML = cart.map(item => `
     <div class="cart-item">
-      <div class="cart-item-img">
-        ${item.image ? `<img src="${item.image}" alt="${item.name}">` : "🍽"}
+      <div class="cart-item-img" style="display:flex;align-items:center;justify-content:center;background:var(--bg-warm);">
+        ${item.image ? `<img src="${getOptimizedImageUrl(item.image, 120)}" alt="${item.name}">` : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted);"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle></svg>`}
       </div>
       <div class="cart-item-info">
         <div class="cart-item-name">${item.name}</div>
@@ -1022,7 +1071,7 @@ function openModal(id) {
       <div class="modal-gallery">
         <div class="modal-main-img-wrap" id="modalMainWrap">
           ${productImages.length > 0
-            ? `<img id="modalMainImg" src="${productImages[0]}" alt="${p.name}">`
+            ? `<img id="modalMainImg" src="${getOptimizedImageUrl(productImages[0], 600)}" alt="${p.name}">`
             : renderStorefrontVideoMarkup(productVideo)
           }
         </div>
@@ -1030,7 +1079,7 @@ function openModal(id) {
         <div class="modal-thumbnails">
           ${productImages.map((img, idx) => `
             <div class="modal-thumb ${idx === 0 ? 'active' : ''}" onclick="setModalMainImg(this, '${p.id}', ${idx})">
-              <img src="${img}" alt="${p.name} - image ${idx + 1}">
+              <img src="${getOptimizedImageUrl(img, 120)}" alt="${p.name} - image ${idx + 1}">
             </div>
           `).join("")}
           ${productVideo ? `

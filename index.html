@@ -140,7 +140,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="css/style.min.css?v=4.00">
+  <link rel="stylesheet" href="css/style.css?v=4.00">
+  <link rel="preload" href="images/hero.jpg" as="image" fetchpriority="high">
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-PDL2THFP8Z"></script>
@@ -184,7 +185,9 @@
   <header class="site-header">
     <div class="header-inner">
       <!-- Hamburger Trigger (Mobile only) -->
-      <button class="mobile-menu-trigger" id="mobileMenuTrigger">☰</button>
+      <button class="mobile-menu-trigger" id="mobileMenuTrigger" style="display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
 
       <!-- Logo -->
       <a href="index.html" class="logo-wrap">
@@ -194,31 +197,43 @@
       <!-- Search -->
       <div class="search-wrap" style="position: relative;">
         <input type="text" id="searchInput" placeholder="Search dinner sets, mugs, bowls..." autocomplete="off">
-        <button class="search-btn">⌕</button>
+        <button class="search-btn" style="display:flex;align-items:center;justify-content:center;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
         <div class="search-suggestions" id="searchSuggestions" style="display: none;"></div>
       </div>
 
       <!-- Actions -->
       <div class="header-actions">
-        <button class="dark-mode-toggle" onclick="toggleDarkMode()" aria-label="Toggle Dark Mode">
-          <span class="toggle-icon">🌙</span>
+        <button class="dark-mode-toggle" onclick="toggleDarkMode()" aria-label="Toggle Dark Mode" style="display:flex;align-items:center;justify-content:center;">
+          <span class="toggle-icon" style="display:flex;">
+            <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+            <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </span>
         </button>
-        <button onclick="openOrderTracker()" style="display:flex; align-items:center; gap:5px; background:none; border:none; cursor:pointer; font-size:15px; color:var(--text); font-weight:600; padding:0; margin-right:10px;">
-          <span>📦</span> <span class="action-text">Track Order</span>
+        <button onclick="openOrderTracker()" style="display:flex; align-items:center; gap:6px; background:none; border:none; cursor:pointer; font-size:13px; color:var(--text); font-weight:600; padding:0; margin-right:10px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+          <span class="action-text">Track Order</span>
         </button>
-        <a href="https://wa.me/916369142027" target="_blank" style="color:#25D366; font-weight:600; display: flex; align-items: center; gap: 4px;">
-          <span>💬</span> <span class="action-text">WhatsApp</span>
+        <a href="https://wa.me/916369142027" target="_blank" style="color:#25D366; font-size:13px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          <span class="action-text">WhatsApp</span>
         </a>
-        <button class="giftcard-trigger" id="giftCardTrigger" onclick="openGiftCardModal()" style="display:flex; align-items:center; gap:5px; background:none; border:none; cursor:pointer; font-size:15px; color:var(--text); font-weight:600; padding:0; margin-right:10px;">
-          <span>🎫</span> <span class="action-text">Gift Card</span>
+        <button class="giftcard-trigger" id="giftCardTrigger" onclick="openGiftCardModal()" style="display:flex; align-items:center; gap:6px; background:none; border:none; cursor:pointer; font-size:13px; color:var(--text); font-weight:600; padding:0; margin-right:10px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <span class="action-text">Gift Card</span>
         </button>
-        <button class="wishlist-trigger" id="wishlistTrigger" onclick="openWishlist()" style="display:flex; align-items:center; gap:5px; background:none; border:none; cursor:pointer; font-size:15px; color:var(--text); font-weight:600; padding:0; margin-right:10px;">
-          <span class="wishlist-icon" style="font-size:18px;">♡</span>
+        <button class="wishlist-trigger" id="wishlistTrigger" onclick="openWishlist()" style="display:flex; align-items:center; gap:6px; background:none; border:none; cursor:pointer; font-size:13px; color:var(--text); font-weight:600; padding:0; margin-right:10px;">
+          <span class="wishlist-icon" style="display:flex;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          </span>
           <span class="action-text">Wishlist</span>
           <span class="cart-count-badge" id="wishlistCountBadge" style="display:none; margin-left: 3px; position:static;">0</span>
         </button>
-        <button class="cart-trigger" id="cartTrigger">
-          <span class="cart-icon">🛒</span>
+        <button class="cart-trigger" id="cartTrigger" style="display:flex; align-items:center; gap:6px;">
+          <span class="cart-icon" style="display:flex;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          </span>
           <span class="action-text">Cart</span>
           <span class="cart-count-badge" style="display:none;">0</span>
         </button>
@@ -252,14 +267,17 @@
   <!-- ═══ Features Strip ════════════════════════════════════ -->
   <div class="features-strip">
     <div class="features-inner">
-
-      <div class="feature-item">
-        <span class="feature-icon">🏆</span>
+      <div class="feature-item" style="gap:8px;">
+        <span class="feature-icon" style="display:flex;color:var(--gold);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+        </span>
         <span class="feature-text">Premium Authentic Quality</span>
       </div>
 
-      <div class="feature-item">
-        <span class="feature-icon">💬</span>
+      <div class="feature-item" style="gap:8px;">
+        <span class="feature-icon" style="display:flex;color:var(--gold);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+        </span>
         <span class="feature-text">WhatsApp Support</span>
       </div>
     </div>
@@ -486,6 +504,21 @@
             <a class="social-link" href="mailto:pranathwork@gmail.com" title="Email">✉</a>
             <a class="social-link" href="tel:6369142027" title="Call">☎</a>
           </div>
+
+          <a href="https://www.refrens.com/free-online-invoicing-software" target="_blank" class="refrens-badge" rel="noopener">
+            <div class="refrens-logo-wrap">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="white">
+                <polygon points="12,2 20,18 10,15" fill="white" />
+                <polygon points="12,2 10,15 4,16" fill="white" opacity="0.85" />
+                <polygon points="4,16 10,15 7,18" fill="white" opacity="0.7" />
+              </svg>
+            </div>
+            <div class="refrens-text-wrap">
+              <span class="refrens-subtitle">Invoicing Powered by</span>
+              <span class="refrens-title">Refrens.com</span>
+            </div>
+          </a>
+          <div class="refrens-extra-text" style="font-size: 11.5px; margin-top: 8px; color: var(--text-light); font-style: italic; font-weight: 500; letter-spacing: 0.5px; display: block; padding-left: 2px;">only our proud invoice maker</div>
         </div>
 
         <div>
@@ -549,13 +582,18 @@
   <div class="cart-overlay" id="cartOverlay"></div>
   <div class="cart-drawer" id="cartDrawer">
     <div class="cart-head">
-      <h3>🛒 &nbsp; Your Cart</h3>
+      <h3 style="display:flex; align-items:center; gap:8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+        Your Cart
+      </h3>
       <button class="cart-close-btn" id="cartClose">✕</button>
     </div>
     <div class="cart-body" id="cartBody">
-      <div class="cart-empty">
-        <div class="empty-icon">🛒</div>
-        <p>Your cart is empty.<br>Add some beautiful pieces!</p>
+      <div class="cart-empty" style="text-align:center;padding:40px 20px;color:var(--text-light);">
+        <div class="empty-icon" style="margin-bottom:12px;color:var(--text-muted);display:flex;justify-content:center;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+        </div>
+        <p style="font-size:14px;line-height:1.5;">Your cart is empty.<br>Add some beautiful pieces!</p>
       </div>
     </div>
     <div class="cart-foot">
@@ -587,18 +625,26 @@
   <div class="wishlist-overlay" id="wishlistOverlay" onclick="closeWishlist()"></div>
   <div class="wishlist-drawer" id="wishlistDrawer">
     <div class="wishlist-head">
-      <h3>♡ &nbsp; Your Wishlist</h3>
+      <h3 style="display:flex; align-items:center; gap:8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        Your Wishlist
+      </h3>
       <button class="wishlist-close-btn" onclick="closeWishlist()">✕</button>
     </div>
     <div class="wishlist-body" id="wishlistBody">
-      <div class="wishlist-empty">
-        <div class="empty-icon">♡</div>
-        <p>Your wishlist is empty.<br>Save your favorite items here!</p>
+      <div class="wishlist-empty" style="text-align:center;padding:40px 20px;color:var(--text-light);">
+        <div class="empty-icon" style="margin-bottom:12px;color:var(--text-muted);display:flex;justify-content:center;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </div>
+        <p style="font-size:14px;line-height:1.5;">Your wishlist is empty.<br>Save your favorite items here!</p>
       </div>
     </div>
     <div class="wishlist-foot">
       <div class="wishlist-share-section" style="border-top: 1.5px dashed var(--border-dark); padding-top: 12px;">
-        <div style="font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text);">🎁 Share Gift Registry / Wishlist</div>
+        <div style="font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text); display:flex; align-items:center; gap:6px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M12 8v13"></path><path d="M3 12h18"></path><path d="M7.5 8C7.5 5 12 3 12 8c0-5 4.5-5 4.5 0H12"></path></svg>
+          Share Gift Registry / Wishlist
+        </div>
         <div style="display:flex; gap: 8px;">
           <input type="text" id="wishlistShareName" placeholder="e.g. My Wedding Registry" style="flex:1; box-sizing:border-box; padding:10px 12px; border:1.5px solid var(--border-dark); border-radius:8px; font-size:13px; outline:none;">
           <button onclick="shareWishlistRegistry()" class="btn-share-wishlist" style="padding:10px 16px; background:var(--gold-dark); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">Create Link</button>
@@ -606,7 +652,10 @@
         <div id="wishlistShareLinkWrap" style="display:none; margin-top: 12px; padding: 12px; background: var(--bg-warm); border: 1.5px dashed var(--gold); border-radius:8px; text-align: center;">
           <div style="font-size: 11px; color: var(--text-light); margin-bottom: 6px; font-weight:600;">Shareable Registry URL:</div>
           <input type="text" id="wishlistShareLinkInput" readonly style="width: 100%; box-sizing: border-box; padding: 8px; border: 1.5px solid var(--border-dark); border-radius: 6px; font-size: 12px; text-align: center; background: #fff; margin-bottom: 8px; outline:none;">
-          <button onclick="copyWishlistShareLink()" id="wishlistCopyBtn" style="padding: 6px 16px; background: var(--text); color: #fff; border: none; border-radius: 6px; font-size: 11.5px; font-weight: bold; cursor: pointer; transition: all 0.2s;">📋 Copy Link</button>
+          <button onclick="copyWishlistShareLink()" id="wishlistCopyBtn" style="padding: 6px 16px; background: var(--text); color: #fff; border: none; border-radius: 6px; font-size: 11.5px; font-weight: bold; cursor: pointer; transition: all 0.2s; display:inline-flex; align-items:center; gap:5px; margin:0 auto;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy Link
+          </button>
         </div>
       </div>
       <button class="btn-continue-shopping" onclick="closeWishlist()" style="margin-top: 10px; width:100%;">← Continue Shopping</button>
@@ -676,7 +725,7 @@
           <div class="checkout-gifting-wrap" style="margin-top: 10px; border-top: 1.5px dashed var(--border-dark); padding-top: 12px;">
             <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">
               <input type="checkbox" id="giftCheckbox" onchange="toggleGiftingSection(this)" style="width: 16px; height: 16px; accent-color: var(--gold-dark);">
-              🎁 Send as a Gift (+₹150 for Premium Wrapping & Greeting Card)
+              Send as a Gift (+₹150 for Premium Wrapping & Greeting Card)
             </label>
             <div id="giftMessageWrap" style="display: none; margin-top: 10px;">
               <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Greeting Card Message</label>

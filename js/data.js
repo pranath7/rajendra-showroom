@@ -3,17 +3,17 @@
 // ============================================================
 
 let CATEGORIES = [
-  { id: "all",          label: "All Products",   icon: "◈" },
-  { id: "Dinner Sets",  label: "Dinner Sets",    icon: "🍽" },
-  { id: "Tea Sets",     label: "Tea Sets",       icon: "🫖" },
-  { id: "Cups & Mugs",  label: "Cups & Mugs",    icon: "☕" },
-  { id: "Plates",       label: "Plates",         icon: "🍽️" },
-  { id: "Bowls",        label: "Bowls",          icon: "🥣" },
-  { id: "Glassware",    label: "Glassware",      icon: "🥂" },
-  { id: "Serving",      label: "Serving",        icon: "🍲" },
-  { id: "Cookware",     label: "Cookware",       icon: "🍳" },
-  { id: "Cutlery",      label: "Cutlery",        icon: "🍴" },
-  { id: "Gift Sets",    label: "Gift Sets",      icon: "🎁" },
+  { id: "all",          label: "All Products" },
+  { id: "Dinner Sets",  label: "Dinner Sets" },
+  { id: "Tea Sets",     label: "Tea Sets" },
+  { id: "Cups & Mugs",  label: "Cups & Mugs" },
+  { id: "Plates",       label: "Plates" },
+  { id: "Bowls",        label: "Bowls" },
+  { id: "Glassware",    label: "Glassware" },
+  { id: "Serving",      label: "Serving" },
+  { id: "Cookware",     label: "Cookware" },
+  { id: "Cutlery",      label: "Cutlery" },
+  { id: "Gift Sets",    label: "Gift Sets" },
 ];
 
 const DEFAULT_PRODUCTS = [
