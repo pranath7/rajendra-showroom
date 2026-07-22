@@ -475,64 +475,33 @@
   <!-- Shared Wishlist Banner -->
   <div id="wishlistSharedBanner" class="wishlist-shared-banner" style="display:none;"></div>
 
-  <!-- ═══ Main Content (Sidebar Column + Vigneto Grid Architecture) ═════ -->
-  <div class="main-wrapper-sidebar" id="products">
+  <!-- ═══ Main Content (Vigneto Full-Width Architecture) ═════ -->
+  <div class="main-wrapper-full" id="products">
 
-    <!-- ═══ Left Category Sidebar ════════════════════════════ -->
-    <aside class="sidebar" id="categorySidebar">
-      <div class="sidebar-block">
-        <h3 class="sidebar-title">Shop by Category</h3>
-        <ul class="category-list" id="categoryList">
-          <li><button class="cat-item active" onclick="setCategory('all')">All Products</button></li>
-          <li><button class="cat-item" onclick="setCategory('Dinner Sets')">Dinner Sets</button></li>
-          <li><button class="cat-item" onclick="setCategory('Tea Sets')">Tea Sets</button></li>
-          <li><button class="cat-item" onclick="setCategory('Glassware')">Glassware</button></li>
-          <li><button class="cat-item" onclick="setCategory('Cookware')">Cookware</button></li>
-          <li><button class="cat-item" onclick="setCategory('Gift Sets')">Gift Sets</button></li>
-        </ul>
+    <!-- Vigneto Top Filter Bar -->
+    <div class="vigneto-filter-bar">
+      <div class="vigneto-pills">
+        <button class="vigneto-pill active" onclick="setCategory('all')">All Products</button>
+        <button class="vigneto-pill" onclick="setCategory('Dinner Sets')">Dinner Sets</button>
+        <button class="vigneto-pill" onclick="setCategory('Tea Sets')">Tea Sets</button>
+        <button class="vigneto-pill" onclick="setCategory('Glassware')">Glassware</button>
+        <button class="vigneto-pill" onclick="setCategory('Cookware')">Cookware</button>
+        <button class="vigneto-pill" onclick="setCategory('Gift Sets')">Gift Sets</button>
       </div>
 
-      <div class="sidebar-block">
-        <h3 class="sidebar-title">Price Range</h3>
-        <input type="range" id="priceRange" min="500" max="60000" step="500" value="60000" oninput="updatePriceFilter(this.value)" style="width:100%;">
-        <div style="font-size:12px; color:var(--text-light); margin-top:6px;">Max Price: <strong id="priceRangeVal">₹60,000</strong></div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span style="font-size:13px; color:var(--text-light); font-weight:500;">Sort By:</span>
+        <select class="vigneto-sort-select" onchange="sortProducts(this.value)">
+          <option value="featured">Featured</option>
+          <option value="low-high">Price: Low to High</option>
+          <option value="high-low">Price: High to Low</option>
+          <option value="rating">Highest Rated</option>
+        </select>
       </div>
-
-      <div class="sidebar-block" style="background:var(--bg-warm); padding:16px; border-radius:12px;">
-        <h4 style="font-size:13px; font-weight:700; margin-bottom:6px;">💬 Need Help Ordering?</h4>
-        <p style="font-size:11.5px; color:var(--text-light); margin-bottom:10px;">Chat with our Chennai showroom team directly on WhatsApp.</p>
-        <a href="https://wa.me/916369142027" target="_blank" style="display:inline-block; padding:8px 14px; background:#25D366; color:#fff; font-size:12px; font-weight:700; border-radius:6px; text-decoration:none;">WhatsApp Support</a>
-      </div>
-    </aside>
-
-    <!-- ═══ Right Main Products Column ═══════════════════════ -->
-    <div class="products-content-main">
-      <!-- Vigneto Top Filter Bar -->
-      <div class="vigneto-filter-bar">
-        <div class="vigneto-pills">
-          <button class="vigneto-pill active" onclick="setCategory('all')">All Products</button>
-          <button class="vigneto-pill" onclick="setCategory('Dinner Sets')">Dinner Sets</button>
-          <button class="vigneto-pill" onclick="setCategory('Tea Sets')">Tea Sets</button>
-          <button class="vigneto-pill" onclick="setCategory('Glassware')">Glassware</button>
-          <button class="vigneto-pill" onclick="setCategory('Cookware')">Cookware</button>
-          <button class="vigneto-pill" onclick="setCategory('Gift Sets')">Gift Sets</button>
-        </div>
-
-        <div style="display:flex; align-items:center; gap:12px;">
-          <span style="font-size:13px; color:var(--text-light); font-weight:500;">Sort By:</span>
-          <select class="vigneto-sort-select" onchange="sortProducts(this.value)">
-            <option value="featured">Featured</option>
-            <option value="low-high">Price: Low to High</option>
-            <option value="high-low">Price: High to Low</option>
-            <option value="rating">Highest Rated</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Products Grid -->
-      <div class="vigneto-products-grid" id="productsGrid"></div>
     </div>
 
+    <!-- Products Grid -->
+    <div class="vigneto-products-grid" id="productsGrid"></div>
   </div>
 
   <!-- ═══ Google Review CTA ══════════════════════════════════ -->
