@@ -765,5 +765,130 @@ window.db = {
     localStorage.setItem("rs_customer_photos", JSON.stringify(local));
     if (firebaseError) return { success: false, error: firebaseError };
     return { success: true, mode: useFirebase ? "firebase" : "local" };
+  },
+
+  // --- Automated QR Payment Detection (No Payment Gateway) ---
+  async getUpiConfig() {
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        const doc = await withTimeout(firestoreDb.collection("settings").doc("upi").get(), 4000);
+        if (doc.exists) {
+          const data = doc.data();
+          localStorage.setItem("rs_upi_config", JSON.stringify(data));
+          return data;
+        }
+      } catch (e) {
+        console.error("Error fetching UPI config:", e);
+      }
+    }
+    const cached = localStorage.getItem("rs_upi_config");
+    return cached ? JSON.parse(cached) : { upiId: "pranath7@fam", businessName: "Rajendra Showroom" };
+  },
+
+  async saveUpiConfig(config) {
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        await withTimeout(firestoreDb.collection("settings").doc("upi").set(config), 4000);
+      } catch (e) {
+        console.error("Error saving UPI config:", e);
+      }
+    }
+    localStorage.setItem("rs_upi_config", JSON.stringify(config));
+    return { success: true };
+  },
+
+  async createPendingPayment(p) {
+    const docData = {
+      orderRef: String(p.orderRef),
+      amount: Number(p.amount),
+      customer: p.customer || "",
+      phone: p.phone || "",
+      status: "pending",
+      createdAt: new Date().toISOString(),
+      utr: null
+    };
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        await withTimeout(firestoreDb.collection("pending_payments").doc(String(p.orderRef)).set(docData), 4000);
+      } catch (e) {
+        console.error("Error creating pending payment in Firebase:", e);
+      }
+    }
+    const local = JSON.parse(localStorage.getItem("rs_pending_payments") || "{}");
+    local[p.orderRef] = docData;
+    localStorage.setItem("rs_pending_payments", JSON.stringify(local));
+    return { success: true };
+  },
+
+  async markPaymentSuccess(orderRef, utr = "", amount = 0) {
+    const cleanRef = String(orderRef).trim();
+    const updateData = {
+      status: "PAID",
+      utr: utr || ("AUTO" + Date.now().toString().slice(-8)),
+      verifiedAt: new Date().toISOString()
+    };
+    if (amount) updateData.amount = Number(amount);
+
+    if (useFirebase && isFirebaseResponsive) {
+      try {
+        await withTimeout(firestoreDb.collection("pending_payments").doc(cleanRef).set(updateData, { merge: true }), 4000);
+      } catch (e) {
+        console.error("Error marking payment success in Firebase:", e);
+      }
+    }
+    const local = JSON.parse(localStorage.getItem("rs_pending_payments") || "{}");
+    if (local[cleanRef]) {
+      local[cleanRef] = { ...local[cleanRef], ...updateData };
+    } else {
+      local[cleanRef] = { orderRef: cleanRef, ...updateData };
+    }
+    localStorage.setItem("rs_pending_payments", JSON.stringify(local));
+
+    window.dispatchEvent(new CustomEvent("rs_payment_verified", { detail: { orderRef: cleanRef, utr: updateData.utr } }));
+    return { success: true };
+  },
+
+  listenToPaymentStatus(orderRef, callback) {
+    const cleanRef = String(orderRef).trim();
+    let unsubFirestore = null;
+
+    if (useFirebase && isFirebaseResponsive && firestoreDb) {
+      try {
+        unsubFirestore = firestoreDb.collection("pending_payments").doc(cleanRef)
+          .onSnapshot(doc => {
+            if (doc.exists) {
+              const data = doc.data();
+              if (data && data.status === "PAID") {
+                callback(data);
+              }
+            }
+          }, err => console.error("Error listening to pending payment:", err));
+      } catch (e) {
+        console.error("Firestore snapshot setup error:", e);
+      }
+    }
+
+    // Local polling fallback (runs every 1.5s as backup)
+    const localInterval = setInterval(() => {
+      const local = JSON.parse(localStorage.getItem("rs_pending_payments") || "{}");
+      if (local[cleanRef] && local[cleanRef].status === "PAID") {
+        callback(local[cleanRef]);
+      }
+    }, 1500);
+
+    // Event listener for tab sync
+    const eventHandler = (evt) => {
+      if (evt.detail && String(evt.detail.orderRef) === cleanRef) {
+        callback({ status: "PAID", utr: evt.detail.utr });
+      }
+    };
+    window.addEventListener("rs_payment_verified", eventHandler);
+
+    return () => {
+      if (unsubFirestore) unsubFirestore();
+      clearInterval(localInterval);
+      window.removeEventListener("rs_payment_verified", eventHandler);
+    };
   }
 };
+

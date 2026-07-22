@@ -2085,30 +2085,58 @@ function submitOrderOnSite() {
 }
 
 let _upiTimerInterval = null;
+let _paymentListenerUnsub = null;
+let _currentOrderRef = null;
 
-/* ─── UPI Gateway Functions ───────────────────────────────── */
-function openUpiModal(amount) {
+/* ─── UPI Gateway Functions (Automated Zero-Fee Detector) ────── */
+async function openUpiModal(amount) {
   document.getElementById("upiAmount").textContent = `₹${amount.toLocaleString("en-IN")}`;
-  // Also update the amount reminder inside processing screen
   const remEl = document.getElementById("upiAmtReminder");
   if (remEl) remEl.textContent = `₹${amount.toLocaleString("en-IN")}`;
   
-  // Reset screenshot upload preview state
   _currentPaymentScreenshot = null;
   const previewWrap = document.getElementById("screenshotPreviewWrap");
   if (previewWrap) previewWrap.style.display = "none";
   const screenshotInput = document.getElementById("screenshotInput");
   if (screenshotInput) screenshotInput.value = "";
 
-  // Update VPA and dynamic QR code image
-  const upiId = "pranath7@fam";
+  // Get UPI config (or default)
+  const upiConfig = (typeof db !== "undefined" && db.getUpiConfig) ? await db.getUpiConfig() : { upiId: "pranath7@fam", businessName: "Rajendra Showroom" };
+  const upiId = upiConfig.upiId || "pranath7@fam";
+  const businessName = upiConfig.businessName || "Rajendra Showroom";
+
+  // Create unique order reference for this payment session
+  _currentOrderRef = "ORD" + Date.now();
+
   const vpaEl = document.getElementById("upiVpaDisplay");
   if (vpaEl) vpaEl.textContent = upiId;
+
+  // Build Dynamic UPI String with exact amount and Order Ref ID
+  const upiUri = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(businessName)}&am=${amount}&tr=${_currentOrderRef}&tn=${encodeURIComponent("Bill_" + _currentOrderRef)}`;
+
   const qrEl = document.getElementById("upiQrImg");
   if (qrEl) {
-    const upiUri = `upi://pay?pa=${upiId}&pn=${encodeURIComponent("Rajendra Showroom")}&am=${amount}&cu=INR&tn=${encodeURIComponent("Crockery Order")}`;
-    qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUri)}`;
+    qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(upiUri)}`;
   }
+
+  // Create pending payment record in Firebase / LocalStorage
+  if (typeof db !== "undefined" && db.createPendingPayment && _pendingOrderData) {
+    await db.createPendingPayment({
+      orderRef: _currentOrderRef,
+      amount: amount,
+      customer: _pendingOrderData.name || "",
+      phone: _pendingOrderData.phone || ""
+    });
+  }
+
+  // Attach real-time payment listener
+  if (_paymentListenerUnsub) { _paymentListenerUnsub(); _paymentListenerUnsub = null; }
+  if (typeof db !== "undefined" && db.listenToPaymentStatus) {
+    _paymentListenerUnsub = db.listenToPaymentStatus(_currentOrderRef, (verifiedData) => {
+      onAutoPaymentDetected(verifiedData);
+    });
+  }
+
   document.getElementById("upiScreen").style.display = "block";
   document.getElementById("upiProcessing").style.display = "none";
   document.getElementById("upiError").style.display = "none";
@@ -2118,31 +2146,50 @@ function openUpiModal(amount) {
   document.body.style.overflow = "hidden";
 }
 
+// Triggered automatically when bank payment SMS is parsed or updated in Firebase
+function onAutoPaymentDetected(verifiedData) {
+  console.log("🎉 AUTO PAYMENT DETECTED!", verifiedData);
+  
+  // Show processing screen if not already visible
+  document.getElementById("upiScreen").style.display = "none";
+  document.getElementById("upiProcessing").style.display = "block";
+
+  const utrInput = document.getElementById("utrInput");
+  if (utrInput) utrInput.value = verifiedData.utr || "AUTO_VERIFIED";
+
+  // Update status UI banner if present
+  const autoBanner = document.getElementById("autoDetectStatus");
+  if (autoBanner) {
+    autoBanner.innerHTML = `<span style="color:#10B981; font-weight:700;">✅ Payment Verified via Bank SMS! (UTR: ${verifiedData.utr})</span>`;
+  }
+
+  showToast("🎉 Bank Payment Detected & Verified Automatically!", "success");
+
+  // Automatically confirm the payment after 1 second delay
+  setTimeout(() => {
+    confirmUpiPayment(true);
+  }, 1000);
+}
+
 function showProcessingScreen(label) {
   document.getElementById("upiScreen").style.display = "none";
   document.getElementById("upiProcessing").style.display = "block";
-  // Reset UTR
   document.getElementById("utrInput").value = "";
   document.getElementById("utrError").style.display = "none";
-  // Disable confirm button until timer finishes or UTR/screenshot is uploaded
+  
   const btn = document.getElementById("upiConfirmBtn");
   if (btn && !_currentPaymentScreenshot) { btn.disabled = true; btn.style.opacity = "0.45"; btn.style.cursor = "not-allowed"; }
-  // Start countdown
   startUpiTimer();
 }
 
-// Called every time the user types in the UTR input field
-// Immediately unlock the confirm button if they've entered a valid UTR
 function onUtrInput(inputEl) {
   const val = inputEl.value.trim().replace(/\s/g, "");
   const btn = document.getElementById("upiConfirmBtn");
   if (!btn) return;
   if (val.length >= 10 || _currentPaymentScreenshot) {
-    // Valid UTR length or screenshot uploaded — unlock button immediately
     btn.disabled = false;
     btn.style.opacity = "1";
     btn.style.cursor = "pointer";
-    // Also stop the timer since we don't need it anymore
     if (_upiTimerInterval) {
       clearInterval(_upiTimerInterval);
       _upiTimerInterval = null;
@@ -2150,7 +2197,6 @@ function onUtrInput(inputEl) {
       if (wrapEl) wrapEl.style.display = "none";
     }
   } else {
-    // Not enough digits yet — keep button disabled
     btn.disabled = true;
     btn.style.opacity = "0.45";
     btn.style.cursor = "not-allowed";
@@ -2181,7 +2227,8 @@ function startUpiTimer() {
 }
 
 function copyUpiId() {
-  const id = "pranath7@fam";
+  const vpaEl = document.getElementById("upiVpaDisplay");
+  const id = vpaEl ? vpaEl.textContent.trim() : "pranath7@fam";
   navigator.clipboard.writeText(id).then(() => {
     const btn = document.getElementById("upiCopyBtn");
     if (btn) {
@@ -2191,13 +2238,13 @@ function copyUpiId() {
     }
     showToast("✔ UPI ID copied to clipboard", "success");
   }).catch(() => {
-    showToast("pranath7@fam — copy manually", "info");
+    showToast(`${id} — copy manually`, "info");
   });
 }
 
-
 function closeUpiModal() {
   if (_upiTimerInterval) { clearInterval(_upiTimerInterval); _upiTimerInterval = null; }
+  if (_paymentListenerUnsub) { _paymentListenerUnsub(); _paymentListenerUnsub = null; }
   document.getElementById("upiModal").classList.remove("open");
   document.getElementById("upiOverlay").classList.remove("visible");
   document.body.style.overflow = "";
@@ -2205,30 +2252,29 @@ function closeUpiModal() {
   _currentPaymentScreenshot = null;
 }
 
-function launchUpiApp(app) {
+async function launchUpiApp(app) {
   if (!_pendingOrderData) return;
   const amount = _pendingOrderData.grand;
-  const upiId  = "pranath7@fam"; // Store UPI VPA
-  const name   = "Rajendra Showroom";
-  const note   = "Crockery Order";
+  const upiConfig = (typeof db !== "undefined" && db.getUpiConfig) ? await db.getUpiConfig() : { upiId: "pranath7@fam", businessName: "Rajendra Showroom" };
+  const upiId = upiConfig.upiId || "pranath7@fam";
+  const name  = upiConfig.businessName || "Rajendra Showroom";
+  const note  = `Bill_${_currentOrderRef || Date.now()}`;
 
-  // Build UPI deep link URI
-  const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+  const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&tr=${_currentOrderRef}&cu=INR&tn=${encodeURIComponent(note)}`;
 
-  // App-specific intent links (Android) — fallback to generic UPI link on others
   const appLinks = {
-    gpay:    `tez://upi/pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`,
-    phonepe: `phonepe://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`,
-    paytm:   `paytmmp://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`,
+    gpay:    `tez://upi/pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&tr=${_currentOrderRef}&cu=INR&tn=${encodeURIComponent(note)}`,
+    phonepe: `phonepe://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&tr=${_currentOrderRef}&cu=INR&tn=${encodeURIComponent(note)}`,
+    paytm:   `paytmmp://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&tr=${_currentOrderRef}&cu=INR&tn=${encodeURIComponent(note)}`,
     bhim:    upiLink
   };
 
   const link = appLinks[app] || upiLink;
   window.location.href = link;
 
-  // Show processing/verification screen after 1.2s
   setTimeout(() => showProcessingScreen(app), 1200);
 }
+
 
 function verifyUpiAndPay() {
   const upiInput = document.getElementById("upiIdInput");
@@ -2240,19 +2286,21 @@ function verifyUpiAndPay() {
   showProcessingScreen("manual-upi");
 }
 
-async function confirmUpiPayment() {
+async function confirmUpiPayment(isAuto = false) {
   if (!_pendingOrderData) return;
 
-  // ── Compulsory Payment Screenshot Validation ──────────────
-  if (!_currentPaymentScreenshot) {
+  const utrInput = (document.getElementById("utrInput").value || "").trim().replace(/\s/g, "");
+  const utr = utrInput || (_currentOrderRef ? "AUTO_" + _currentOrderRef : "AUTO_" + Date.now());
+
+  // If manual submit (not auto-verified) and no screenshot & no valid UTR provided
+  if (!isAuto && !_currentPaymentScreenshot && utrInput.length < 10) {
     const errEl = document.getElementById("utrError");
     if (errEl) errEl.style.display = "block";
-    showToast("⚠️ Payment Screenshot is REQUIRED! Please attach your payment screenshot proof.", "error");
+    showToast("⚠️ Payment Proof Required! Please attach screenshot or enter 12-digit UTR.", "error");
     const inputEl = document.getElementById("screenshotInput");
     if (inputEl) inputEl.focus();
     return;
   }
-  const utr = (document.getElementById("utrInput").value || "").trim().replace(/\s/g, "");
 
   const { name, phone, address, cart: pendingCart, shippingCharge, gift, giftMessage, giftCharge, appliedVoucherCode, voucherDiscount } = _pendingOrderData;
 
@@ -2279,6 +2327,7 @@ async function confirmUpiPayment() {
   pendingCart.forEach((item, idx) => {
     const orderData = {
       id: orderGroupId + idx,
+      orderRef: _currentOrderRef || ("ORD" + orderGroupId),
       productId: item.id,
       productName: item.name + (item.selectedSize ? ` (${item.selectedSize})` : "") + (item.selectedColor ? ` [${item.selectedColor}]` : ""),
       customer: name,
@@ -2288,12 +2337,12 @@ async function confirmUpiPayment() {
       qty: item.qty,
       total: item.price * item.qty,
       date: dateStr,
-      notes: `UPI Order | Shipping: Rs.${shippingCharge || 0} | UTR: ${utr} | Address: ${address}` + 
+      notes: `UPI Order (${isAuto ? 'AUTO DETECTED' : 'Manual'}) | Shipping: Rs.${shippingCharge || 0} | UTR: ${utr} | Address: ${address}` + 
              (gift ? ` | Gift: Yes | Msg: ${giftMessage}` : "") +
              (appliedVoucherCode ? ` | Voucher: ${appliedVoucherCode} | Discount: Rs.${voucherDiscount}` : ""),
       utr: utr,
-      paymentScreenshot: _currentPaymentScreenshot,
-      status: "unpaid",
+      paymentScreenshot: _currentPaymentScreenshot || null,
+      status: isAuto ? "paid" : "unpaid",
       createdAt: new Date().toISOString(),
       gift: gift || false,
       giftMessage: giftMessage || "",
@@ -2305,6 +2354,7 @@ async function confirmUpiPayment() {
   });
 
   await Promise.all(savePromises);
+
 
   // Clear abandoned cart draft
   try {

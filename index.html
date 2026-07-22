@@ -917,6 +917,14 @@
       <!-- Processing / UTR Verification Screen -->
       <div id="upiProcessing" class="upi-processing" style="display:none;">
 
+        <!-- Live Auto-Detection Status Banner -->
+        <div id="autoDetectStatus" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; font-size: 13px;">
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: #10B981; box-shadow: 0 0 10px #10B981; flex-shrink:0;"></div>
+          <span style="color: var(--text-heading); font-weight: 500;">
+            <strong>Auto-Detector Active:</strong> Listening for direct bank payment... (No PG fee)
+          </span>
+        </div>
+
         <!-- Step 1: Pay -->
         <div class="utr-step-label">Step 1 — Scan & Pay</div>
         <div class="upi-qr-container">

@@ -1712,6 +1712,45 @@
             </div>
           </div>
 
+          <!-- Automated Payment Gateway Settings & Simulator -->
+          <div class="settings-card" style="border: 1.5px solid var(--gold); background: rgba(200, 160, 80, 0.03);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+              <h4 style="color:var(--gold-dark); margin:0;">⚡ Automated QR Payment Detector (0% Gateway Fee)</h4>
+              <span style="background:rgba(39,174,96,0.15); color:#27AE60; font-size:11px; padding:4px 10px; border-radius:12px; font-weight:700;">ACTIVE (Zero Fees)</span>
+            </div>
+            <p>Configure your Business VPA (UPI ID) and test live real-time payment auto-detection.</p>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px;">
+              <div>
+                <label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px; color:var(--text-heading);">Business UPI ID (VPA)</label>
+                <input type="text" id="adminUpiVpaInput" class="admin-input" placeholder="e.g. rajendrashowroom@icici" value="pranath7@fam" style="width:100%; padding:9px 12px; border-radius:6px; border:1px solid #ccc;">
+              </div>
+              <div>
+                <label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px; color:var(--text-heading);">Business / Display Name</label>
+                <input type="text" id="adminUpiNameInput" class="admin-input" placeholder="e.g. Rajendra Showroom" value="Rajendra Showroom" style="width:100%; padding:9px 12px; border-radius:6px; border:1px solid #ccc;">
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+              <button class="btn-settings" onclick="saveAdminUpiConfig()" style="background:var(--bg-dark); color:#fff; padding:9px 16px; border-radius:6px; cursor:pointer;">
+                💾 Save UPI Settings
+              </button>
+            </div>
+
+            <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
+
+            <h5 style="margin:0 0 8px 0; font-size:14px; color:var(--text-heading);">🧪 Live Payment Simulator (Test Auto-Verification)</h5>
+            <p style="font-size:12px; color:#666; margin-bottom:10px;">Simulate an incoming bank SMS or instant payment verification for any order ID to test real-time checkout updates.</p>
+            
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <input type="text" id="simOrderRefInput" placeholder="Order Ref ID (e.g. ORD172...)" style="padding:8px 12px; border:1px solid #ccc; border-radius:6px; font-size:13px; flex:1; min-width:180px;">
+              <input type="text" id="simUtrInput" placeholder="Simulated UTR (12 digits)" style="padding:8px 12px; border:1px solid #ccc; border-radius:6px; font-size:13px; width:160px;">
+              <button onclick="triggerSimulatedPayment()" style="background:#27AE60; color:#fff; border:none; padding:9px 16px; border-radius:6px; font-weight:600; font-size:13px; cursor:pointer;">
+                🚀 Simulate Instant Credit
+              </button>
+            </div>
+          </div>
+
           <!-- Danger Zone -->
           <div class="settings-card">
             <h4>⚠ Reset Data</h4>

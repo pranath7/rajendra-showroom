@@ -2053,6 +2053,201 @@ async function approveCustomerPhoto(id) {
   const photo = photos.find(p => String(p.id) === String(id));
   if (!photo) return;
   photo.approved = true;
+  if (sizesList) sizesList.innerHTML = "";
+  const sizesToggle = document.getElementById("bulkEnableSizesToggle");
+  if (sizesToggle) sizesToggle.checked = false;
+}
+
+/* ─── Abandoned Carts Recovery ──────────────────────────── */
+async function loadAbandonedCarts() {
+  const container = document.getElementById("abandonedTableBody");
+  if (container) {
+    container.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:50px;color:#bbb;">Loading abandoned carts...</td></tr>`;
+  }
+  try {
+    if (typeof db !== "undefined" && db.getAbandonedCarts) {
+      abandonedCarts = await db.getAbandonedCarts();
+    } else {
+      abandonedCarts = [];
+    }
+    renderAbandonedTable();
+  } catch (e) {
+    console.error("Failed to load abandoned carts:", e);
+    if (container) {
+      container.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:50px;color:red;">Error loading abandoned carts: ${e.message || e}</td></tr>`;
+    }
+  }
+}
+
+function renderAbandonedTable() {
+  const container = document.getElementById("abandonedTableBody");
+  const summaryBar = document.getElementById("abandonedSummaryBar");
+  const searchInput = document.getElementById("abandonedSearch");
+  const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
+
+  if (!container) return;
+
+  const filtered = abandonedCarts.filter(c => {
+    if (!query) return true;
+    const nameMatch = c.name && c.name.toLowerCase().includes(query);
+    const phoneMatch = c.phone && c.phone.toLowerCase().includes(query);
+    const addressMatch = c.address && c.address.toLowerCase().includes(query);
+    const itemsMatch = c.cart && c.cart.some(item => item.name && item.name.toLowerCase().includes(query));
+    return nameMatch || phoneMatch || addressMatch || itemsMatch;
+  });
+
+  const totalValue = filtered.reduce((s, c) => s + (c.grand || 0), 0);
+  if (summaryBar) {
+    summaryBar.textContent = `${filtered.length} cart(s) · Total Potential Value: ₹${totalValue.toLocaleString("en-IN")}`;
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:50px;color:#bbb;">No abandoned carts found.</td></tr>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(c => {
+    const timestamp = c.timestamp ? new Date(c.timestamp).toLocaleString("en-IN") : "N/A";
+    const custDetails = `
+      <div style="font-weight:600;color:var(--text);">${c.name || 'Anonymous'}</div>
+      <div style="font-size:12px;color:var(--text-light);margin-top:2px;">
+        📞 <a href="tel:${c.phone}" style="color:inherit;text-decoration:underline;">${c.phone}</a>
+      </div>
+      ${c.address ? `<div style="font-size:11px;color:var(--text-light);margin-top:2px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${c.address}">${c.address}</div>` : ''}
+    `;
+
+    const itemsHTML = c.cart ? c.cart.map(item => {
+      const colorText = item.selectedColor ? ` [${item.selectedColor}]` : "";
+      const sizeText = item.selectedSize ? ` (${item.selectedSize})` : "";
+      return `<div style="font-size:12px;line-height:1.4;">• ${item.name}${sizeText}${colorText} × ${item.qty}</div>`;
+    }).join("") : "No items";
+
+    const valueHTML = `<div style="font-weight:700;color:var(--gold-dark);">₹${(c.grand || 0).toLocaleString("en-IN")}</div>`;
+
+    const cleanPhone = c.phone.replace(/\D/g, "");
+    const waMsg = encodeURIComponent(
+      `Hi ${c.name || ''}! We noticed you left some beautiful items in your shopping cart at Rajendra Showroom. 😊\n\n` +
+      `Items in your cart:\n` +
+      (c.cart ? c.cart.map(item => `• ${item.name} × ${item.qty}`).join("\n") : "") +
+      `\n\nWould you like us to assist you in completing your order, or send you real-time showroom photos of these items on WhatsApp? Let us know! We offer fast delivery across India.`
+    );
+
+    const actionsHTML = `
+      <div style="display:flex;gap:8px;">
+        <a class="btn-action edit" href="https://wa.me/91${cleanPhone}?text=${waMsg}" target="_blank" style="background:#25D366;border-color:#25D366;color:#fff;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;height:30px;padding:0 10px;font-size:12px;border-radius:4px;font-weight:600;">
+          📲 Recover
+        </a>
+        <button class="btn-action delete" onclick="deleteAbandonedCart('${c.id}')" style="height:30px;padding:0 10px;font-size:12px;border-radius:4px;font-weight:600;">
+          🗑 Delete
+        </button>
+      </div>
+    `;
+
+    return `
+      <tr>
+        <td style="font-size:12.5px;color:var(--text-light);">${timestamp}</td>
+        <td>${custDetails}</td>
+        <td>${itemsHTML}</td>
+        <td>${valueHTML}</td>
+        <td>${actionsHTML}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+async function deleteAbandonedCart(id) {
+  if (!confirm("Are you sure you want to delete this abandoned cart draft?")) return;
+  try {
+    if (typeof db !== "undefined" && db.deleteAbandonedCart) {
+      const res = await db.deleteAbandonedCart(id);
+      if (res.success) {
+        showAdminToast("Abandoned cart deleted successfully.");
+        loadAbandonedCarts();
+      } else {
+        showAdminToast("Failed to delete cart: " + res.error, "error");
+      }
+    }
+  } catch (e) {
+    console.error(e);
+    showAdminToast("Error: " + e.message, "error");
+  }
+}
+
+function setupDiscountCalculator(priceId, origPriceId, discountId) {
+  const priceInput = document.getElementById(priceId);
+  const origPriceInput = document.getElementById(origPriceId);
+  const discountInput = document.getElementById(discountId);
+
+  if (!priceInput || !origPriceInput || !discountInput) return;
+
+  const updatePriceFromDiscount = () => {
+    const mrp = parseFloat(origPriceInput.value) || 0;
+    const pct = parseFloat(discountInput.value) || 0;
+    if (mrp > 0) {
+      if (pct >= 0 && pct <= 100) {
+        const sellingPrice = Math.round(mrp * (1 - pct / 100));
+        priceInput.value = sellingPrice;
+      }
+    }
+  };
+
+  const updateDiscountFromPrice = () => {
+    const mrp = parseFloat(origPriceInput.value) || 0;
+    const sellingPrice = parseFloat(priceInput.value) || 0;
+    if (mrp > 0 && sellingPrice > 0 && sellingPrice <= mrp) {
+      const pct = Math.round(((mrp - sellingPrice) / mrp) * 100);
+      discountInput.value = pct;
+    } else {
+      discountInput.value = "";
+    }
+  };
+
+  origPriceInput.addEventListener("input", () => {
+    if (discountInput.value !== "") {
+      updatePriceFromDiscount();
+    } else if (priceInput.value !== "") {
+      updateDiscountFromPrice();
+    }
+  });
+
+  discountInput.addEventListener("input", updatePriceFromDiscount);
+  priceInput.addEventListener("input", updateDiscountFromPrice);
+}
+
+// --- Customer Photos Management ---
+async function loadCustomerPhotosAdmin() {
+  const grid = document.getElementById("customerPhotosAdminGrid");
+  if (!grid) return;
+  grid.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);">Loading photos...</div>';
+  const photos = await db.getCustomerPhotos();
+  if (!photos || photos.length === 0) {
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);"><div style="font-size:36px;margin-bottom:12px;">📸</div>No customer photos submitted yet.</div>';
+    return;
+  }
+  grid.innerHTML = photos.map(p => `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+      <img src="${p.image}" style="width:100%;height:160px;object-fit:cover;" alt="${p.caption || ''}">
+      <div style="padding:12px;">
+        <div style="font-weight:600;font-size:13px;">${p.name || 'Anonymous'}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin:4px 0;">${p.caption || ''}</div>
+        <div style="font-size:10px;color:var(--text-muted);">${new Date(p.createdAt).toLocaleDateString()}</div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          ${p.approved ? 
+            '<span style="color:var(--green);font-size:12px;font-weight:600;">✅ Approved</span>' :
+            '<button class="btn-edit-row" style="padding:5px 12px;font-size:11px;" onclick="approveCustomerPhoto(\'' + p.id + '\')">✅ Approve</button>'
+          }
+          <button class="btn-delete-row" style="padding:5px 12px;font-size:11px;" onclick="rejectCustomerPhoto('${p.id}')">🗑 Delete</button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function approveCustomerPhoto(id) {
+  const photos = await db.getCustomerPhotos();
+  const photo = photos.find(p => String(p.id) === String(id));
+  if (!photo) return;
+  photo.approved = true;
   await db.saveCustomerPhoto(photo);
   showAdminToast("Photo approved! It will now appear on the storefront.", "success");
   loadCustomerPhotosAdmin();
@@ -2064,3 +2259,55 @@ async function rejectCustomerPhoto(id) {
   showAdminToast("Photo deleted.", "success");
   loadCustomerPhotosAdmin();
 }
+
+// --- Automated UPI Payment Detector Admin Settings & Simulator ---
+async function loadAdminUpiConfig() {
+  if (typeof db !== "undefined" && db.getUpiConfig) {
+    const config = await db.getUpiConfig();
+    const vpaInput = document.getElementById("adminUpiVpaInput");
+    const nameInput = document.getElementById("adminUpiNameInput");
+    if (vpaInput) vpaInput.value = config.upiId || "pranath7@fam";
+    if (nameInput) nameInput.value = config.businessName || "Rajendra Showroom";
+  }
+}
+
+async function saveAdminUpiConfig() {
+  const upiId = (document.getElementById("adminUpiVpaInput").value || "").trim();
+  const businessName = (document.getElementById("adminUpiNameInput").value || "").trim();
+
+  if (!upiId || !upiId.includes("@")) {
+    showAdminToast("Please enter a valid UPI VPA (e.g. rajendrashowroom@bank)", "error");
+    return;
+  }
+
+  const config = { upiId, businessName: businessName || "Rajendra Showroom" };
+  await db.saveUpiConfig(config);
+  showAdminToast("✔ Business UPI Settings saved successfully!", "success");
+}
+
+async function triggerSimulatedPayment() {
+  const refInput = document.getElementById("simOrderRefInput");
+  const utrInput = document.getElementById("simUtrInput");
+
+  const orderRef = (refInput ? refInput.value : "").trim();
+  const utr = (utrInput ? utrInput.value : "").trim() || ("SIM" + Date.now().toString().slice(-8));
+
+  if (!orderRef) {
+    showAdminToast("Please enter an Order Ref ID (e.g. ORD172...)", "error");
+    if (refInput) refInput.focus();
+    return;
+  }
+
+  await db.markPaymentSuccess(orderRef, utr, 0);
+  showAdminToast(`🚀 Simulated Bank SMS Credit: Marked Order ${orderRef} as PAID!`, "success");
+  if (refInput) refInput.value = "";
+  if (utrInput) utrInput.value = "";
+  
+  if (typeof renderOrdersTable === "function") {
+    renderOrdersTable();
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(loadAdminUpiConfig, 1000);
+});
