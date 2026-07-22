@@ -4346,12 +4346,16 @@ body.dark-mode .dark-mode-toggle { background: #333336; border-color: var(--gold
   position: relative;
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  background: #F9F8F5;
+  background: #FAF8F5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .vigneto-card-img-primary, .vigneto-card-img-secondary {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 6px;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
 }
 .vigneto-card-img-secondary {

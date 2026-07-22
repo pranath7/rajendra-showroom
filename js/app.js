@@ -33,10 +33,10 @@ function getCategorySvg(catId) {
   return icons[catId] || icons["all"];
 }
 
-function getOptimizedImageUrl(url, width = 450) {
+function getOptimizedImageUrl(url, width = 1000) {
   if (!url) return url;
   if (url.includes("res.cloudinary.com") && url.includes("/image/upload/")) {
-    return url.replace("/image/upload/", `/image/upload/f_auto,q_auto,w_${width}/`);
+    return url.replace("/image/upload/", `/image/upload/f_auto,q_auto:best,w_${width}/`);
   }
   return url;
 }
@@ -305,8 +305,8 @@ function productCardHTML(p, idx = 4) {
     : 0;
   const stars = renderStars(rating);
 
-  let primarySrc = p.image ? getOptimizedImageUrl(p.image, 400) : "images/hero.jpg";
-  let secondarySrc = (p.images && p.images[1]) ? getOptimizedImageUrl(p.images[1], 400) : primarySrc;
+  let primarySrc = p.image ? getOptimizedImageUrl(p.image, 1000) : "images/hero.jpg";
+  let secondarySrc = (p.images && p.images[1]) ? getOptimizedImageUrl(p.images[1], 1000) : primarySrc;
   const loadingAttr = idx < 4 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
   
   const imgHTML = `
