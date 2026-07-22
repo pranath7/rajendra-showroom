@@ -276,6 +276,45 @@
     </div>
   </section>
 
+  <!-- ═══ "Shop by Category" Line Art Icons Strip (Top Placement) ═══ -->
+  <section class="lineart-category-strip" style="border-bottom:1px solid var(--border); border-top:1px solid var(--border); padding:36px 24px; background:#fff;">
+    <h2 class="lineart-title" style="font-family:var(--font-serif); font-size:32px; font-weight:500; text-align:center; margin-bottom:28px;">Shop by Category</h2>
+    <div class="lineart-icons-row" style="max-width:1100px; margin:0 auto; display:flex; justify-content:space-around; align-items:center; flex-wrap:wrap; gap:20px;">
+      <div class="lineart-item" onclick="setCategory('Dinner Sets')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
+        <div style="font-size:38px; filter: grayscale(100%) opacity(0.85);">🍽️</div>
+        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Dinnerware</span>
+      </div>
+      <div class="lineart-item" onclick="setCategory('Tea Sets')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
+        <div style="font-size:38px; filter: grayscale(100%) opacity(0.85);">🫖</div>
+        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Teaware</span>
+      </div>
+      <div class="lineart-item" onclick="setCategory('Tea Sets')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
+        <div style="font-size:38px; filter: grayscale(100%) opacity(0.85);">☕</div>
+        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Mugs</span>
+      </div>
+      <div class="lineart-item" onclick="setCategory('Glassware')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
+        <div style="font-size:38px; filter: grayscale(100%) opacity(0.85);">🥂</div>
+        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Glassware</span>
+      </div>
+      <div class="lineart-item" onclick="setCategory('Serving')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
+        <div style="font-size:38px; filter: grayscale(100%) opacity(0.85);">🧁</div>
+        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Dessertware</span>
+      </div>
+      <div class="lineart-item" onclick="setCategory('Cookware')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
+        <div style="font-size:38px; filter: grayscale(100%) opacity(0.85);">🍲</div>
+        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Cookware</span>
+      </div>
+      <div class="lineart-item" onclick="setCategory('Cookware')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
+        <div style="font-size:38px; filter: grayscale(100%) opacity(0.85);">🍴</div>
+        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Cutlery</span>
+      </div>
+      <div class="lineart-item" onclick="setCategory('Gift Sets')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
+        <div style="font-size:38px; filter: grayscale(100%) opacity(0.85);">🏺</div>
+        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Vases & Decor</span>
+      </div>
+    </div>
+  </section>
+
   <!-- ═══ "Shop the Look" Reel Slider (Screenshot 2) ═══════ -->
   <section class="shop-the-look-section">
     <h2 class="stl-heading">Shop the Look</h2>
@@ -465,73 +504,6 @@
     <div class="vigneto-products-grid" id="productsGrid"></div>
   </div>
 
-  <!-- ═══ Store Reviews Section ═════════════════════════════ -->
-  <section class="store-reviews-section">
-    <div class="store-reviews-inner">
-      <div class="reviews-header-center">
-        <span class="reviews-eyebrow">✦ &nbsp; Customer Testimonials &nbsp; ✦</span>
-        <h2 class="reviews-main-title">What Our Patrons Say</h2>
-        <p class="reviews-subtitle">Real experiences shared by families who love dining and gifting with us.</p>
-        <div class="reviews-score-badge">
-          <span class="stars">★★★★★</span>
-          <span class="score-text"><strong>4.8 / 5</strong> average rating based on 280+ Chennai reviews</span>
-        </div>
-      </div>
-
-      <div class="store-reviews-grid">
-        <div class="store-review-card">
-          <div class="sr-avatar">K</div>
-          <div class="sr-info">
-            <div class="sr-name">Karthik R.</div>
-            <div class="sr-meta">Chennai · Verified Buyer</div>
-          </div>
-          <div class="sr-stars">★★★★★</div>
-          <p class="sr-text">
-            Bought a 24-piece bone china dinner set for my sister's wedding. The gold detailing looks exceptionally premium. The packaging was double-boxed with layers of bubble wrap, ensuring zero damage. Truly Chennai's finest crockery store!
-          </p>
-        </div>
-
-        <div class="store-review-card">
-          <div class="sr-avatar">M</div>
-          <div class="sr-info">
-            <div class="sr-name">Meenakshi S.</div>
-            <div class="sr-meta">Adyar, Chennai · Verified Buyer</div>
-          </div>
-          <div class="sr-stars">★★★★★</div>
-          <p class="sr-text">
-            I've been visiting their shop at NSC Bose Road for decades, and ordering online via WhatsApp is just as seamless. Ordered a beautiful ceramic tea set last week, and it was delivered to my house within 24 hours. The finish is flawless.
-          </p>
-        </div>
-
-        <div class="store-review-card">
-          <div class="sr-avatar">P</div>
-          <div class="sr-info">
-            <div class="sr-name">Pooja Krishnan</div>
-            <div class="sr-meta">T. Nagar, Chennai · Verified Buyer</div>
-          </div>
-          <div class="sr-stars">★★★★★</div>
-          <p class="sr-text">
-            Fantastic customer service! I was confused about gifting options for a housewarming party. The team guided me on WhatsApp with pictures of their stoneware mugs and salad bowls. The gift boxes they provided look so elegant and luxury!
-          </p>
-        </div>
-      </div>
-  </section>
-
-  <!-- ═══ "Shop by Category" Line Art Icons Strip (Screenshot 5) ═══ -->
-  <section class="lineart-category-strip">
-    <h2 class="lineart-title">Shop by Category</h2>
-    <div class="lineart-icons-row">
-      <div style="font-size:36px; filter: grayscale(100%) opacity(0.7);">🍽️</div>
-      <div style="font-size:36px; filter: grayscale(100%) opacity(0.7);">🫖</div>
-      <div style="font-size:36px; filter: grayscale(100%) opacity(0.7);">☕</div>
-      <div style="font-size:36px; filter: grayscale(100%) opacity(0.7);">🥂</div>
-      <div style="font-size:36px; filter: grayscale(100%) opacity(0.7);">🧁</div>
-      <div style="font-size:36px; filter: grayscale(100%) opacity(0.7);">🍲</div>
-      <div style="font-size:36px; filter: grayscale(100%) opacity(0.7);">🍴</div>
-      <div style="font-size:36px; filter: grayscale(100%) opacity(0.7);">🏺</div>
-    </div>
-  </section>
-
   <!-- ═══ Google Review CTA ══════════════════════════════════ -->
   <section class="google-review-cta">
     <div class="google-review-cta-inner">
@@ -576,38 +548,6 @@
       </div>
       <div class="customer-photo-grid" id="customerPhotoGrid">
         <!-- Loaded dynamically via JS -->
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══ Static SEO Curated Collections Section ════════════ -->
-  <section class="seo-collections-section">
-    <div class="seo-collections-inner">
-      <div class="seo-header">
-        <h2>Curated <span>Crockery, Home Needs & Gifting</span> Collections</h2>
-        <p>Explore Chennai's finest boutique curation of luxury dinnerware, everyday utility kitchenware, and elegant products perfect for home needs or styling.</p>
-      </div>
-      <div class="seo-grid">
-        <div class="seo-col">
-          <span class="seo-icon">🍽</span>
-          <h3>Luxury Tableware & Dinnerware</h3>
-          <p>Set a table that speaks of elegance. Discover our premium <strong>bone china dinner sets</strong>, fine porcelain dinner plates, <strong>soup bowls</strong>, and designer <strong>cutlery sets</strong>. Elevate your morning tea or coffee gatherings with our handcrafted ceramic <strong>mugs</strong> and premium <strong>cup and saucer</strong> sets, alongside lead-free crystal glassware.</p>
-        </div>
-        <div class="seo-col">
-          <span class="seo-icon">🍱</span>
-          <h3>Everyday Home Needs & Utilities</h3>
-          <p>Bring style to your daily life. Browse our collection of durable, leak-proof <strong>lunch boxes</strong> and insulated stainless steel <strong>water bottles</strong> ideal for school, office, or travel. From regular kitchenware and everyday <strong>home needs</strong> to premium ceramic jars and serving accessories, we cover all your household requirements.</p>
-        </div>
-        <div class="seo-col">
-          <span class="seo-icon">🎁</span>
-          <h3>Premium Gifting & Home Decor</h3>
-          <p>Find the perfect gesture. We specialize in luxury <strong>gifting items</strong> tailored for all special milestones in Chennai. Choose from gold-finished <strong>flower vases</strong>, porcelain serving platters, and premium crockery gift sets. Perfect as elegant <strong>wedding gifts</strong>, thoughtful <strong>housewarming gifts</strong>, or festive hampers.</p>
-        </div>
-        <div class="seo-col">
-          <span class="seo-icon">📍</span>
-          <h3>Chennai's Fine Crockery Destination</h3>
-          <p>Serving Chennai for decades with authentic, lead-free kitchenware. Conveniently located at Patni Plaza on NSC Bose Road, we are the trusted local <strong>crockery shop in Chennai</strong>. If you are searching for a high-quality <strong>crockery store near me</strong>, visit us in person or shop online for express delivery.</p>
-        </div>
       </div>
     </div>
   </section>
@@ -1043,12 +983,6 @@
 
   <!-- ═══ Toast Container ════════════════════════════════════ -->
   <div class="toast-container" id="toastContainer"></div>
-
-  <!-- ═══ WhatsApp Floating Button ══════════════════════════ -->
-  <a class="whatsapp-float" href="https://wa.me/916369142027?text=Hi! I'm visiting your website and would like to know more." target="_blank" title="Chat on WhatsApp">
-    <div class="wa-pulse"></div>
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.99 2C6.477 2 2 6.477 2 11.99c0 1.72.454 3.33 1.24 4.73L2 22l5.47-1.22A9.957 9.957 0 0011.99 22C17.51 22 22 17.52 22 11.99 22 6.477 17.51 2 11.99 2zm0 18.18c-1.65 0-3.19-.44-4.52-1.21l-.32-.19-3.37.75.8-3.28-.21-.34A8.17 8.17 0 013.82 12c0-4.51 3.67-8.18 8.17-8.18 4.51 0 8.18 3.67 8.18 8.18 0 4.51-3.67 8.18-8.18 8.18z"/></svg>
-  </a>
 
   <!-- ═══ Gift Card Modal ════════════════════════════════════ -->
   <div class="giftcard-modal-overlay" id="giftCardOverlay" onclick="closeGiftCardModal()"></div>
