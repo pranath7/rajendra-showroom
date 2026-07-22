@@ -187,43 +187,64 @@ function renderTopNavCategories() {
 
 
 
+function quickAddToCart(id) {
+  addToCart(id, 1);
+  showToast("🛒 Added to Cart!", "success");
+  openCart();
+}
+
 /* ─── Render Products ─────────────────────────────────────── */
 function getFilteredProducts() {
-  let list = [...allProducts];
+  let list = (Array.isArray(allProducts) && allProducts.length > 0) ? [...allProducts] : [...DEFAULT_PRODUCTS];
 
-  // Shared Wishlist Registry filter
-  if (window.sharedWishlistItems && window.sharedWishlistItems.length > 0) {
+  // Shared Wishlist Registry filter ONLY if ?wishlist= param is active in URL
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('wishlist') && window.sharedWishlistItems && window.sharedWishlistItems.length > 0) {
     list = list.filter(p => window.sharedWishlistItems.map(String).includes(String(p.id)));
   }
 
-  // Category filter
-  if (activeCategory !== "all") {
-    list = list.filter(p => p.category === activeCategory);
+  // Category filter with flexible matching
+  if (activeCategory && activeCategory !== "all") {
+    const catLower = activeCategory.toLowerCase();
+    list = list.filter(p => p.category && (
+      p.category.toLowerCase() === catLower ||
+      p.category.toLowerCase().includes(catLower) ||
+      catLower.includes(p.category.toLowerCase())
+    ));
   }
 
   // Search filter
-  if (searchQuery.trim()) {
+  if (searchQuery && searchQuery.trim()) {
     const q = searchQuery.toLowerCase();
     list = list.filter(p =>
-      p.name.toLowerCase().includes(q) ||
-      p.category.toLowerCase().includes(q) ||
-      (p.description || "").toLowerCase().includes(q)
+      (p.name && p.name.toLowerCase().includes(q)) ||
+      (p.category && p.category.toLowerCase().includes(q)) ||
+      (p.description && p.description.toLowerCase().includes(q))
     );
   }
 
   // Price filter
-  list = list.filter(p => p.price <= maxPriceFilter);
+  if (maxPriceFilter && maxPriceFilter > 0) {
+    list = list.filter(p => (p.price || 0) <= maxPriceFilter);
+  }
 
   // Sort
   switch (currentSort) {
     case "featured":  list.sort((a,b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0)); break;
-    case "price-asc": list.sort((a,b) => a.price - b.price); break;
-    case "price-dsc": list.sort((a,b) => b.price - a.price); break;
-    case "rating":    list.sort((a,b) => b.rating - a.rating); break;
+    case "price-asc":
+    case "low-high": list.sort((a,b) => (a.price || 0) - (b.price || 0)); break;
+    case "price-dsc":
+    case "high-low": list.sort((a,b) => (b.price || 0) - (a.price || 0)); break;
+    case "rating":    list.sort((a,b) => (b.rating || 0) - (a.rating || 0)); break;
     case "newest":    list.sort((a,b) => b.id - a.id); break;
   }
 
   return list;
+}
+
+function sortProducts(sortVal) {
+  currentSort = sortVal;
+  renderProducts();
 }
 
 function renderProducts() {
