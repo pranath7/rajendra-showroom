@@ -250,7 +250,7 @@ function renderProducts() {
     return;
   }
 
-  grid.className = `products-grid ${currentView === "list" ? "list-view" : ""}`;
+  grid.className = "vigneto-products-grid";
   grid.innerHTML = filtered.map((p, idx) => productCardHTML(p, idx)).join("");
   setTimeout(initScrollReveal, 100);
 }
@@ -284,70 +284,40 @@ function productCardHTML(p, idx = 4) {
     : 0;
   const stars = renderStars(rating);
 
-  let imgHTML = "";
-  if (p.image) {
-    const optimizedSrc = getOptimizedImageUrl(p.image, 400);
-    const loadingAttr = idx < 4 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
-    imgHTML = `<img class="product-img" src="${optimizedSrc}" alt="${p.name}" ${loadingAttr}>`;
-  } else if (p.video) {
-    const isEmbed = p.video.includes("youtube.com/embed/") || p.video.includes("drive.google.com/file/d/");
-    if (isEmbed) {
-      imgHTML = `
-        <div class="product-placeholder" style="background:#1C1C1A;color:var(--gold-light);display:flex;flex-direction:column;align-items:center;justify-content:center;">
-          <div class="placeholder-icon" style="margin-bottom:8px;color:var(--gold);display:flex;">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
-          </div>
-          <div class="placeholder-text" style="color:var(--gold-light);font-weight:500;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;">Watch Video</div>
-        </div>`;
-    } else {
-      imgHTML = `<video class="product-img" src="${p.video}" muted loop autoplay playsinline style="object-fit:cover;width:100%;height:100%;background:#000;display:block;"></video>`;
-    }
-  } else {
-    imgHTML = `
-      <div class="product-placeholder" style="background:var(--bg-warm);display:flex;flex-direction:column;align-items:center;justify-content:center;">
-        <div class="placeholder-icon" style="margin-bottom:8px;color:var(--text-muted);display:flex;">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-        </div>
-        <div class="placeholder-text" style="color:var(--text-light);font-size:12px;font-weight:400;">Photo coming soon</div>
-      </div>`;
-  }
+  let primarySrc = p.image ? getOptimizedImageUrl(p.image, 400) : "images/hero.jpg";
+  let secondarySrc = (p.images && p.images[1]) ? getOptimizedImageUrl(p.images[1], 400) : primarySrc;
+  const loadingAttr = idx < 4 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
+  
+  const imgHTML = `
+    <img class="vigneto-card-img-primary" src="${primarySrc}" alt="${p.name}" ${loadingAttr}>
+    <img class="vigneto-card-img-secondary" src="${secondarySrc}" alt="${p.name} detail" loading="lazy">
+  `;
 
   const badgeHTML = (discount > 0 && !isPriceOnRequest)
-    ? `<span class="product-badge badge-sale">−${discount}%</span>`
-    : "";
-
-  let fomoBadgeHTML = "";
-  if (p.badge) {
-    let badgeClass = "";
-    if (p.badge === "Best Seller") badgeClass = "badge-bestseller";
-    else if (p.badge === "New Arrival") badgeClass = "badge-new";
-    else if (p.badge === "Low Stock") badgeClass = "badge-lowstock";
-    fomoBadgeHTML = `<span class="product-badge-fomo ${badgeClass}">${p.badge}</span>`;
-  }
+    ? `<span class="vigneto-card-badge">−${discount}% OFF</span>`
+    : (p.badge ? `<span class="vigneto-card-badge">${p.badge}</span>` : "");
 
   const isWishlisted = wishlist.some(x => String(x) === String(p.id));
 
   return `
-    <div class="product-card" onclick="openModal('${p.id}')">
-      <div class="product-img-wrap">
-        ${fomoBadgeHTML}
-        ${imgHTML}
+    <div class="vigneto-card" onclick="openModal('${p.id}')">
+      <div class="vigneto-card-img-wrap">
         ${badgeHTML}
-        <button class="product-wishlist ${isWishlisted ? 'active' : ''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${isWishlisted ? '♥' : '♡'}</button>
+        ${imgHTML}
+        <button class="vigneto-wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${p.id}')" title="Add to Wishlist">
+          ${isWishlisted ? '♥' : '♡'}
+        </button>
       </div>
-      <div class="product-info">
-        <div class="product-category">${p.category}</div>
-        <div class="product-name">${p.name}</div>
-        <div class="product-rating">
-          <span class="stars">${stars}</span>
-          <span class="rating-val">${rating.toFixed(1)}</span>
-          <span class="rating-count">(${reviews})</span>
+      <div class="vigneto-card-body">
+        <div class="vigneto-rating-line">${stars} <span>${rating.toFixed(1)} (${reviews})</span></div>
+        <h3 class="vigneto-card-title">${p.name}</h3>
+        <div class="vigneto-card-price-row">
+          <span class="vigneto-price-current">${isPriceOnRequest ? 'Price on Request' : '₹' + p.price.toLocaleString("en-IN")}</span>
+          ${(p.originalPrice > p.price && !isPriceOnRequest) ? `<span class="vigneto-price-old">₹${p.originalPrice.toLocaleString("en-IN")}</span>` : ""}
         </div>
-        <div class="product-price">
-          <span class="price-current">${isPriceOnRequest ? 'Price on Request' : '₹' + p.price.toLocaleString("en-IN")}</span>
-          ${(p.originalPrice > p.price && !isPriceOnRequest) ? `<span class="price-original">₹${p.originalPrice.toLocaleString("en-IN")}</span>` : ""}
-          ${(discount > 0 && !isPriceOnRequest) ? `<span class="price-discount">Save ${discount}%</span>` : ""}
-        </div>
+        <button class="vigneto-add-btn" onclick="event.stopPropagation(); quickAddToCart('${p.id}')">
+          Add to Cart
+        </button>
       </div>
     </div>`;
 }

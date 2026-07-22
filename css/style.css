@@ -4254,7 +4254,215 @@ body.dark-mode .dark-mode-toggle { background: #333336; border-color: var(--gold
   border: 1px solid var(--border); background: var(--white);
   border-radius: var(--radius); cursor: pointer; transition: var(--transition);
 }
-.balance-checker-footer button:hover { color: var(--text); border-color: var(--border-dark); }
+.balance-checker-footer button:hover {
+  background: var(--border-dark);
+}
+
+/* ─── Vigneto Architecture & Full-Width Container Grid ────── */
+.main-wrapper-full {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 30px 24px;
+}
+
+.vigneto-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 30px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.vigneto-pills {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.vigneto-pills::-webkit-scrollbar { display: none; }
+.vigneto-pill {
+  padding: 8px 18px;
+  border-radius: 50px;
+  border: 1px solid var(--border-dark);
+  background: var(--white);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-light);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+.vigneto-pill:hover, .vigneto-pill.active {
+  background: var(--bg-dark);
+  color: var(--gold-light);
+  border-color: var(--bg-dark);
+}
+
+.vigneto-sort-select {
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: 1px solid var(--border-dark);
+  font-size: 13px;
+  background: var(--white);
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+}
+
+/* Vigneto Product Grid: 4 columns desktop, 2 columns mobile */
+.vigneto-products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+@media (max-width: 1100px) {
+  .vigneto-products-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+}
+@media (max-width: 768px) {
+  .vigneto-products-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+}
+
+/* Vigneto Product Card with Image Hover Flip */
+.vigneto-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
+}
+.vigneto-card:hover {
+  border-color: var(--gold);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+}
+
+.vigneto-card-img-wrap {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #F9F8F5;
+}
+.vigneto-card-img-primary, .vigneto-card-img-secondary {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+}
+.vigneto-card-img-secondary {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+}
+.vigneto-card:hover .vigneto-card-img-secondary {
+  opacity: 1;
+  transform: scale(1.06);
+}
+.vigneto-card:hover .vigneto-card-img-primary {
+  opacity: 0;
+  transform: scale(1.06);
+}
+
+.vigneto-card-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--bg-dark);
+  color: var(--gold-light);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  padding: 4px 10px;
+  border-radius: 50px;
+  z-index: 2;
+}
+
+.vigneto-wishlist-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  border: none;
+  cursor: pointer;
+  z-index: 2;
+  transition: var(--transition);
+}
+.vigneto-wishlist-btn:hover {
+  background: var(--white);
+  color: var(--red);
+  transform: scale(1.1);
+}
+
+.vigneto-card-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.vigneto-rating-line {
+  font-size: 11px;
+  color: var(--gold-dark);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.vigneto-card-title {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+.vigneto-card-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: auto;
+  margin-bottom: 12px;
+}
+.vigneto-price-current {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.vigneto-price-old {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.vigneto-add-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--bg-dark);
+  color: var(--gold-light);
+  border: none;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.vigneto-add-btn:hover {
+  background: var(--gold-dark);
+  color: var(--white);
+}
 
 /* Refrens Invoicing Badge */
 .refrens-badge {
