@@ -4864,158 +4864,246 @@ button:active, .btn-primary:active, .btn-wa-lg:active {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   MOBILE OPTIMIZATION ENGINE (SMARTPHONE & TABLET RESPONSIVENESS)
+   COMPREHENSIVE MOBILE RESPONSIVENESS ENGINE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+}
+
 @media (max-width: 768px) {
-  /* 1. Header & Navigation Ticker */
-  .site-header {
-    padding: 10px 14px;
+  /* 1. Header Ticker & Main Header */
+  .announcement-bar {
+    font-size: 11px;
+    padding: 6px 10px;
   }
   .header-inner {
-    gap: 10px;
+    flex-wrap: wrap;
+    padding: 10px 14px;
+  }
+  .site-nav {
+    border-top: 1px solid var(--border);
   }
   .nav-inner {
     overflow-x: auto;
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
-    padding: 8px 10px;
-    gap: 14px;
+    padding: 8px 12px;
+    gap: 16px;
     scrollbar-width: none;
   }
   .nav-inner::-webkit-scrollbar {
     display: none;
   }
 
-  /* 2. Split Hero Banner Vertical Stacking */
+  /* 2. Split Hero Banner */
   .vigneto-hero-split {
     flex-direction: column;
     min-height: auto;
   }
   .vigneto-hero-left {
-    height: 260px;
+    height: 240px;
     width: 100%;
   }
   .vigneto-hero-right {
     width: 100%;
-    padding: 32px 18px;
+    padding: 28px 16px;
+  }
+  .vigneto-ribbon-left, .vigneto-ribbon-right {
+    display: none !important;
   }
   .vigneto-promo-title {
-    font-size: 30px;
+    font-size: 28px !important;
     line-height: 1.15;
   }
+  .vigneto-promo-sub {
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+  .vigneto-promo-date {
+    font-size: 12px;
+    padding: 4px 12px;
+  }
   .vigneto-promo-off {
-    font-size: 24px;
+    font-size: 22px !important;
   }
 
-  /* 3. Shop by Category Line-Art Strip */
+  /* 3. Line Art Icons Strip */
   .lineart-category-strip {
-    padding: 24px 14px !important;
+    padding: 20px 12px !important;
   }
   .lineart-title {
-    font-size: 24px !important;
-    margin-bottom: 18px !important;
+    font-size: 22px !important;
+    margin-bottom: 14px !important;
   }
   .lineart-icons-row {
     display: grid !important;
     grid-template-columns: repeat(4, 1fr) !important;
-    gap: 16px 10px !important;
+    gap: 14px 8px !important;
   }
   .lineart-item div {
-    font-size: 30px !important;
+    font-size: 28px !important;
   }
   .lineart-item span {
-    font-size: 11px !important;
+    font-size: 10.5px !important;
   }
 
   /* 4. Category Circles Grid */
+  .vigneto-category-section {
+    padding: 24px 12px !important;
+  }
+  .vigneto-cat-heading {
+    font-size: 24px !important;
+  }
+  .vigneto-cat-sub {
+    font-size: 12px !important;
+    margin-bottom: 16px !important;
+  }
   .vigneto-category-grid {
     grid-template-columns: repeat(3, 1fr) !important;
-    gap: 16px 12px !important;
+    gap: 14px 10px !important;
   }
   .vigneto-cat-circle {
-    width: 80px !important;
-    height: 80px !important;
+    width: 76px !important;
+    height: 76px !important;
+  }
+  .vigneto-cat-title {
+    font-size: 11.5px !important;
   }
 
   /* 5. Shop the Look Reel Slider */
+  .shop-the-look-section {
+    padding: 24px 12px !important;
+  }
+  .stl-heading {
+    font-size: 24px !important;
+    margin-bottom: 16px !important;
+  }
   .stl-grid {
-    gap: 12px !important;
+    gap: 10px !important;
     overflow-x: auto !important;
     scroll-snap-type: x mandatory !important;
-    padding-bottom: 12px !important;
+    padding-bottom: 10px !important;
     -webkit-overflow-scrolling: touch !important;
   }
   .stl-card {
-    min-width: 165px !important;
+    min-width: 150px !important;
+    scroll-snap-align: start !important;
+  }
+  .stl-title {
+    font-size: 12px !important;
+  }
+
+  /* 6. "Let customers speak for us" Reviews Horizontal Scroll */
+  .reviews-vigneto-section {
+    padding: 24px 12px !important;
+  }
+  .rv-heading {
+    font-size: 24px !important;
+  }
+  .rv-cards-grid {
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    gap: 12px !important;
+    padding-bottom: 10px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .rv-card {
+    min-width: 260px !important;
+    max-width: 280px !important;
     scroll-snap-align: start !important;
   }
 
-  /* 6. Mobile 2-Column Product Grid */
+  /* 7. Full-Width Container & 2-Column Product Grid */
+  .main-wrapper-full {
+    padding: 16px 10px !important;
+  }
   .vigneto-products-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
+    gap: 10px !important;
   }
   .vigneto-card {
-    padding: 10px !important;
+    padding: 8px !important;
+    border-radius: 10px !important;
+  }
+  .vigneto-card-img-primary, .vigneto-card-img-secondary {
+    padding: 4px !important;
+  }
+  .vigneto-card-badge {
+    font-size: 9px !important;
+    padding: 3px 6px !important;
   }
   .vigneto-card-title {
     font-size: 12px !important;
     height: 32px !important;
     line-height: 1.3 !important;
   }
+  .vigneto-price-curr {
+    font-size: 14px !important;
+  }
   .vigneto-add-btn {
-    padding: 10px 8px !important;
+    padding: 9px 6px !important;
     font-size: 11px !important;
-    letter-spacing: 0.5px !important;
+    letter-spacing: 0.3px !important;
   }
 
-  /* 7. Filter Bar & Pills Horizontal Scroll */
+  /* 8. Filter Bar & Pills Horizontal Scroll */
   .vigneto-filter-bar {
     flex-direction: column !important;
     align-items: flex-start !important;
-    gap: 12px !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
   }
   .vigneto-pills {
     width: 100% !important;
     overflow-x: auto !important;
     white-space: nowrap !important;
-    padding-bottom: 6px !important;
+    padding-bottom: 4px !important;
     -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none;
+  }
+  .vigneto-pills::-webkit-scrollbar {
+    display: none;
   }
 
-  /* 8. Full-Screen Mobile Cart Drawer & Dialogs */
+  /* 9. Drawers & Dialog Modals */
   .cart-drawer, .wishlist-drawer {
     width: 100% !important;
     max-width: 100% !important;
   }
-  .upi-modal-inner, #screenshotModal, .modal-content {
-    width: 94% !important;
-    padding: 18px !important;
+  .modal-dialog, .upi-modal-inner, #screenshotModal, .modal-content {
+    width: 95% !important;
+    padding: 16px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
   }
 
   /* Prevent iOS Input Auto-Zoom */
-  input[type="text"], input[type="tel"], input[type="number"], select {
+  input[type="text"], input[type="tel"], input[type="number"], select, textarea {
     font-size: 16px !important;
   }
 }
 
 @media (max-width: 480px) {
+  .vigneto-hero-left {
+    height: 200px !important;
+  }
   .vigneto-category-grid {
     grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px 8px !important;
   }
   .vigneto-cat-circle {
-    width: 72px !important;
-    height: 72px !important;
+    width: 68px !important;
+    height: 68px !important;
   }
   .vigneto-cat-title {
-    font-size: 11px !important;
+    font-size: 10.5px !important;
   }
   .vigneto-products-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px !important;
-  }
-  .vigneto-promo-title {
-    font-size: 26px !important;
+    gap: 8px !important;
   }
 }
 
