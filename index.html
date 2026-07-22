@@ -859,7 +859,7 @@
         </div>
 
         <div class="upi-manual-pay-row">
-          <span class="upi-vpa-text" id="upiVpaDisplay">Q17629536@ybl</span>
+          <span class="upi-vpa-text" id="upiVpaDisplay">pranath7@fam</span>
           <button class="upi-copy-btn" onclick="copyUpiId()" id="upiCopyBtn">📋 Copy</button>
         </div>
         <div class="upi-amount-reminder">Pay exactly <strong id="upiAmtReminder">₹0</strong></div>
@@ -877,6 +877,17 @@
           </p>
           <div id="utrError" class="upi-utr-error" style="display:none;">
             ⚠️ Please enter a valid UTR/Reference number (at least 10 digits) shown in your payment app.
+          </div>
+        </div>
+
+        <!-- Step 3: Upload Screenshot -->
+        <div class="utr-step-label" style="margin-top:16px;">Step 3 — Upload Payment Screenshot</div>
+        <div class="upi-utr-box" style="margin-top:6px;">
+          <label class="upi-utr-label">📷 &nbsp;Payment Proof / Screenshot</label>
+          <input type="file" id="screenshotInput" accept="image/*" class="upi-utr-input" onchange="handlePaymentScreenshotUpload(this)" style="padding: 8px;">
+          <div id="screenshotPreviewWrap" style="display:none; margin-top:10px; text-align:center;">
+            <img id="screenshotPreviewImg" style="max-width:180px; max-height:180px; border-radius:8px; border:1px solid var(--border-dark); box-shadow:var(--shadow-sm);" alt="Payment Screenshot Preview">
+            <div style="font-size:11px; color:#27AE60; font-weight:600; margin-top:4px;">✔ Screenshot Attached</div>
           </div>
         </div>
 

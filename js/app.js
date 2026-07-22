@@ -2101,12 +2101,23 @@ function openUpiModal(amount) {
   // Also update the amount reminder inside processing screen
   const remEl = document.getElementById("upiAmtReminder");
   if (remEl) remEl.textContent = `₹${amount.toLocaleString("en-IN")}`;
-  // Update VPA and QR code image
-  const upiId = "Q17629536@ybl";
+  
+  // Reset screenshot upload preview state
+  _currentPaymentScreenshot = null;
+  const previewWrap = document.getElementById("screenshotPreviewWrap");
+  if (previewWrap) previewWrap.style.display = "none";
+  const screenshotInput = document.getElementById("screenshotInput");
+  if (screenshotInput) screenshotInput.value = "";
+
+  // Update VPA and dynamic QR code image
+  const upiId = "pranath7@fam";
   const vpaEl = document.getElementById("upiVpaDisplay");
   if (vpaEl) vpaEl.textContent = upiId;
   const qrEl = document.getElementById("upiQrImg");
-  if (qrEl) qrEl.src = `images/payment-qr.jpg?v=3.24`;
+  if (qrEl) {
+    const upiUri = `upi://pay?pa=${upiId}&pn=${encodeURIComponent("Rajendra Showroom")}&am=${amount}&cu=INR&tn=${encodeURIComponent("Crockery Order")}`;
+    qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUri)}`;
+  }
   document.getElementById("upiScreen").style.display = "block";
   document.getElementById("upiProcessing").style.display = "none";
   document.getElementById("upiError").style.display = "none";
@@ -2122,9 +2133,9 @@ function showProcessingScreen(label) {
   // Reset UTR
   document.getElementById("utrInput").value = "";
   document.getElementById("utrError").style.display = "none";
-  // Disable confirm button until timer finishes
+  // Disable confirm button until timer finishes or UTR/screenshot is uploaded
   const btn = document.getElementById("upiConfirmBtn");
-  if (btn) { btn.disabled = true; btn.style.opacity = "0.45"; btn.style.cursor = "not-allowed"; }
+  if (btn && !_currentPaymentScreenshot) { btn.disabled = true; btn.style.opacity = "0.45"; btn.style.cursor = "not-allowed"; }
   // Start countdown
   startUpiTimer();
 }
@@ -2135,8 +2146,8 @@ function onUtrInput(inputEl) {
   const val = inputEl.value.trim().replace(/\s/g, "");
   const btn = document.getElementById("upiConfirmBtn");
   if (!btn) return;
-  if (val.length >= 10) {
-    // Valid UTR length — unlock button immediately
+  if (val.length >= 10 || _currentPaymentScreenshot) {
+    // Valid UTR length or screenshot uploaded — unlock button immediately
     btn.disabled = false;
     btn.style.opacity = "1";
     btn.style.cursor = "pointer";
@@ -2179,7 +2190,7 @@ function startUpiTimer() {
 }
 
 function copyUpiId() {
-  const id = "Q17629536@ybl";
+  const id = "pranath7@fam";
   navigator.clipboard.writeText(id).then(() => {
     const btn = document.getElementById("upiCopyBtn");
     if (btn) {
@@ -2189,7 +2200,7 @@ function copyUpiId() {
     }
     showToast("✔ UPI ID copied to clipboard", "success");
   }).catch(() => {
-    showToast("Q17629536@ybl — copy manually", "info");
+    showToast("pranath7@fam — copy manually", "info");
   });
 }
 
@@ -2200,13 +2211,14 @@ function closeUpiModal() {
   document.getElementById("upiOverlay").classList.remove("visible");
   document.body.style.overflow = "";
   _pendingOrderData = null;
+  _currentPaymentScreenshot = null;
 }
 
 function launchUpiApp(app) {
   if (!_pendingOrderData) return;
   const amount = _pendingOrderData.grand;
-  const upiId  = "Q17629536@ybl"; // Store UPI VPA
-  const name   = "PhonePeMerchant";
+  const upiId  = "pranath7@fam"; // Store UPI VPA
+  const name   = "Rajendra Showroom";
   const note   = "Crockery Order";
 
   // Build UPI deep link URI
@@ -2228,18 +2240,13 @@ function launchUpiApp(app) {
 }
 
 function verifyUpiAndPay() {
-  const upiId = document.getElementById("upiIdInput").value.trim();
+  const upiInput = document.getElementById("upiIdInput");
+  const upiId = upiInput ? upiInput.value.trim() : "";
   if (!upiId || !upiId.includes("@")) {
     showToast("Please enter a valid UPI ID (e.g. name@upi)", "error");
     return;
   }
-  document.getElementById("upiScreen").style.display = "none";
-  document.getElementById("upiProcessing").style.display = "block";
-  document.getElementById("upiProcessingText").textContent = "Processing payment...";
-  // Clear any previous UTR input
-  document.getElementById("utrInput").value = "";
-  document.getElementById("utrError").style.display = "none";
-  showProcessingScreen("upi-id");
+  showProcessingScreen("manual-upi");
 }
 
 async function confirmUpiPayment() {
@@ -2248,13 +2255,13 @@ async function confirmUpiPayment() {
   // ── UTR Validation ────────────────────────────────────────
   const utr = (document.getElementById("utrInput").value || "").trim().replace(/\s/g, "");
   const errEl = document.getElementById("utrError");
-  if (!utr || !/^[0-9A-Za-z]{10,22}$/.test(utr)) {
-    errEl.style.display = "block";
+  if (!utr && !_currentPaymentScreenshot) {
+    if (errEl) errEl.style.display = "block";
     document.getElementById("utrInput").focus();
-    showToast("⚠️ Enter your UPI Transaction ID to confirm", "error");
+    showToast("⚠️ Enter UTR Number or Upload Payment Screenshot", "error");
     return;
   }
-  errEl.style.display = "none";
+  if (errEl) errEl.style.display = "none";
 
   const { name, phone, address, cart: pendingCart, shippingCharge, gift, giftMessage, giftCharge, appliedVoucherCode, voucherDiscount } = _pendingOrderData;
 

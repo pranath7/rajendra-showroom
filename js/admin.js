@@ -502,7 +502,39 @@ function getOrderCustomerInfoHTML(o) {
     html += `<div style="font-size:11px;color:#27AE60;margin-top:2px;font-weight:600;">🎫 Voucher: ${o.appliedVoucherCode} (-₹${o.voucherDiscount || 0})</div>`;
   }
 
+  // 6. Payment Screenshot proof
+  if (o.paymentScreenshot) {
+    html += `<div style="margin-top:5px;"><button class="btn-edit-row" style="padding:4px 8px;font-size:11px;background:#eef6ff;border-color:#3182ce;color:#3182ce;font-weight:600;border-radius:4px;cursor:pointer;" onclick="viewPaymentScreenshot(${o.id})">📷 View Payment Screenshot</button></div>`;
+  }
+
   return html;
+}
+
+let _activeScreenshotOrderId = null;
+
+function viewPaymentScreenshot(orderId) {
+  const o = orders.find(x => x.id === orderId);
+  if (!o || !o.paymentScreenshot) {
+    showAdminToast("No screenshot attached for this order.", "info");
+    return;
+  }
+  _activeScreenshotOrderId = orderId;
+  const imgEl = document.getElementById("screenshotModalImg");
+  if (imgEl) imgEl.src = o.paymentScreenshot;
+  document.getElementById("screenshotOverlay").style.display = "block";
+  document.getElementById("screenshotModal").style.display = "block";
+}
+
+function closeScreenshotModal() {
+  document.getElementById("screenshotOverlay").style.display = "none";
+  document.getElementById("screenshotModal").style.display = "none";
+  _activeScreenshotOrderId = null;
+}
+
+async function approveScreenshotOrder() {
+  if (!_activeScreenshotOrderId) return;
+  await updateOrderStatus(_activeScreenshotOrderId, "completed");
+  closeScreenshotModal();
 }
 
 function renderOrdersTable() {
