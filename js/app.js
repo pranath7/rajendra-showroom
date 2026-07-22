@@ -2243,16 +2243,16 @@ function verifyUpiAndPay() {
 async function confirmUpiPayment() {
   if (!_pendingOrderData) return;
 
-  // ── UTR Validation ────────────────────────────────────────
-  const utr = (document.getElementById("utrInput").value || "").trim().replace(/\s/g, "");
-  const errEl = document.getElementById("utrError");
-  if (!utr && !_currentPaymentScreenshot) {
+  // ── Compulsory Payment Screenshot Validation ──────────────
+  if (!_currentPaymentScreenshot) {
+    const errEl = document.getElementById("utrError");
     if (errEl) errEl.style.display = "block";
-    document.getElementById("utrInput").focus();
-    showToast("⚠️ Enter UTR Number or Upload Payment Screenshot", "error");
+    showToast("⚠️ Payment Screenshot is REQUIRED! Please attach your payment screenshot proof.", "error");
+    const inputEl = document.getElementById("screenshotInput");
+    if (inputEl) inputEl.focus();
     return;
   }
-  if (errEl) errEl.style.display = "none";
+  const utr = (document.getElementById("utrInput").value || "").trim().replace(/\s/g, "");
 
   const { name, phone, address, cart: pendingCart, shippingCharge, gift, giftMessage, giftCharge, appliedVoucherCode, voucherDiscount } = _pendingOrderData;
 
@@ -2292,7 +2292,8 @@ async function confirmUpiPayment() {
              (gift ? ` | Gift: Yes | Msg: ${giftMessage}` : "") +
              (appliedVoucherCode ? ` | Voucher: ${appliedVoucherCode} | Discount: Rs.${voucherDiscount}` : ""),
       utr: utr,
-      status: "paid",
+      paymentScreenshot: _currentPaymentScreenshot,
+      status: "unpaid",
       createdAt: new Date().toISOString(),
       gift: gift || false,
       giftMessage: giftMessage || "",

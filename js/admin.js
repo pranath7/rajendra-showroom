@@ -533,7 +533,8 @@ function closeScreenshotModal() {
 
 async function approveScreenshotOrder() {
   if (!_activeScreenshotOrderId) return;
-  await updateOrderStatus(_activeScreenshotOrderId, "completed");
+  await updateOrderStatus(_activeScreenshotOrderId, "paid");
+  showAdminToast("✔ Payment Verified & Marked Paid!", "success");
   closeScreenshotModal();
 }
 
@@ -560,7 +561,7 @@ function renderOrdersTable() {
       <tr>
         <td colspan="7" style="text-align:center;padding:50px;color:#bbb;">
           <div style="font-size:36px;margin-bottom:12px;">📋</div>
-          No orders yet. <a href="#" onclick="switchTab('add-order')" style="color:var(--gold);">Log your first order →</a>
+          No orders found.
         </td>
       </tr>`;
     return;
@@ -580,13 +581,20 @@ function renderOrdersTable() {
       </td>
       <td style="font-size:15px;font-weight:700;">₹${(o.price * o.qty).toLocaleString("en-IN")}</td>
       <td>
-        <select class="status-select ${o.status}" onchange="updateOrderStatus(${o.id}, this.value)">
-          <option value="pending"   ${o.status === "pending"   ? "selected" : ""}>⏳ Pending</option>
-          <option value="completed" ${o.status === "completed" ? "selected" : ""}>✔ Completed</option>
-          <option value="cancelled" ${o.status === "cancelled" ? "selected" : ""}>✕ Cancelled</option>
+        <select class="status-select ${o.status || 'unpaid'}" onchange="updateOrderStatus(${o.id}, this.value)" style="font-weight:600; padding:6px 8px; border-radius:6px; font-size:12px;">
+          <option value="unpaid"    ${(!o.status || o.status === "unpaid" || o.status === "pending") ? "selected" : ""}>⏳ Unpaid (Pending Proof)</option>
+          <option value="paid"      ${o.status === "paid"      ? "selected" : ""}>💳 Paid (Verified)</option>
+          <option value="shipped"   ${o.status === "shipped"   ? "selected" : ""}>🚚 Shipped</option>
+          <option value="completed" ${o.status === "completed" ? "selected" : ""}>✅ Completed</option>
+          <option value="cancelled" ${o.status === "cancelled" ? "selected" : ""}>❌ Cancelled</option>
         </select>
       </td>
       <td>
+        ${(o.paymentScreenshot || o.screenshot) ? `
+          <button class="btn-edit-row" style="padding:6px 10px; font-size:12px; margin-bottom:4px; background:#27AE60; color:#fff; border:none; font-weight:600; display:inline-flex; align-items:center; gap:4px; border-radius:6px; cursor:pointer;"
+                  onclick="viewPaymentScreenshot(${o.id})">
+            📷 View Screenshot
+          </button><br>` : `<span style="font-size:11px; color:#C0392B; display:block; margin-bottom:4px;">No screenshot</span>`}
         ${o.phone ? `
           <a href="https://wa.me/91${o.phone.replace(/\D/g,'')}" target="_blank"
              style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:#25D366;color:#fff;border-radius:7px;font-size:12px;font-weight:500;text-decoration:none;margin-bottom:4px;">

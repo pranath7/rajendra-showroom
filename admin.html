@@ -1013,11 +1013,13 @@
           <input type="text" class="admin-search" id="ordersSearch"
                  placeholder="Search by customer name, phone, or product..."
                  oninput="renderOrdersTable()">
-          <select class="form-select" id="ordersFilter" onchange="renderOrdersTable()" style="padding: 10px 16px; border-radius: 10px; font-size: 13.5px; border: 1.5px solid var(--border-dark); background: #fff; width: 180px;">
-            <option value="all">All Orders</option>
-            <option value="pending">⏳ Pending</option>
-            <option value="completed">✔ Completed</option>
-            <option value="cancelled">✕ Cancelled</option>
+          <select class="form-select" id="ordersFilter" onchange="renderOrdersTable()" style="padding: 10px 16px; border-radius: 10px; font-size: 13.5px; border: 1.5px solid var(--border-dark); background: #fff; width: 220px;">
+            <option value="all">All Statuses</option>
+            <option value="unpaid">⏳ Unpaid (Pending Proof)</option>
+            <option value="paid">💳 Paid (Verified)</option>
+            <option value="shipped">🚚 Shipped</option>
+            <option value="completed">✅ Completed</option>
+            <option value="cancelled">❌ Cancelled</option>
           </select>
           <button class="btn-add-product" onclick="resetOrderForm(); switchTab('add-order')">
             ➕ Log Offline Order
