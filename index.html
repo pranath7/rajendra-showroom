@@ -239,27 +239,96 @@
         </button>
       </div>
     </div>
-    <!-- Nav -->
+    <!-- Nav (Vigneto Links) -->
     <nav class="site-nav">
       <div class="nav-inner" id="topNavInner">
-        <a href="#products" onclick="setCategory('Dinner Sets')">Dinner Sets</a>
-        <a href="#products" onclick="setCategory('Tea Sets')">Tea Sets</a>
+        <a href="#products" style="font-family:'Brush Script MT', cursive, sans-serif; color:#D9534F; font-size:15px; font-weight:bold;">Palace Collection</a>
+        <a href="#products" onclick="setCategory('all')">Best Sellers</a>
+        <a href="#products" onclick="setCategory('Gift Sets')">Gifting ▾</a>
+        <a href="#products" onclick="setCategory('all')">Collections ▾</a>
+        <a href="#products" onclick="setCategory('Dinner Sets')">Dinnerware ▾</a>
+        <a href="#products" onclick="setCategory('Cookware')">Cutlery</a>
+        <a href="#products" onclick="setCategory('Tea Sets')">Teaware ▾</a>
+        <a href="#products" onclick="setCategory('Tea Sets')">Mugs ▾</a>
+        <a href="#products" onclick="setCategory('Serving')">Dessertware ▾</a>
+        <a href="#products" onclick="setCategory('Serving')">Snack Platters ▾</a>
+        <a href="#products" onclick="setCategory('Cookware')">Canisters</a>
         <a href="#products" onclick="setCategory('Glassware')">Glassware</a>
-        <a href="#products" onclick="setCategory('Cookware')">Cookware</a>
-        <a href="#products" onclick="setCategory('Gift Sets')">Gift Sets</a>
       </div>
     </nav>
   </header>
 
-  <!-- ═══ Hero ═════════════════════════════════════════════ -->
-  <section class="hero">
-    <img class="hero-img" src="images/hero.jpg" alt="Rajendra Showroom – Premium Crockery Chennai" width="1024" height="1024">
-    <div class="hero-overlay">
-      <div class="hero-content">
-        <span class="hero-eyebrow">✦ &nbsp; Rajendra Showroom, Chennai</span>
-        <h2 class="hero-title">Every Piece<br><em>Tells a Story</em></h2>
-        <p class="hero-subtitle">Discover our curated collection of luxury crockery — crafted for those who believe dining is an experience, not just a meal.</p>
+  <!-- ═══ Split Hero Banner (Vigneto Screenshot 1) ═════════ -->
+  <section class="vigneto-hero-split">
+    <div class="vigneto-hero-left">
+      <img src="images/hero.jpg" alt="Rajendra Showroom – Luxury Tableware Collection">
+    </div>
+    <div class="vigneto-hero-right">
+      <div class="vigneto-ribbon-left">SALE SALE SALE SALE</div>
+      <div class="vigneto-ribbon-right">SALE SALE SALE SALE</div>
+      <span class="vigneto-promo-sub">RS RAJENDRA SHOWROOM HOME LUXURY</span>
+      <h2 class="vigneto-promo-title">End <em>of</em> Season<br>SALE</h2>
+      <div class="vigneto-promo-date">14TH JULY – 19TH JULY</div>
+      <div class="vigneto-promo-off">
+        UPTO 40% off
+        <span>SITEWIDE</span>
+      </div>
+    </div>
+  </section>
 
+  <!-- ═══ "Shop the Look" Reel Slider (Screenshot 2) ═══════ -->
+  <section class="shop-the-look-section">
+    <h2 class="stl-heading">Shop the Look</h2>
+    <div class="stl-grid">
+      <div class="stl-card" onclick="setCategory('Dinner Sets')">
+        <div class="stl-card-img-wrap">
+          <img src="images/hero.jpg" alt="Victorian Green Dinner Set">
+          <span class="stl-view-badge">👁 5K</span>
+        </div>
+        <div class="stl-info">
+          <div class="stl-title">Victorian Green 59 Pcs Dinner Set</div>
+          <div class="stl-price-row"><span class="stl-price-curr">₹ 24,500</span> <span class="stl-price-old">₹ 28,000</span></div>
+        </div>
+      </div>
+      <div class="stl-card" onclick="setCategory('Dinner Sets')">
+        <div class="stl-card-img-wrap">
+          <img src="images/hero.jpg" alt="Majestique Blue Dinner Set">
+          <span class="stl-view-badge">👁 4K</span>
+        </div>
+        <div class="stl-info">
+          <div class="stl-title">Majestique Blue 60 Pcs Dinner Set</div>
+          <div class="stl-price-row"><span class="stl-price-curr">₹ 27,000</span> <span class="stl-price-old">₹ 32,000</span></div>
+        </div>
+      </div>
+      <div class="stl-card" onclick="setCategory('Dinner Sets')">
+        <div class="stl-card-img-wrap">
+          <img src="images/hero.jpg" alt="Palace Verde Dinner Set">
+          <span class="stl-view-badge">👁 7K</span>
+        </div>
+        <div class="stl-info">
+          <div class="stl-title">Palace Verde 42 Pcs Dinner Set</div>
+          <div class="stl-price-row"><span class="stl-price-curr">₹ 58,000</span> <span class="stl-price-old">₹ 65,000</span></div>
+        </div>
+      </div>
+      <div class="stl-card" onclick="setCategory('Tea Sets')">
+        <div class="stl-card-img-wrap">
+          <img src="images/hero.jpg" alt="Spring Meadows Tea Set">
+          <span class="stl-view-badge">👁 897</span>
+        </div>
+        <div class="stl-info">
+          <div class="stl-title">Spring Meadows 15 Pcs Tea Set</div>
+          <div class="stl-price-row"><span class="stl-price-curr">₹ 8,499</span> <span class="stl-price-old">₹ 9,599</span></div>
+        </div>
+      </div>
+      <div class="stl-card" onclick="setCategory('Tea Sets')">
+        <div class="stl-card-img-wrap">
+          <img src="images/hero.jpg" alt="Gilded Realm Cup & Saucer">
+          <span class="stl-view-badge">👁 2K</span>
+        </div>
+        <div class="stl-info">
+          <div class="stl-title">Gilded Realm Cup & Saucer Set</div>
+          <div class="stl-price-row"><span class="stl-price-curr">₹ 13,500</span> <span class="stl-price-old">₹ 15,000</span></div>
+        </div>
       </div>
     </div>
   </section>
@@ -326,6 +395,40 @@
       <div class="vigneto-cat-card" onclick="setCategory('Gift Sets')">
         <div class="vigneto-cat-circle"><img src="images/logo.png" alt="Gift Sets"></div>
         <span class="vigneto-cat-title">Gift Sets</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ "Let customers speak for us" (Screenshot 3) ════════ -->
+  <section class="reviews-vigneto-section">
+    <h2 class="rv-heading">Let customers speak for us</h2>
+    <div class="rv-score-wrap">
+      <div class="rv-black-boxes">
+        <div class="rv-box">★</div><div class="rv-box">★</div><div class="rv-box">★</div><div class="rv-box">★</div><div class="rv-box">★</div>
+      </div>
+      <span class="rv-count-text">from 526 reviews</span>
+    </div>
+    <div class="rv-cards-grid">
+      <div class="rv-card">
+        <div class="rv-stars">★★★★★</div>
+        <div class="rv-title">Absolutely Stunning...</div>
+        <div class="rv-body">I recently purchased this snack set and it transformed our dining table completely.</div>
+        <div class="rv-author">Bana</div>
+        <a href="#products" class="rv-product-link">Gold Roses 8 Pcs Snack Set</a>
+      </div>
+      <div class="rv-card">
+        <div class="rv-stars">★★★★★</div>
+        <div class="rv-title">Just love it</div>
+        <div class="rv-body">It's amazingly beautiful and must appreciate the fine porcelain finish.</div>
+        <div class="rv-author">Masooma Siddiqui</div>
+        <a href="#products" class="rv-product-link">Azure Gold 15 Pcs Tea Set</a>
+      </div>
+      <div class="rv-card">
+        <div class="rv-stars">★★★★★</div>
+        <div class="rv-title">Fabulous 🌟</div>
+        <div class="rv-body">The two tier cake stand highlights the quality and craftsmanship.</div>
+        <div class="rv-author">Saira Thomas</div>
+        <a href="#products" class="rv-product-link">Flower Bed Two Tier Stand</a>
       </div>
     </div>
   </section>
@@ -412,6 +515,20 @@
           </p>
         </div>
       </div>
+  </section>
+
+  <!-- ═══ "Shop by Category" Line Art Icons Strip (Screenshot 5) ═══ -->
+  <section class="lineart-category-strip">
+    <h2 class="lineart-title">Shop by Category</h2>
+    <div class="lineart-icons-row">
+      <div style="font-size:36px; filter: grayscale(100%) opacity(0.7);">🍽️</div>
+      <div style="font-size:36px; filter: grayscale(100%) opacity(0.7);">🫖</div>
+      <div style="font-size:36px; filter: grayscale(100%) opacity(0.7);">☕</div>
+      <div style="font-size:36px; filter: grayscale(100%) opacity(0.7);">🥂</div>
+      <div style="font-size:36px; filter: grayscale(100%) opacity(0.7);">🧁</div>
+      <div style="font-size:36px; filter: grayscale(100%) opacity(0.7);">🍲</div>
+      <div style="font-size:36px; filter: grayscale(100%) opacity(0.7);">🍴</div>
+      <div style="font-size:36px; filter: grayscale(100%) opacity(0.7);">🏺</div>
     </div>
   </section>
 

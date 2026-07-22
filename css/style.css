@@ -4564,12 +4564,234 @@ button:active, .btn-primary:active, .btn-wa-lg:active {
   animation: waPulseRing 3s infinite cubic-bezier(0.4, 0, 0.6, 1);
 }
 
-/* Liquid Spring Drawer & Modal Animation */
-.cart-drawer, .wishlist-drawer {
-  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) !important;
+/* ─── Screenshot 1: Split Hero Section & Slate Promo ──────── */
+.vigneto-hero-split {
+  display: flex;
+  min-height: 480px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
 }
-.product-modal, .checkout-modal-card, .giftcard-modal, .upi-modal {
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease !important;
+.vigneto-hero-left {
+  flex: 1.8;
+  position: relative;
+  overflow: hidden;
+}
+.vigneto-hero-left img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.vigneto-hero-right {
+  flex: 1;
+  background: #62728D; /* Slate Blue matching Screenshot 1 */
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 30px;
+  text-align: center;
+  position: relative;
+}
+.vigneto-ribbon-left, .vigneto-ribbon-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 24px;
+  background: rgba(0,0,0,0.15);
+  writing-mode: vertical-rl;
+  font-size: 11px;
+  letter-spacing: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.7);
+}
+.vigneto-ribbon-left { left: 0; }
+.vigneto-ribbon-right { right: 0; }
+
+.vigneto-promo-sub {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  opacity: 0.9;
+}
+.vigneto-promo-title {
+  font-family: var(--font-serif);
+  font-size: 42px;
+  font-weight: 300;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+.vigneto-promo-title em { font-style: italic; font-weight: 400; }
+.vigneto-promo-date {
+  font-size: 14px;
+  letter-spacing: 2px;
+  font-weight: 600;
+  padding: 6px 16px;
+  background: var(--white);
+  color: #62728D;
+  border-radius: 4px;
+  margin-bottom: 24px;
+}
+.vigneto-promo-off {
+  font-family: var(--font-serif);
+  font-size: 56px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.vigneto-promo-off span { font-size: 24px; font-weight: 300; display: block; letter-spacing: 4px; }
+
+/* ─── Screenshot 2: "Shop the Look" Reel Slider ───────────── */
+.shop-the-look-section {
+  max-width: 1400px;
+  margin: 50px auto;
+  padding: 0 24px;
+}
+.stl-heading {
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 400;
+  text-align: center;
+  margin-bottom: 30px;
+}
+.stl-grid {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scrollbar-width: none;
+}
+.stl-grid::-webkit-scrollbar { display: none; }
+.stl-card {
+  flex: 0 0 220px;
+  display: flex;
+  flex-direction: column;
+}
+.stl-card-img-wrap {
+  position: relative;
+  aspect-ratio: 9 / 14;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  background: #000;
+}
+.stl-card-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.stl-view-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+.stl-info {
+  margin-top: 10px;
+}
+.stl-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+.stl-price-row {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+  margin-top: 4px;
+}
+.stl-price-curr { font-weight: 700; color: var(--text); }
+.stl-price-old { color: var(--text-muted); text-decoration: line-through; }
+
+/* ─── Screenshot 3: "Let customers speak for us" ──────────── */
+.reviews-vigneto-section {
+  background: #FAF9F6;
+  padding: 50px 24px;
+  text-align: center;
+}
+.rv-heading {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.rv-score-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 30px;
+}
+.rv-black-boxes {
+  display: flex;
+  gap: 3px;
+}
+.rv-box {
+  width: 22px;
+  height: 22px;
+  background: #000;
+  color: #fff;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rv-count-text { font-size: 13px; color: var(--text-light); text-decoration: underline; }
+
+.rv-cards-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.rv-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+}
+.rv-stars { color: #E67E22; font-size: 14px; margin-bottom: 8px; }
+.rv-title { font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+.rv-body { font-size: 13px; color: var(--text-light); line-height: 1.4; margin-bottom: 14px; }
+.rv-author { font-size: 12px; font-weight: 700; color: var(--text); }
+.rv-product-link { font-size: 11px; color: var(--text-muted); text-decoration: underline; margin-top: 2px; }
+
+/* ─── Screenshot 5: Line-Art Category Icons Footer Strip ─── */
+.lineart-category-strip {
+  border-top: 1px solid var(--border);
+  padding: 40px 24px;
+  background: var(--white);
+  text-align: center;
+}
+.lineart-title {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+.lineart-icons-row {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 0.7;
 }
 
 
