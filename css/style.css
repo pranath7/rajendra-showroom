@@ -5,26 +5,26 @@
 
 /* ─── CSS Variables ──────────────────────────────────────── */
 :root {
-  --bg:          #FAFAF7;
-  --bg-warm:     #F5F2EC;
-  --bg-dark:     #1C1C1A;
+  --bg:          #FCFBF7;
+  --bg-warm:     #F7F3EB;
+  --bg-dark:     #0D2818; /* Vigneto Deep Emerald Green / Dark Charcoal */
   --text:        #1C1C1A;
-  --text-light:  #706F68;
-  --text-muted:  #A8A79F;
-  --gold:        #BFA06A;
-  --gold-light:  #D9C49A;
-  --gold-dark:   #8C6F3E;
-  --border:      #E8E4DC;
-  --border-dark: #D0CAC0;
+  --text-light:  #5C5B55;
+  --text-muted:  #94928A;
+  --gold:        #D4AF37; /* Metallic Gold */
+  --gold-light:  #F3E5AB;
+  --gold-dark:   #997A15;
+  --border:      #EBE7DE;
+  --border-dark: #D4CEBF;
   --white:       #FFFFFF;
   --red:         #C0392B;
-  --green:       #2ECC71;
-  --shadow-sm:   0 2px 8px rgba(28,28,26,0.06);
-  --shadow-md:   0 4px 20px rgba(28,28,26,0.10);
-  --shadow-lg:   0 8px 40px rgba(28,28,26,0.14);
+  --green:       #1E824C;
+  --shadow-sm:   0 2px 10px rgba(13,40,24,0.06);
+  --shadow-md:   0 6px 24px rgba(13,40,24,0.12);
+  --shadow-lg:   0 12px 48px rgba(13,40,24,0.18);
   --radius:      8px;
-  --radius-lg:   14px;
-  --transition:  all 0.3s ease;
+  --radius-lg:   16px;
+  --transition:  all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   --font-serif:  'Cormorant Garamond', Georgia, serif;
   --font-sans:   'Jost', system-ui, sans-serif;
 }
@@ -45,23 +45,198 @@ ul { list-style: none; }
 button { cursor: pointer; border: none; background: none; font-family: inherit; }
 input, select, textarea { font-family: inherit; }
 
-/* ─── Announcement Bar ───────────────────────────────────── */
+/* ─── Announcement Bar (Vigneto Style) ───────────────────── */
 .announcement-bar {
   background: var(--bg-dark);
   color: var(--gold-light);
   text-align: center;
-  padding: 8px 20px;
+  padding: 9px 24px;
   font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 1.8px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   white-space: nowrap;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  border-bottom: 1px solid rgba(212,175,55,0.25);
 }
-.announcement-bar::-webkit-scrollbar {
+.announcement-bar::-webkit-scrollbar { display: none; }
+
+/* ─── Vigneto Trust Badges Grid ──────────────────────────── */
+.vigneto-trust-strip {
+  background: var(--bg-warm);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 24px 20px;
+}
+.vigneto-trust-grid {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.vigneto-trust-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px;
+}
+.vigneto-trust-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 1px solid var(--border-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-dark);
+  flex-shrink: 0;
+}
+.vigneto-trust-info {
+  display: flex;
+  flex-direction: column;
+}
+.vigneto-trust-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.25;
+}
+.vigneto-trust-sub {
+  font-size: 11.5px;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+@media (max-width: 900px) {
+  .vigneto-trust-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+}
+@media (max-width: 550px) {
+  .vigneto-trust-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── Vigneto Category Circles ────────────────────────────── */
+.vigneto-category-section {
+  max-width: 1400px;
+  margin: 40px auto 20px;
+  padding: 0 24px;
+  text-align: center;
+}
+.vigneto-cat-heading {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.vigneto-cat-sub {
+  font-size: 13.5px;
+  color: var(--text-light);
+  margin-bottom: 28px;
+}
+.vigneto-category-grid {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.vigneto-cat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  width: 120px;
+  transition: var(--transition);
+}
+.vigneto-cat-card:hover { transform: translateY(-4px); }
+.vigneto-cat-circle {
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--border-dark);
+  box-shadow: var(--shadow-sm);
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+.vigneto-cat-card:hover .vigneto-cat-circle {
+  border-color: var(--gold);
+  box-shadow: 0 8px 24px rgba(212,175,55,0.25);
+}
+.vigneto-cat-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.vigneto-cat-card:hover .vigneto-cat-circle img {
+  transform: scale(1.1);
+}
+.vigneto-cat-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.3px;
+  text-align: center;
+}
+
+/* ─── Mega Menu Dropdown (Vigneto Style) ─────────────────── */
+.nav-item-has-mega {
+  position: relative;
+}
+.mega-menu-dropdown {
+  position: absolute;
+  top: 100%;
+  left: -100px;
+  width: 780px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-lg);
+  padding: 24px 30px;
   display: none;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: var(--transition);
+  z-index: 1000;
+}
+.nav-item-has-mega:hover .mega-menu-dropdown {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+.mega-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.mega-col-title {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gold-dark);
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.mega-links a {
+  display: block;
+  font-size: 13px;
+  color: var(--text-light);
+  padding: 5px 0;
+  transition: var(--transition);
+}
+.mega-links a:hover {
+  color: var(--gold-dark);
+  transform: translateX(4px);
 }
 
 /* ─── Header ─────────────────────────────────────────────── */
