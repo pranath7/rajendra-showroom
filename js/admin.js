@@ -732,28 +732,26 @@ function renderProductTable() {
 
 /* ─── Image Upload to Cloudinary (Free CDN) ─────────────── */
 
-// Upload a single File to Cloudinary and return its permanent CDN URL
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function previewBulkImages(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+
+  const results = await Promise.all(files.map(fileToBase64));
+  productImages = productImages.concat(results);
+  renderImagePreviews();
+  input.value = "";
+}
+
 async function uploadImageToStorage(file) {
-  // Check Cloudinary is configured
-  if (
-    typeof CLOUDINARY_CONFIG === "undefined" ||
-    !CLOUDINARY_CONFIG.cloudName ||
-    CLOUDINARY_CONFIG.cloudName === "YOUR_CLOUD_NAME"
-  ) {
-    throw new Error(
-      "Cloudinary is not configured yet. Please follow the setup steps in the Admin Panel → Settings → Image Storage Setup."
-    );
-  }
-
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", CLOUDINARY_CONFIG.uploadPreset);
-  formData.append("folder", "rajendra-showroom/products");
-
-  const response = await fetch(
-    "https://api.cloudinary.com/v1_1/" + CLOUDINARY_CONFIG.cloudName + "/image/upload",
-    { method: "POST", body: formData }
-  );
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
