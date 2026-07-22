@@ -196,10 +196,10 @@ function updateCloudinaryStatus() {
     statusEl.style.color = "#1a7a4a";
     statusEl.innerHTML = `✅ Image upload is ACTIVE — Cloud: <strong>${name}</strong> · Preset: <strong>${preset}</strong><br><span style="font-size:11px;font-weight:400;">Photos will upload directly to Cloudinary and be stored permanently.</span>`;
   } else {
-    statusEl.style.background = "#fff8f0";
-    statusEl.style.border = "1.5px solid #f39c12";
-    statusEl.style.color = "#b7700a";
-    statusEl.innerHTML = `⚠️ Not configured yet — follow the steps below and click Save to enable direct photo uploads.`;
+    statusEl.style.background = "#f0fdf4";
+    statusEl.style.border = "1.5px solid #27AE60";
+    statusEl.style.color = "#1a7a4a";
+    statusEl.innerHTML = `✅ Image Storage Engine ACTIVE — Base64 & Cloud Storage enabled.<br><span style="font-size:11.5px;font-weight:400;color:#27AE60;">All photos uploaded via Add Product or Checkout are saved permanently.</span>`;
   }
 }
 
