@@ -254,8 +254,8 @@ function renderProducts() {
 }
 
 function productCardHTML(p, idx = 4) {
-  const rating = p.rating || parseFloat((4.5 + ((p.id * 7) % 5) * 0.1).toFixed(1));
-  const reviews = p.reviews || ((p.id * 13) % 100) + 40;
+  const rating = p.rating ? p.rating : 4.8;
+  const reviews = p.reviews ? p.reviews : 24;
   
   const isPriceOnRequest = !p.price || p.price <= 0;
   const discount = (p.originalPrice > p.price && !isPriceOnRequest)
@@ -856,7 +856,9 @@ function renderCartItems() {
   }
 
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const delivery = subtotal >= 5000 ? 0 : 99;
+  const state = document.getElementById("custState") ? document.getElementById("custState").value : "Tamil Nadu";
+  const pincode = document.getElementById("custPincode") ? document.getElementById("custPincode").value.trim() : "";
+  const delivery = getDynamicShippingRate(subtotal, state, pincode);
   const grand    = subtotal + delivery;
 
   body.innerHTML = cart.map(item => `

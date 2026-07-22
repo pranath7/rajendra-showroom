@@ -69,7 +69,9 @@ input, select, textarea { font-family: inherit; }
   position: sticky;
   top: 0;
   z-index: 900;
-  background: var(--white);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
 }
@@ -286,15 +288,15 @@ input, select, textarea { font-family: inherit; }
   align-items: center;
   gap: 8px;
   padding: 13px 28px;
-  background: var(--gold);
+  background: var(--gold-dark);
   color: var(--white);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
   border-radius: var(--radius);
   transition: var(--transition);
-  border: 1.5px solid var(--gold);
+  border: 1.5px solid var(--gold-dark);
 }
 .btn-primary:hover { background: var(--gold-dark); border-color: var(--gold-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
 .btn-outline {
