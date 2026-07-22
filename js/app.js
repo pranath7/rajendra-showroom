@@ -81,6 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Run background revalidation sync from Firebase
   triggerBackgroundSync();
+  setTimeout(initScrollReveal, 200);
 
   // Handle PWA Shortcut routing
   const params = new URLSearchParams(window.location.search);
@@ -251,6 +252,26 @@ function renderProducts() {
 
   grid.className = `products-grid ${currentView === "list" ? "list-view" : ""}`;
   grid.innerHTML = filtered.map((p, idx) => productCardHTML(p, idx)).join("");
+  setTimeout(initScrollReveal, 100);
+}
+
+function initScrollReveal() {
+  if (!('IntersectionObserver' in window)) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+
+  document.querySelectorAll('.product-card, .store-review-card, .seo-col, .feature-item').forEach(el => {
+    if (!el.classList.contains('revealed')) {
+      el.classList.add('reveal-item');
+      observer.observe(el);
+    }
+  });
 }
 
 function productCardHTML(p, idx = 4) {

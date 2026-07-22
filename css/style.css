@@ -4128,3 +4128,65 @@ body.dark-mode .dark-mode-toggle { background: #333336; border-color: var(--gold
   white-space: nowrap;
 }
 
+/* ─── Luxury Animations & Scroll Micro-Interactions ──────── */
+
+/* Scroll Reveal Base */
+.reveal-item {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.reveal-item.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Product Card Luxury Hover Effects */
+.product-card {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease;
+  will-change: transform, box-shadow;
+}
+.product-card:hover {
+  transform: translateY(-6px) scale(1.008);
+  box-shadow: 0 14px 36px rgba(191, 160, 106, 0.22), 0 4px 12px rgba(28, 28, 26, 0.08);
+  border-color: var(--gold-light);
+}
+
+.product-img-wrap {
+  overflow: hidden;
+}
+.product-card .product-img {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.product-card:hover .product-img {
+  transform: scale(1.07);
+}
+
+/* Tactile Button Feedback */
+button, .btn-primary, .btn-wa-lg, .cart-trigger, .wishlist-trigger {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, box-shadow 0.2s ease;
+}
+button:active, .btn-primary:active, .btn-wa-lg:active {
+  transform: scale(0.96) !important;
+}
+
+/* WhatsApp Pulse Ring Animation */
+@keyframes waPulseRing {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.6); }
+  70% { transform: scale(1.02); box-shadow: 0 0 0 14px rgba(37, 211, 102, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+}
+.whatsapp-float, .wa-floating-bubble {
+  animation: waPulseRing 3s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* Liquid Spring Drawer & Modal Animation */
+.cart-drawer, .wishlist-drawer {
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.product-modal, .checkout-modal-card, .giftcard-modal, .upi-modal {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease !important;
+}
+
+
