@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rajendra-showroom-cache-v5';
+const CACHE_NAME = 'rajendra-showroom-cache-v6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
