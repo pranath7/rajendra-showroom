@@ -3424,3 +3424,118 @@ async function checkGiftCardBalance() {
     </div>
   `;
 }
+
+// ============================================================
+// INSTAGRAM REELS MODAL (rajendra_show_room)
+// ============================================================
+const INSTAGRAM_REELS_DATA = {
+  1: {
+    title: "Royal 24K Gold Rim 59 Pcs Dinner Set",
+    image: "images/cat_dinner.jpg",
+    views: "14.2K",
+    handle: "@rajendra_show_room",
+    price: "₹24,500",
+    oldPrice: "₹28,000",
+    category: "Dinner Sets",
+    caption: "Unboxing our best-selling 59-piece 24K gold rimmed bone china dinner set! 👑✨ Crafted for grand dinners and festive hosting."
+  },
+  2: {
+    title: "Victorian Emerald 15 Pcs Tea Set",
+    image: "images/cat_tea.jpg",
+    views: "18.5K",
+    handle: "@rajendra_show_room",
+    price: "₹8,499",
+    oldPrice: "₹9,999",
+    category: "Tea Sets",
+    caption: "Morning tea hits different with Victorian Emerald 🫖 Experience high tea luxury aesthetics at Rajendra Showroom."
+  },
+  3: {
+    title: "Imperial Cut Crystal Glassware (Set of 6)",
+    image: "images/cat_glassware.jpg",
+    views: "11.3K",
+    handle: "@rajendra_show_room",
+    price: "₹4,999",
+    oldPrice: "₹6,200",
+    category: "Glassware",
+    caption: "Hand-cut crystal glassware collection for luxury cocktail evenings and elegant hosting 🥂✨"
+  },
+  4: {
+    title: "Palace Gold Double-Walled Serveware",
+    image: "images/cat_serveware.jpg",
+    views: "12.8K",
+    handle: "@rajendra_show_room",
+    price: "₹12,500",
+    oldPrice: "₹14,800",
+    category: "Serving",
+    caption: "Serve in style with our signature Palace Gold double-walled casseroles & serving platters 🍲 keeps food warm for hours!"
+  },
+  5: {
+    title: "Artisanal Porcelain Luxury Gift Box",
+    image: "images/cat_gifting.jpg",
+    views: "9.4K",
+    handle: "@rajendra_show_room",
+    price: "₹6,999",
+    oldPrice: "₹7,999",
+    category: "Gift Sets",
+    caption: "Handcrafted festive crockery gift boxes with custom luxury velvet casing 🎁 ideal for weddings & corporate gifting!"
+  }
+};
+
+function openReelModal(id) {
+  const reel = INSTAGRAM_REELS_DATA[id];
+  if (!reel) return;
+  
+  let modalEl = document.getElementById('reelModal');
+  if (!modalEl) {
+    modalEl = document.createElement('div');
+    modalEl.id = 'reelModal';
+    modalEl.className = 'modal-backdrop';
+    modalEl.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); z-index:9999; display:flex; align-items:center; justify-content:center; padding:16px;';
+    modalEl.onclick = (e) => { if (e.target === modalEl) closeReelModal(); };
+    document.body.appendChild(modalEl);
+  }
+  
+  modalEl.innerHTML = `
+    <div class="modal-dialog" style="max-width: 420px; width: 100%; padding: 0; overflow: hidden; border-radius: 24px; background: #0a0a0a; color: #fff; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.15); animation: zoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
+      <div style="position: relative; aspect-ratio: 9/13; width: 100%; background: #000; overflow: hidden;">
+        <img src="${reel.image}" alt="${reel.title}" style="width: 100%; height: 100%; object-fit: cover;">
+        <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.05) 45%, rgba(0,0,0,0.92) 100%); pointer-events: none;"></div>
+        
+        <!-- Close Button -->
+        <button onclick="closeReelModal()" style="position: absolute; top: 14px; right: 14px; background: rgba(0,0,0,0.65); color: #fff; border: 1px solid rgba(255,255,255,0.2); width: 34px; height: 34px; border-radius: 50%; font-size: 16px; cursor: pointer; backdrop-filter: blur(6px); z-index: 10; display:flex; align-items:center; justify-content:center;">✕</button>
+        
+        <!-- Insta Header Badge -->
+        <div style="position: absolute; top: 14px; left: 14px; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); z-index: 10;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="color: #e1306c;"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          <span style="font-size: 11.5px; font-weight: 700; color: #fff;">${reel.handle}</span>
+        </div>
+        
+        <!-- Reel Info Overlay -->
+        <div style="position: absolute; bottom: 18px; left: 18px; right: 18px; z-index: 10;">
+          <div style="display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.18); backdrop-filter: blur(6px); font-size: 10.5px; font-weight: 700; padding: 4px 10px; border-radius: 14px; margin-bottom: 8px; color: #fff; letter-spacing: 0.5px;">
+            <span>👁 ${reel.views}</span>
+          </div>
+          <h3 style="font-size: 17px; font-weight: 700; margin: 0 0 6px 0; color: #fff; line-height: 1.25;">${reel.title}</h3>
+          <p style="font-size: 12px; color: rgba(255,255,255,0.85); margin: 0 0 14px 0; line-height: 1.45;">${reel.caption}</p>
+          
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <a href="https://www.instagram.com/rajendra_show_room/" target="_blank" rel="noopener" style="text-align: center; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #fff; padding: 11px; border-radius: 12px; font-size: 12.5px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(220, 39, 67, 0.35);">
+              <span>📷 Watch on Instagram (@rajendra_show_room)</span>
+            </a>
+            <button onclick="closeReelModal(); setCategory('${reel.category}'); document.querySelector('.vigneto-products-grid').scrollIntoView({behavior:'smooth'});" style="background: #ffffff; color: #111; border: none; padding: 11px; border-radius: 12px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <span>🛍️ Shop Featured Set (${reel.price})</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  modalEl.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeReelModal() {
+  const modalEl = document.getElementById('reelModal');
+  if (modalEl) modalEl.style.display = 'none';
+  document.body.style.overflow = '';
+}

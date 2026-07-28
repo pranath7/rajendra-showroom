@@ -4719,6 +4719,54 @@ button:active, .btn-primary:active, .btn-wa-lg:active {
 .stl-price-curr { font-weight: 700; color: var(--text); }
 .stl-price-old { color: var(--text-muted); text-decoration: line-through; }
 
+/* Instagram Reel Card Overlays */
+.reel-play-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+  transition: opacity 0.25s ease, background-color 0.25s ease;
+}
+.stl-card:hover .reel-play-overlay {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.45);
+}
+.reel-play-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  color: #111;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 3px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s ease;
+}
+.stl-card:hover .reel-play-btn {
+  transform: scale(1.18);
+  background: #ffffff;
+}
+.reel-handle-tag {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* ─── Screenshot 3: "Let customers speak for us" ──────────── */
 .reviews-vigneto-section {
   background: #FAF9F6;
