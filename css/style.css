@@ -6542,3 +6542,60 @@ body {
   min-width: 0;
 }
 
+/* ─── Official Hero Banner Section ────────────────────────── */
+.official-hero-section {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px 20px 24px;
+  box-sizing: border-box;
+}
+
+.hero-banner-link {
+  display: block;
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  background: #141412;
+}
+
+[data-theme="dark"] .hero-banner-link {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.hero-banner-link:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+}
+
+.hero-banner-img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-banner-link:hover .hero-banner-img {
+  transform: scale(1.015);
+}
+
+@media (max-width: 768px) {
+  .official-hero-section {
+    padding: 8px 10px 16px;
+  }
+  .hero-banner-link {
+    border-radius: 14px;
+  }
+  .hero-banner-img {
+    aspect-ratio: 16 / 10;
+    min-height: 220px;
+  }
+}
+
+
