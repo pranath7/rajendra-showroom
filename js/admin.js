@@ -701,8 +701,9 @@ function renderProductTable() {
   tbody.innerHTML = filtered.map(p => {
     const discount = p.originalPrice > p.price
       ? Math.round((1 - p.price / p.originalPrice) * 100) : 0;
+    const safeId = String(p.id).replace(/'/g, "\\'");
     return `
-      <tr class="product-row" id="row-${p.id}">
+      <tr class="product-row" id="row-${safeId}">
         <td>
           <div class="table-img">
             ${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<div class="table-img-placeholder">🍽</div>`}
@@ -714,7 +715,7 @@ function renderProductTable() {
         </td>
         <td><span class="table-badge">${p.category}</span></td>
         <td>
-          <div class="table-price">₹${p.price.toLocaleString("en-IN")}</div>
+          <div class="table-price">₹${(p.price || 0).toLocaleString("en-IN")}</div>
           ${p.originalPrice > p.price
             ? `<div class="table-orig-price">₹${p.originalPrice.toLocaleString("en-IN")}</div>
                <div class="table-discount">−${discount}% off</div>`
@@ -722,8 +723,8 @@ function renderProductTable() {
         </td>
         <td>
           <div class="table-actions">
-            <button class="btn-edit-row" onclick="editProduct(${p.id})">✏ Edit</button>
-            <button class="btn-delete-row" onclick="deleteProduct(${p.id})">🗑 Delete</button>
+            <button class="btn-edit-row" onclick="editProduct('${safeId}')">✏ Edit</button>
+            <button class="btn-delete-row" onclick="deleteProduct('${safeId}')">🗑 Delete</button>
           </div>
         </td>
       </tr>`;
@@ -1052,7 +1053,6 @@ async function saveProduct() {
     sizesStr = sizeParts.join(", ");
   }
 
-  // Parse colors as a list of trimmed strings
   const colors = colorsStr ? colorsStr.split(",").map(c => c.trim()).filter(Boolean) : [];
 
   if (!name)            { showAdminToast("Please enter a product name", "error"); return; }
@@ -1061,23 +1061,29 @@ async function saveProduct() {
   let isEdit = (editingId !== null);
 
   if (isEdit) {
-    const original = products.find(p => p.id === editingId);
+    const original = products.find(p => String(p.id) === String(editingId));
     if (!original) { showAdminToast("Product not found", "error"); return; }
     targetProduct = { ...original, name, category, price, originalPrice: origPrice, description: desc, featured,
       images: productImages, image: productImages[0] || null, colors, sizes: sizesStr };
   } else {
-    const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+    let maxNum = 0;
+    products.forEach(p => {
+      const num = parseInt(p.id, 10);
+      if (!isNaN(num) && num > maxNum && num < 1000000000) {
+        maxNum = num;
+      }
+    });
+    const newId = maxNum > 0 ? (maxNum + 1) : Date.now();
     
-    // Generate randomized default high rating and reviews to look professional
     const defaultRating = parseFloat((4.4 + Math.random() * 0.5).toFixed(1));
     const defaultReviews = Math.floor(Math.random() * 100) + 35;
     
     targetProduct = { id: newId, name, category, price, originalPrice: origPrice,
       description: desc, images: productImages, image: productImages[0] || null, featured, inStock: true, 
-      rating: defaultRating, reviews: defaultReviews, colors, sizes: sizesStr };
+      rating: defaultRating, reviews: defaultReviews, colors, sizes: sizesStr,
+      createdAt: new Date().toISOString() };
   }
 
-  // Images are already Firebase Storage URLs at this point — no compression needed
   targetProduct.images = productImages;
   targetProduct.image = productImages[0] || null;
   var videoUrlEl = document.getElementById("productVideoUrl");
@@ -1096,24 +1102,24 @@ async function saveProduct() {
 
   const savedToCloud = res && res.success === true && res.mode === "firebase";
 
-  if (isEdit) {
-    const idx = products.findIndex(p => p.id === editingId);
-    if (idx >= 0) products[idx] = targetProduct;
-    showAdminToast(savedToCloud ? 'Updated successfully!' : 'Saved locally (cloud sync pending)', savedToCloud ? "success" : "info");
-  } else {
-    products.push(targetProduct);
-    showAdminToast(savedToCloud ? 'Product added to store!' : 'Saved locally (cloud sync pending)', savedToCloud ? "success" : "info");
-  }
-
+  await loadProducts();
+  renderProductTable();
+  if (document.getElementById("panel-dashboard")?.classList.contains("active")) renderDashboard();
   await populateOrderProductDropdown();
+
+  showAdminToast(isEdit ? (savedToCloud ? 'Updated successfully!' : 'Saved locally!') : (savedToCloud ? 'Product added to store!' : 'Product added locally!'), "success");
+
   resetForm();
   switchTab("products");
 }
 
 function editProduct(id) {
-  const p = products.find(x => x.id === id);
-  if (!p) return;
-  editingId = id;
+  const p = products.find(x => String(x.id) === String(id));
+  if (!p) {
+    showAdminToast("Product not found", "error");
+    return;
+  }
+  editingId = p.id;
   
   if (p.images && p.images.length > 0) {
     productImages = [...p.images];
@@ -1128,25 +1134,14 @@ function editProduct(id) {
   if (p.video) {
     renderAdminVideoPreview(p.video);
     var isUpload = p.video.includes("firebasestorage.googleapis.com") || p.video.startsWith("blob:");
-    var radioUp = document.querySelector('input[name="videoSourceType"][value="upload"]');
-    var radioLink = document.querySelector('input[name="videoSourceType"][value="link"]');
-    
-    if (isUpload) {
-      if (radioUp) radioUp.checked = true;
-      toggleVideoSourceMode("upload");
-      document.getElementById("videoFileName").textContent = "Video uploaded";
-      var urlInput = document.getElementById("productVideoUrlInput");
-      if (urlInput) urlInput.value = "";
-    } else {
-      if (radioLink) radioLink.checked = true;
-      toggleVideoSourceMode("link");
-      var urlInput = document.getElementById("productVideoUrlInput");
-      if (urlInput) urlInput.value = p.video;
-    }
+    toggleVideoSourceMode(isUpload ? "upload" : "link");
+    var rUp = document.querySelector('input[name="videoSourceType"][value="upload"]');
+    var rLink = document.querySelector('input[name="videoSourceType"][value="link"]');
+    if (isUpload && rUp) rUp.checked = true;
+    if (!isUpload && rLink) rLink.checked = true;
+    var vUrlIn = document.getElementById("productVideoUrlInput");
+    if (vUrlIn) vUrlIn.value = p.video;
   } else {
-    renderAdminVideoPreview("");
-    var radioUp = document.querySelector('input[name="videoSourceType"][value="upload"]');
-    if (radioUp) radioUp.checked = true;
     toggleVideoSourceMode("upload");
     document.getElementById("videoFileName").textContent = "No video selected";
     var urlInput = document.getElementById("productVideoUrlInput");
@@ -1198,7 +1193,6 @@ function editProduct(id) {
   const hiddenSizesEl = document.getElementById("productSizes");
   if (hiddenSizesEl) hiddenSizesEl.value = sizesStr;
   
-  
   renderImagePreviews();
   
   document.getElementById("formTitle").textContent   = `✏  Editing — ${p.name}`;
@@ -1208,11 +1202,12 @@ function editProduct(id) {
 }
 
 function deleteProduct(id) {
-  const p = products.find(x => x.id === id);
+  const p = products.find(x => String(x.id) === String(id));
   if (!p) return;
   if (!confirm(`Delete "${p.name}" permanently?`)) return;
   
-  const row = document.getElementById(`row-${p.id}`);
+  const safeId = String(p.id).replace(/'/g, "\\'");
+  const row = document.getElementById(`row-${safeId}`);
   showAdminToast("Deleting product...", "info");
   
   if (row) { row.style.opacity = "0.4"; }
@@ -1810,7 +1805,7 @@ async function saveBulkProducts() {
 
   for (let i = 0; i < bulkProductImages.length; i++) {
     const imgUrl = bulkProductImages[i];
-    const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+    const newId = Date.now() + i;
     
     // Generate randomized default high rating and reviews to look professional
     const defaultRating = parseFloat((4.4 + Math.random() * 0.5).toFixed(1));
