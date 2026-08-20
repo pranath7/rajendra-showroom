@@ -897,20 +897,49 @@ function updateWishlistUI() {
 }
 
 function renderCartItems() {
-  const body = document.getElementById("cartBody");
-  if (!body) return;
+  const emptyEl = document.getElementById("cartEmptyState");
+  const listEl = document.getElementById("cartItemsList");
+  const extraEl = document.getElementById("cartExtraSections");
+  const footEl = document.getElementById("cartFoot");
+  const countHeader = document.getElementById("cartHeaderCount");
+
+  const totalQty = cart.reduce((s, i) => s + i.qty, 0);
+  if (countHeader) countHeader.textContent = totalQty;
 
   if (cart.length === 0) {
-    body.innerHTML = `
-      <div class="cart-empty" style="text-align:center;padding:40px 20px;color:var(--text-light);">
-        <div class="empty-icon" style="margin-bottom:12px;color:var(--text-muted);display:flex;justify-content:center;">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-        </div>
-        <p style="font-size:14px;line-height:1.5;">Your cart is empty.<br>Add some beautiful pieces!</p>
-      </div>`;
-    document.getElementById("cartGrandTotal").textContent = "₹0";
+    if (emptyEl) emptyEl.style.display = "block";
+    if (listEl) { listEl.innerHTML = ""; listEl.style.display = "none"; }
+    if (extraEl) extraEl.style.display = "none";
+    if (footEl) footEl.style.display = "none";
+    const grandEl = document.getElementById("cartGrandTotal");
+    if (grandEl) grandEl.textContent = "₹0";
     return;
   }
+
+  if (emptyEl) emptyEl.style.display = "none";
+  if (listEl) {
+    listEl.style.display = "block";
+    listEl.innerHTML = cart.map(item => `
+      <div class="cart-item">
+        <div class="cart-item-img" style="display:flex;align-items:center;justify-content:center;background:var(--bg-warm);">
+          ${item.image ? `<img src="${getOptimizedImageUrl(item.image, 140)}" alt="${item.name}">` : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted);"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle></svg>`}
+        </div>
+        <div class="cart-item-info">
+          <div class="cart-item-name">${item.name}</div>
+          ${item.selectedSize ? `<div class="cart-item-variant" style="font-size:11.5px; color:var(--text-light); margin-top:2px;">Size: ${item.selectedSize}</div>` : ""}
+          ${item.selectedColor ? `<div class="cart-item-variant" style="font-size:11.5px; color:var(--text-light); margin-top:2px;">Color: ${item.selectedColor}</div>` : ""}
+          <div class="cart-item-price">${item.price > 0 ? '₹' + item.price.toLocaleString("en-IN") : 'Price on Request'}</div>
+          <div class="cart-item-controls">
+            <button class="qty-btn" onclick="changeQty('${item.id}', ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'}, -1)">−</button>
+            <span class="qty-val">${item.qty}</span>
+            <button class="qty-btn" onclick="changeQty('${item.id}', ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'}, 1)">+</button>
+          </div>
+        </div>
+        <button class="cart-item-remove" onclick="removeFromCart('${item.id}', ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'})">×</button>
+      </div>`).join("");
+  }
+  if (extraEl) extraEl.style.display = "block";
+  if (footEl) footEl.style.display = "block";
 
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const state = document.getElementById("custState") ? document.getElementById("custState").value : "Tamil Nadu";
@@ -918,28 +947,12 @@ function renderCartItems() {
   const delivery = getDynamicShippingRate(subtotal, state, pincode);
   const grand    = subtotal + delivery;
 
-  body.innerHTML = cart.map(item => `
-    <div class="cart-item">
-      <div class="cart-item-img" style="display:flex;align-items:center;justify-content:center;background:var(--bg-warm);">
-        ${item.image ? `<img src="${getOptimizedImageUrl(item.image, 120)}" alt="${item.name}">` : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted);"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle></svg>`}
-      </div>
-      <div class="cart-item-info">
-        <div class="cart-item-name">${item.name}</div>
-        ${item.selectedSize ? `<div class="cart-item-variant" style="font-size:11.5px; color:var(--text-light); margin-top:2px;">Size: ${item.selectedSize}</div>` : ""}
-        ${item.selectedColor ? `<div class="cart-item-variant" style="font-size:11.5px; color:var(--text-light); margin-top:2px;">Color: ${item.selectedColor}</div>` : ""}
-        <div class="cart-item-price">${item.price > 0 ? '₹' + item.price.toLocaleString("en-IN") : 'Price on Request'}</div>
-        <div class="cart-item-controls">
-          <button class="qty-btn" onclick="changeQty('${item.id}', ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'}, -1)">−</button>
-          <span class="qty-val">${item.qty}</span>
-          <button class="qty-btn" onclick="changeQty('${item.id}', ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'}, 1)">+</button>
-        </div>
-      </div>
-      <button class="cart-item-remove" onclick="removeFromCart('${item.id}', ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'})">×</button>
-    </div>`).join("");
-
-  document.getElementById("cartSubtotal").textContent = `₹${subtotal.toLocaleString("en-IN")}`;
-  document.getElementById("cartDelivery").textContent = delivery === 0 ? "FREE" : `₹${delivery}`;
-  document.getElementById("cartGrandTotal").textContent = `₹${grand.toLocaleString("en-IN")}`;
+  const subEl = document.getElementById("cartSubtotal");
+  const delEl = document.getElementById("cartDelivery");
+  const grandEl = document.getElementById("cartGrandTotal");
+  if (subEl) subEl.textContent = `₹${subtotal.toLocaleString("en-IN")}`;
+  if (delEl) delEl.textContent = delivery === 0 ? "FREE" : `₹${delivery}`;
+  if (grandEl) grandEl.textContent = `₹${grand.toLocaleString("en-IN")}`;
 }
 
 function openCart() {

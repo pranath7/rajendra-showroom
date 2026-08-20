@@ -693,53 +693,65 @@
   </footer>
 
   <!-- ═══ Cart Drawer ════════════════════════════════════════ -->
-  <div class="cart-overlay" id="cartOverlay"></div>
+  <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
   <div class="cart-drawer" id="cartDrawer">
     <div class="cart-head">
       <h3 style="display:flex; align-items:center; gap:8px;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-        Your Cart
+        Your Cart (<span id="cartHeaderCount">0</span>)
       </h3>
-      <button class="cart-close-btn" id="cartClose">✕</button>
+      <button class="cart-close-btn" id="cartClose" onclick="closeCart()">✕</button>
     </div>
+
+    <!-- Main Scrollable Cart Body -->
     <div class="cart-body" id="cartBody">
-      <div class="cart-empty" style="text-align:center;padding:40px 20px;color:var(--text-light);">
+      <!-- Empty State -->
+      <div class="cart-empty" id="cartEmptyState" style="text-align:center;padding:50px 20px;color:var(--text-light);">
         <div class="empty-icon" style="margin-bottom:12px;color:var(--text-muted);display:flex;justify-content:center;">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
         </div>
-        <p style="font-size:14px;line-height:1.5;">Your cart is empty.<br>Add some beautiful pieces!</p>
+        <p style="font-size:15px;line-height:1.5;font-weight:500;">Your cart is empty.<br><span style="font-size:13px;color:var(--text-muted);">Add some luxury tableware to get started!</span></p>
+        <button class="btn-primary" onclick="closeCart()" style="margin-top:16px;padding:10px 24px;border-radius:50px;font-size:13px;">Explore Collections</button>
+      </div>
+
+      <!-- Active Cart Items List -->
+      <div id="cartItemsList" class="cart-items-wrap"></div>
+
+      <!-- Delivery Estimator & Delivery Details in Scrollable Body -->
+      <div id="cartExtraSections" style="display:none; margin-top:20px;">
+        <!-- Live Pincode Delivery Estimator in Cart -->
+        <div class="pincode-checker-wrap" style="margin: 0 0 14px; padding: 14px; border-radius:14px;">
+          <div class="pincode-checker-title">
+            <span>📍 Delivery Estimator</span>
+          </div>
+          <div class="pincode-input-row">
+            <input type="text" id="cartPincodeInput" class="pincode-input-field" placeholder="Enter 6-digit Pincode" maxlength="6" inputmode="numeric" oninput="onCartPincodeChange(this.value)">
+            <button class="pincode-check-btn" onclick="checkCartPincode()">Check</button>
+          </div>
+          <div id="cartPincodeStatus" class="pincode-status-pill"></div>
+        </div>
+
+        <!-- Customer Details for WhatsApp Order -->
+        <div class="smart-checkout-card" id="cartQuickCustomerCard" style="border-radius:14px; margin-bottom: 20px;">
+          <div class="smart-checkout-heading">
+            <span>📝 Quick Delivery Details</span>
+          </div>
+          <input type="text" id="waCustName" class="smart-checkout-input" placeholder="Your Full Name (e.g. Rahul Sharma)">
+          <input type="tel" id="waCustPhone" class="smart-checkout-input" placeholder="WhatsApp Mobile Number" maxlength="10" inputmode="numeric">
+          <input type="text" id="waCustAddress" class="smart-checkout-input" placeholder="Delivery Address & Landmark">
+          
+          <div class="delivery-method-chips">
+            <div class="delivery-chip active" id="chipDoorstep" onclick="selectDeliveryMethod('delivery')">🚚 Doorstep Delivery</div>
+            <div class="delivery-chip" id="chipPickup" onclick="selectDeliveryMethod('pickup')">🏬 NSC Bose Rd Pickup</div>
+          </div>
+
+          <input type="text" id="waCustNote" class="smart-checkout-input" placeholder="Gift Note / Special instructions (Optional)">
+        </div>
       </div>
     </div>
-    <div class="cart-foot">
-      <!-- Live Pincode Delivery Estimator in Cart -->
-      <div class="pincode-checker-wrap" style="margin: 0 0 12px; padding: 12px 14px;">
-        <div class="pincode-checker-title">
-          <span>📍 Delivery Estimator</span>
-        </div>
-        <div class="pincode-input-row">
-          <input type="text" id="cartPincodeInput" class="pincode-input-field" placeholder="Enter 6-digit Pincode" maxlength="6" inputmode="numeric" oninput="onCartPincodeChange(this.value)">
-          <button class="pincode-check-btn" onclick="checkCartPincode()">Check</button>
-        </div>
-        <div id="cartPincodeStatus" class="pincode-status-pill"></div>
-      </div>
 
-      <!-- Customer Details for WhatsApp Order -->
-      <div class="smart-checkout-card" id="cartQuickCustomerCard">
-        <div class="smart-checkout-heading">
-          <span>📝 Quick Delivery Details</span>
-        </div>
-        <input type="text" id="waCustName" class="smart-checkout-input" placeholder="Your Full Name (e.g. Rahul Sharma)">
-        <input type="tel" id="waCustPhone" class="smart-checkout-input" placeholder="WhatsApp Mobile Number" maxlength="10" inputmode="numeric">
-        <input type="text" id="waCustAddress" class="smart-checkout-input" placeholder="Delivery Address & Landmark">
-        
-        <div class="delivery-method-chips">
-          <div class="delivery-chip active" id="chipDoorstep" onclick="selectDeliveryMethod('delivery')">🚚 Doorstep Delivery</div>
-          <div class="delivery-chip" id="chipPickup" onclick="selectDeliveryMethod('pickup')">🏬 NSC Bose Rd Pickup</div>
-        </div>
-
-        <input type="text" id="waCustNote" class="smart-checkout-input" placeholder="Gift Note / Special instructions (Optional)">
-      </div>
-
+    <!-- Compact Sticky Footer -->
+    <div class="cart-foot" id="cartFoot" style="display:none;">
       <div class="cart-totals">
         <div class="cart-total-row">
           <span>Subtotal</span>
@@ -747,23 +759,22 @@
         </div>
         <div class="cart-total-row">
           <span>Delivery</span>
-          <span id="cartDelivery">FREE</span>
+          <span id="cartDelivery" style="color:#27AE60;font-weight:600;">FREE</span>
         </div>
         <div class="cart-total-row grand">
           <span>Grand Total</span>
           <span id="cartGrandTotal">₹0</span>
         </div>
       </div>
-      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
         <button class="btn-smart-wa-checkout" onclick="submitSmartWhatsAppCheckout()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.99 2C6.477 2 2 6.477 2 11.99c0 1.72.454 3.33 1.24 4.73L2 22l5.47-1.22A9.957 9.957 0 0011.99 22C17.51 22 22 17.52 22 11.99 22 6.477 17.51 2 11.99 2zm0 18.18c-1.65 0-3.19-.44-4.52-1.21l-.32-.19-3.37.75.8-3.28-.21-.34A8.17 8.17 0 013.82 12c0-4.51 3.67-8.18 8.17-8.18 4.51 0 8.18 3.67 8.18 8.18 0 4.51-3.67 8.18-8.18 8.18z"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.99 2C6.477 2 2 6.477 2 11.99c0 1.72.454 3.33 1.24 4.73L2 22l5.47-1.22A9.957 9.957 0 0011.99 22C17.51 22 22 17.52 22 11.99 22 6.477 17.51 2 11.99 2zm0 18.18c-1.65 0-3.19-.44-4.52-1.21l-.32-.19-3.37.75.8-3.28-.21-.34A8.17 8.17 0 013.82 12c0-4.51 3.67-8.18 8.17-8.18 4.51 0 8.18 3.67 8.18 8.18 0 4.51-3.67 8.18-8.18 8.18z"/></svg>
           Order Instantly on WhatsApp
         </button>
-        <button class="btn-checkout-primary" onclick="closeCart(); openCheckoutModal();" style="width: 100%; padding: 11px; background: rgba(13,40,24,0.06); color: var(--text); border: 1.5px solid var(--border-dark); border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-          💳 Or Pay Online via UPI / Gateway
+        <button class="btn-checkout-primary" onclick="closeCart(); openCheckoutModal();" style="width: 100%; padding: 10px; background: rgba(13,40,24,0.06); color: var(--text); border: 1.5px solid var(--border-dark); border-radius: 12px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          💳 Or Pay Online via UPI
         </button>
       </div>
-      <button class="btn-continue-shopping" onclick="closeCart()" style="margin-top: 10px;">← Continue Browsing</button>
     </div>
   </div>
 
