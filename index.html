@@ -219,6 +219,10 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
           <span class="action-text">WhatsApp</span>
         </a>
+        <button class="gift-finder-btn" onclick="openGiftQuizModal()" aria-label="Smart Gift Finder">
+          <span class="sparkle-icon">✨</span>
+          <span class="action-text">Gift Finder</span>
+        </button>
         <button class="giftcard-trigger" id="giftCardTrigger" onclick="openGiftCardModal()" style="display:flex; align-items:center; gap:6px; background:none; border:none; cursor:pointer; font-size:13px; color:var(--text); font-weight:600; padding:0; margin-right:10px;">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           <span class="action-text">Gift Card</span>
@@ -526,9 +530,12 @@
       <div class="vigneto-pills">
         <button class="vigneto-pill active" onclick="setCategory('all')">All Products</button>
         <button class="vigneto-pill" onclick="setCategory('Dinner Sets')">Dinner Sets</button>
-        <button class="vigneto-pill" onclick="setCategory('Tea Sets')">Tea Sets</button>
         <button class="vigneto-pill" onclick="setCategory('Glassware')">Glassware</button>
+        <button class="vigneto-pill" onclick="setCategory('Bowls')">Bowls</button>
+        <button class="vigneto-pill" onclick="setCategory('Serving')">Serving</button>
+        <button class="vigneto-pill" onclick="setCategory('Tea Sets')">Tea Sets</button>
         <button class="vigneto-pill" onclick="setCategory('Cookware')">Cookware</button>
+        <button class="vigneto-pill" onclick="setCategory('Cutlery')">Cutlery</button>
         <button class="vigneto-pill" onclick="setCategory('Gift Sets')">Gift Sets</button>
       </div>
 
@@ -704,6 +711,35 @@
       </div>
     </div>
     <div class="cart-foot">
+      <!-- Live Pincode Delivery Estimator in Cart -->
+      <div class="pincode-checker-wrap" style="margin: 0 0 12px; padding: 12px 14px;">
+        <div class="pincode-checker-title">
+          <span>📍 Delivery Estimator</span>
+        </div>
+        <div class="pincode-input-row">
+          <input type="text" id="cartPincodeInput" class="pincode-input-field" placeholder="Enter 6-digit Pincode" maxlength="6" inputmode="numeric" oninput="onCartPincodeChange(this.value)">
+          <button class="pincode-check-btn" onclick="checkCartPincode()">Check</button>
+        </div>
+        <div id="cartPincodeStatus" class="pincode-status-pill"></div>
+      </div>
+
+      <!-- Customer Details for WhatsApp Order -->
+      <div class="smart-checkout-card" id="cartQuickCustomerCard">
+        <div class="smart-checkout-heading">
+          <span>📝 Quick Delivery Details</span>
+        </div>
+        <input type="text" id="waCustName" class="smart-checkout-input" placeholder="Your Full Name (e.g. Rahul Sharma)">
+        <input type="tel" id="waCustPhone" class="smart-checkout-input" placeholder="WhatsApp Mobile Number" maxlength="10" inputmode="numeric">
+        <input type="text" id="waCustAddress" class="smart-checkout-input" placeholder="Delivery Address & Landmark">
+        
+        <div class="delivery-method-chips">
+          <div class="delivery-chip active" id="chipDoorstep" onclick="selectDeliveryMethod('delivery')">🚚 Doorstep Delivery</div>
+          <div class="delivery-chip" id="chipPickup" onclick="selectDeliveryMethod('pickup')">🏬 NSC Bose Rd Pickup</div>
+        </div>
+
+        <input type="text" id="waCustNote" class="smart-checkout-input" placeholder="Gift Note / Special instructions (Optional)">
+      </div>
+
       <div class="cart-totals">
         <div class="cart-total-row">
           <span>Subtotal</span>
@@ -711,23 +747,23 @@
         </div>
         <div class="cart-total-row">
           <span>Delivery</span>
-          <span id="cartDelivery">₹99</span>
+          <span id="cartDelivery">FREE</span>
         </div>
         <div class="cart-total-row grand">
-          <span>Total</span>
+          <span>Grand Total</span>
           <span id="cartGrandTotal">₹0</span>
         </div>
       </div>
-      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
-        <button class="btn-checkout-primary" onclick="closeCart(); openCheckoutModal();" style="width: 100%; padding: 14px; background: #0D2818; color: #D4AF37; border: 1px solid #D4AF37; border-radius: 8px; font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(13,40,24,0.25);">
-          💳 Proceed to Checkout
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+        <button class="btn-smart-wa-checkout" onclick="submitSmartWhatsAppCheckout()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.99 2C6.477 2 2 6.477 2 11.99c0 1.72.454 3.33 1.24 4.73L2 22l5.47-1.22A9.957 9.957 0 0011.99 22C17.51 22 22 17.52 22 11.99 22 6.477 17.51 2 11.99 2zm0 18.18c-1.65 0-3.19-.44-4.52-1.21l-.32-.19-3.37.75.8-3.28-.21-.34A8.17 8.17 0 013.82 12c0-4.51 3.67-8.18 8.17-8.18 4.51 0 8.18 3.67 8.18 8.18 0 4.51-3.67 8.18-8.18 8.18z"/></svg>
+          Order Instantly on WhatsApp
         </button>
-        <button class="btn-whatsapp-checkout" onclick="whatsappCart()" style="background: transparent; color: #27AE60; border: 1px solid #27AE60; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.99 2C6.477 2 2 6.477 2 11.99c0 1.72.454 3.33 1.24 4.73L2 22l5.47-1.22A9.957 9.957 0 0011.99 22C17.51 22 22 17.52 22 11.99 22 6.477 17.51 2 11.99 2zm0 18.18c-1.65 0-3.19-.44-4.52-1.21l-.32-.19-3.37.75.8-3.28-.21-.34A8.17 8.17 0 013.82 12c0-4.51 3.67-8.18 8.17-8.18 4.51 0 8.18 3.67 8.18 8.18 0 4.51-3.67 8.18-8.18 8.18z"/></svg>
-          Inquire via WhatsApp
+        <button class="btn-checkout-primary" onclick="closeCart(); openCheckoutModal();" style="width: 100%; padding: 11px; background: rgba(13,40,24,0.06); color: var(--text); border: 1.5px solid var(--border-dark); border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          💳 Or Pay Online via UPI / Gateway
         </button>
       </div>
-      <button class="btn-continue-shopping" onclick="closeCart()" style="margin-top: 8px;">← Continue Shopping</button>
+      <button class="btn-continue-shopping" onclick="closeCart()" style="margin-top: 10px;">← Continue Browsing</button>
     </div>
   </div>
 
@@ -1286,27 +1322,60 @@
     </div>
   </div>
 
-  <!-- ═══ Gift Card Balance Checker Modal ════════════════════ -->
-  <div class="balance-checker-overlay" id="balanceCheckerModal" onclick="if(event.target===this) closeBalanceChecker()">
-    <div class="balance-checker-card">
-      <div class="balance-checker-header">
-        <div class="bc-icon">💳</div>
-        <h3>Check Gift Card Balance</h3>
-        <p>Enter your voucher code to check the remaining balance.</p>
-      </div>
-      <div class="balance-checker-body">
-        <div class="bc-input-row">
-          <input type="text" id="bcCodeInput" placeholder="e.g. GC-HAPPY-500">
-          <button onclick="checkGiftCardBalance()">Check</button>
+  <!-- ═══ Smart Gift Finder Quiz Modal (iOS Liquid Glass) ═══════════════ -->
+  <div class="gift-quiz-overlay" id="giftQuizOverlay" onclick="if(event.target===this) closeGiftQuizModal()">
+    <div class="gift-quiz-modal">
+      <div class="quiz-header">
+        <div class="quiz-title-wrap">
+          <span class="quiz-badge">Curated by RS</span>
+          <h2 class="quiz-title">Find the Perfect Gift</h2>
         </div>
-        <div class="bc-result" id="bcResult">
-          <!-- Populated by JS -->
-        </div>
+        <button class="quiz-close-btn" onclick="closeGiftQuizModal()" aria-label="Close Quiz">✕</button>
       </div>
-      <div class="balance-checker-footer">
-        <button onclick="closeBalanceChecker()">Close</button>
+
+      <div class="quiz-progress-track">
+        <div class="quiz-progress-bar" id="quizProgressBar" style="width: 33.3%;"></div>
+      </div>
+
+      <div class="quiz-body" id="quizBody">
+        <!-- Dynamic Quiz Steps / Results Injected Here by JS -->
+      </div>
+
+      <div class="quiz-footer" id="quizFooter">
+        <button class="quiz-btn-prev" id="quizPrevBtn" onclick="prevQuizStep()" style="visibility:hidden;">← Back</button>
+        <button class="quiz-btn-next" id="quizNextBtn" onclick="nextQuizStep()">Continue →</button>
       </div>
     </div>
+  </div>
+
+  <!-- ═══ Mobile App-Like Floating Bottom Navigation Dock ═══════════════ -->
+  <div class="mobile-bottom-dock" id="mobileBottomDock">
+    <button class="dock-tab active" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="Home">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      <span>Home</span>
+    </button>
+    <button class="dock-tab" onclick="openMobileCategories()" aria-label="Categories">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+      <span>Explore</span>
+    </button>
+    <button class="dock-tab" onclick="openGiftQuizModal()" aria-label="Gift Finder" style="color:#b88628; font-weight:700;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M12 8v13"></path><path d="M3 12h18"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5C9 3 10.5 5.5 12 8c1.5-2.5 3-5 4.5-5a2.5 2.5 0 0 1 0 5H12"></path></svg>
+      <span>Gift Quiz</span>
+    </button>
+    <button class="dock-tab" onclick="openWishlist()" aria-label="Wishlist">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+      <span>Wishlist</span>
+      <span class="dock-badge" id="dockWishlistBadge" style="display:none;">0</span>
+    </button>
+    <button class="dock-tab" onclick="openCart()" aria-label="Cart">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+      <span>Cart</span>
+      <span class="dock-badge" id="dockCartBadge" style="display:none;">0</span>
+    </button>
+    <button class="dock-tab" onclick="window.open('https://wa.me/916369142027', '_blank')" aria-label="WhatsApp" style="color:#25D366;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+      <span>Chat</span>
+    </button>
   </div>
 
   <!-- Firebase Compat SDKs -->

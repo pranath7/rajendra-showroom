@@ -120,11 +120,11 @@ window.db = {
     let fallbackList;
     if (stored) {
       const parsed = JSON.parse(stored);
-      fallbackList = parsed.length > 0 ? parsed : DEFAULT_PRODUCTS.map(p => ({ ...p }));
+      fallbackList = (parsed && parsed.length > 0) ? parsed : DEFAULT_PRODUCTS.map(p => ({ ...p }));
     } else {
       fallbackList = DEFAULT_PRODUCTS.map(p => ({ ...p }));
-      localStorage.setItem("rs_products", JSON.stringify(fallbackList));
     }
+    localStorage.setItem("rs_products", JSON.stringify(fallbackList));
     return fallbackList;
   },
 
@@ -158,6 +158,22 @@ window.db = {
     localStorage.setItem("rs_products", JSON.stringify(list));
     
     return { success: true, mode: useFirebase ? "firebase" : "local" };
+  },
+
+  async syncDefaultProductsToFirestore(productsList = DEFAULT_PRODUCTS) {
+    if (useFirebase && isFirebaseResponsive && firestoreDb) {
+      const batchWrites = productsList.map(p => 
+        firestoreDb.collection("products").doc(String(p.id)).set(p)
+      );
+      batchWrites.push(firestoreDb.collection("settings").doc("initialized").set({ 
+        initialized: true, 
+        count: productsList.length, 
+        updatedAt: new Date().toISOString() 
+      }));
+      await Promise.all(batchWrites);
+      return { success: true, count: productsList.length };
+    }
+    return { success: false, error: "Firebase is not active or connected" };
   },
 
   async deleteProduct(id) {

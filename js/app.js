@@ -61,9 +61,22 @@ document.addEventListener("DOMContentLoaded", () => {
   loadCart();
   loadWishlist();
   
-  // Stale-While-Revalidate caching: load cache instantly to render page
+  // Stale-While-Revalidate caching with versioning
+  const CATALOG_VERSION = "v4.10_decor_cam";
+  const cachedVersion = localStorage.getItem("rs_catalog_version");
   const cachedProducts = localStorage.getItem(STORE_KEY);
-  allProducts = cachedProducts ? JSON.parse(cachedProducts) : DEFAULT_PRODUCTS.map(p => ({ ...p }));
+  
+  if (cachedVersion !== CATALOG_VERSION || !cachedProducts) {
+    allProducts = DEFAULT_PRODUCTS.map(p => ({ ...p }));
+    localStorage.setItem(STORE_KEY, JSON.stringify(allProducts));
+    localStorage.setItem("rs_catalog_version", CATALOG_VERSION);
+  } else {
+    try {
+      allProducts = JSON.parse(cachedProducts);
+    } catch(e) {
+      allProducts = DEFAULT_PRODUCTS.map(p => ({ ...p }));
+    }
+  }
 
   const cachedCategories = localStorage.getItem("rs_categories");
   if (cachedCategories) {
@@ -101,8 +114,17 @@ async function triggerBackgroundSync() {
         db.getCategories()
       ]);
       
-      // Update active memory
-      allProducts = freshProducts;
+      // Merge: Always preserve all 453+ catalog products
+      const productMap = new Map();
+      DEFAULT_PRODUCTS.forEach(p => productMap.set(String(p.id), p));
+      if (Array.isArray(freshProducts) && freshProducts.length > 0) {
+        freshProducts.forEach(p => {
+          if (p && p.id) productMap.set(String(p.id), p);
+        });
+      }
+      allProducts = Array.from(productMap.values());
+      localStorage.setItem(STORE_KEY, JSON.stringify(allProducts));
+      
       if (freshCategories && freshCategories.length > 0) {
         CATEGORIES = freshCategories;
       }
@@ -111,7 +133,7 @@ async function triggerBackgroundSync() {
       renderTopNavCategories();
       renderCategories();
       renderProducts();
-      console.log("⚡ Storefront synchronized with Cloud Database (Firestore) in background.");
+      console.log(`⚡ Storefront synchronized with Cloud Database (${allProducts.length} products loaded).`);
     } catch (e) {
       console.warn("Background revalidation sync warning:", e);
     }
@@ -353,6 +375,10 @@ function renderStars(rating) {
 /* ─── Category / Filter / Sort ────────────────────────────── */
 function setCategory(catId) {
   activeCategory = catId;
+  document.querySelectorAll('.vigneto-pill').forEach(btn => {
+    const isMatch = btn.getAttribute('onclick')?.includes(`'${catId}'`);
+    btn.classList.toggle('active', !!isMatch);
+  });
   renderCategories();
   renderProducts();
   updateHeading();
@@ -849,6 +875,25 @@ function updateCartUI() {
     el.textContent = total;
     el.style.display = total ? "flex" : "none";
   });
+  const dockCart = document.getElementById("dockCartBadge");
+  if (dockCart) {
+    dockCart.textContent = total;
+    dockCart.style.display = total > 0 ? "flex" : "none";
+  }
+}
+
+function updateWishlistUI() {
+  const total = wishlist.length;
+  const badge = document.getElementById("wishlistCountBadge");
+  if (badge) {
+    badge.textContent = total;
+    badge.style.display = total > 0 ? "flex" : "none";
+  }
+  const dockWishlist = document.getElementById("dockWishlistBadge");
+  if (dockWishlist) {
+    dockWishlist.textContent = total;
+    dockWishlist.style.display = total > 0 ? "flex" : "none";
+  }
 }
 
 function renderCartItems() {
@@ -1272,6 +1317,18 @@ function openModal(id) {
         <!-- Frequently Bought Together Bundle -->
         ${fbtHTML}
 
+        <!-- Live Pincode Delivery Estimator in Modal -->
+        <div class="pincode-checker-wrap" style="margin: 14px 0 10px;">
+          <div class="pincode-checker-title">
+            <span>📍 Check Delivery Timeline</span>
+          </div>
+          <div class="pincode-input-row">
+            <input type="text" id="modalPincodeInput" class="pincode-input-field" placeholder="Enter 6-digit Pincode" maxlength="6" inputmode="numeric" oninput="onModalPincodeChange(this.value)">
+            <button type="button" class="pincode-check-btn" onclick="checkModalPincode()">Check</button>
+          </div>
+          <div id="modalPincodeStatus" class="pincode-status-pill"></div>
+        </div>
+
         <!-- Express Shipping Notice -->
         <div class="express-shipping-notice">
           🚚 &nbsp;<span>Need Express Shipping?</span>
@@ -1509,6 +1566,11 @@ function updateWishlistUI() {
   if (badge) {
     badge.textContent = wishlist.length;
     badge.style.display = wishlist.length > 0 ? "flex" : "none";
+  }
+  const dockWishlist = document.getElementById("dockWishlistBadge");
+  if (dockWishlist) {
+    dockWishlist.textContent = wishlist.length;
+    dockWishlist.style.display = wishlist.length > 0 ? "flex" : "none";
   }
 }
 
@@ -3539,3 +3601,444 @@ function closeReelModal() {
   if (modalEl) modalEl.style.display = 'none';
   document.body.style.overflow = '';
 }
+
+/* ============================================================
+   🎁 SMART GIFT FINDER QUIZ ("Gift in 3 Clicks")
+   ============================================================ */
+let quizStep = 1;
+let quizAnswers = {
+  occasion: null,
+  budget: null,
+  style: null,
+  giftWrap: true
+};
+
+const QUIZ_DATA = {
+  step1: {
+    title: "1. What is the special occasion?",
+    subtitle: "Select the celebration so we can curate matching luxury sets.",
+    options: [
+      { id: "wedding", label: "Wedding / Anniversary", emoji: "💍", desc: "Luxury royal dinner sets & fine bone china" },
+      { id: "housewarming", label: "Housewarming (Griha Pravesh)", emoji: "🏡", desc: "Serveware, dinnerware & tea collections" },
+      { id: "festive", label: "Festive (Diwali, New Year)", emoji: "🪔", desc: "Gold-rimmed sets & auspicious gifting" },
+      { id: "corporate", label: "Corporate / Return Gifts", emoji: "🎁", desc: "Premium mugs, bowls & glassware boxes" },
+      { id: "personal", label: "Everyday Luxury Dining", emoji: "✨", desc: "Aesthetic stoneware & modern table pieces" }
+    ]
+  },
+  step2: {
+    title: "2. What is your gift budget?",
+    subtitle: "We will find the finest items in your target price range.",
+    options: [
+      { id: "b1", label: "Under ₹1,500", emoji: "🏷️", desc: "Mug sets, artisan bowls & glassware", min: 0, max: 1500 },
+      { id: "b2", label: "₹1,500 – ₹3,500", emoji: "💎", desc: "Tea sets, serving platters & cutlery", min: 1500, max: 3500 },
+      { id: "b3", label: "₹3,500 – ₹7,000", emoji: "👑", desc: "Premium dinner sets & complete host sets", min: 3500, max: 7000 },
+      { id: "b4", label: "Luxury ₹7,000+", emoji: "🌟", desc: "Royal Palace bone china & grand collections", min: 7000, max: 999999 }
+    ]
+  },
+  step3: {
+    title: "3. Choose the recipient's style",
+    subtitle: "Select their aesthetic preference for a tailor-made match.",
+    options: [
+      { id: "Dinner Sets", label: "Royal Bone China Dinnerware", emoji: "🍽️", desc: "24K Gold rim, timeless heritage" },
+      { id: "Tea Sets", label: "Porcelain Teaware & Mugs", emoji: "🫖", desc: "Afternoon high-tea elegance" },
+      { id: "Glassware", label: "Crystal Glassware & Barware", emoji: "🥂", desc: "Lead-free crystal clarity" },
+      { id: "Serving", label: "Luxury Serving Platters & Bowls", emoji: "🧁", desc: "Centerpiece presentation" },
+      { id: "Cutlery", label: "Brushed Gold Cutlery & Cookware", emoji: "🍴", desc: "Modern gourmet dining" }
+    ]
+  }
+};
+
+function openGiftQuizModal() {
+  quizStep = 1;
+  quizAnswers = {
+    occasion: quizAnswers.occasion || "wedding",
+    budget: quizAnswers.budget || "b2",
+    style: quizAnswers.style || "Dinner Sets",
+    giftWrap: true
+  };
+  const overlay = document.getElementById("giftQuizOverlay");
+  if (overlay) overlay.classList.add("open");
+  document.body.style.overflow = "hidden";
+  renderQuizStep();
+}
+
+function closeGiftQuizModal() {
+  const overlay = document.getElementById("giftQuizOverlay");
+  if (overlay) overlay.classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+function renderQuizStep() {
+  const body = document.getElementById("quizBody");
+  const bar = document.getElementById("quizProgressBar");
+  const prevBtn = document.getElementById("quizPrevBtn");
+  const nextBtn = document.getElementById("quizNextBtn");
+
+  if (!body) return;
+
+  if (quizStep === 1) {
+    if (bar) bar.style.width = "33.3%";
+    if (prevBtn) prevBtn.style.visibility = "hidden";
+    if (nextBtn) { nextBtn.style.display = "block"; nextBtn.textContent = "Continue →"; }
+
+    const step = QUIZ_DATA.step1;
+    body.innerHTML = `
+      <div class="quiz-step-title">${step.title}</div>
+      <div class="quiz-step-subtitle">${step.subtitle}</div>
+      <div class="quiz-options-grid">
+        ${step.options.map(opt => `
+          <div class="quiz-option-card ${quizAnswers.occasion === opt.id ? 'selected' : ''}" onclick="selectQuizOption('occasion', '${opt.id}')">
+            <span class="quiz-option-emoji">${opt.emoji}</span>
+            <span class="quiz-option-label">${opt.label}</span>
+            <span class="quiz-option-desc">${opt.desc}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  } else if (quizStep === 2) {
+    if (bar) bar.style.width = "66.6%";
+    if (prevBtn) prevBtn.style.visibility = "visible";
+    if (nextBtn) { nextBtn.style.display = "block"; nextBtn.textContent = "Continue →"; }
+
+    const step = QUIZ_DATA.step2;
+    body.innerHTML = `
+      <div class="quiz-step-title">${step.title}</div>
+      <div class="quiz-step-subtitle">${step.subtitle}</div>
+      <div class="quiz-options-grid">
+        ${step.options.map(opt => `
+          <div class="quiz-option-card ${quizAnswers.budget === opt.id ? 'selected' : ''}" onclick="selectQuizOption('budget', '${opt.id}')">
+            <span class="quiz-option-emoji">${opt.emoji}</span>
+            <span class="quiz-option-label">${opt.label}</span>
+            <span class="quiz-option-desc">${opt.desc}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  } else if (quizStep === 3) {
+    if (bar) bar.style.width = "100%";
+    if (prevBtn) prevBtn.style.visibility = "visible";
+    if (nextBtn) { nextBtn.style.display = "block"; nextBtn.textContent = "Show My Curated Gifts ✨"; }
+
+    const step = QUIZ_DATA.step3;
+    body.innerHTML = `
+      <div class="quiz-step-title">${step.title}</div>
+      <div class="quiz-step-subtitle">${step.subtitle}</div>
+      <div class="quiz-options-grid">
+        ${step.options.map(opt => `
+          <div class="quiz-option-card ${quizAnswers.style === opt.id ? 'selected' : ''}" onclick="selectQuizOption('style', '${opt.id}')">
+            <span class="quiz-option-emoji">${opt.emoji}</span>
+            <span class="quiz-option-label">${opt.label}</span>
+            <span class="quiz-option-desc">${opt.desc}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  } else if (quizStep === 4) {
+    // Results view
+    if (bar) bar.style.width = "100%";
+    if (prevBtn) prevBtn.style.visibility = "visible";
+    if (nextBtn) nextBtn.style.display = "none";
+
+    renderQuizResults(body);
+  }
+}
+
+function selectQuizOption(field, value) {
+  quizAnswers[field] = value;
+  renderQuizStep();
+}
+
+function nextQuizStep() {
+  if (quizStep < 4) {
+    quizStep++;
+    renderQuizStep();
+  }
+}
+
+function prevQuizStep() {
+  if (quizStep > 1) {
+    quizStep--;
+    renderQuizStep();
+  }
+}
+
+function toggleQuizGiftWrap() {
+  quizAnswers.giftWrap = !quizAnswers.giftWrap;
+  const checkbox = document.getElementById("quizGiftWrapToggle");
+  if (checkbox) checkbox.checked = quizAnswers.giftWrap;
+}
+
+function renderQuizResults(container) {
+  const budgetObj = QUIZ_DATA.step2.options.find(o => o.id === quizAnswers.budget) || QUIZ_DATA.step2.options[1];
+  const targetCategory = quizAnswers.style || "Dinner Sets";
+
+  let products = (Array.isArray(allProducts) && allProducts.length > 0) ? [...allProducts] : [...DEFAULT_PRODUCTS];
+
+  // Match products based on category and budget tier
+  let matches = products.filter(p => {
+    const price = p.price || 0;
+    const catMatch = p.category && (
+      p.category.toLowerCase().includes(targetCategory.toLowerCase()) ||
+      targetCategory.toLowerCase().includes(p.category.toLowerCase())
+    );
+    const budgetMatch = price >= budgetObj.min && price <= budgetObj.max;
+    return catMatch || budgetMatch;
+  });
+
+  if (matches.length === 0) {
+    matches = products.slice(0, 4);
+  }
+
+  // Sort by featured/rating
+  matches.sort((a,b) => (b.rating || 4.5) - (a.rating || 4.5));
+  const topMatches = matches.slice(0, 6);
+
+  container.innerHTML = `
+    <div class="quiz-results-wrap">
+      <div class="quiz-match-banner">
+        <div class="quiz-match-text">
+          ✨ Found <strong>${topMatches.length} hand-picked gifts</strong> matching your celebration!
+        </div>
+        <span style="font-size:11.5px; background:rgba(37,211,102,0.18); color:#0b8043; font-weight:700; padding:4px 8px; border-radius:8px;">98% Match</span>
+      </div>
+
+      <div class="quiz-giftwrap-box" onclick="toggleQuizGiftWrap()">
+        <div class="quiz-giftwrap-info">
+          <input type="checkbox" id="quizGiftWrapToggle" ${quizAnswers.giftWrap ? 'checked' : ''} style="cursor:pointer; width:18px; height:18px;">
+          <div>
+            <div class="quiz-giftwrap-title">🎀 Add Complimentary Luxury Gift Wrap</div>
+            <div class="quiz-giftwrap-sub">Gold ribbon box + Custom handwritten calligraphy greeting note</div>
+          </div>
+        </div>
+        <span style="font-size:12px; font-weight:800; color:#0b8043;">FREE</span>
+      </div>
+
+      <div class="quiz-results-grid">
+        ${topMatches.map(p => `
+          <div class="quiz-item-card">
+            <img src="${p.image ? getOptimizedImageUrl(p.image, 200) : 'images/cat_dinner.jpg'}" alt="${p.name}" class="quiz-item-img">
+            <div class="quiz-item-name" title="${p.name}">${p.name}</div>
+            <div class="quiz-item-price">₹${(p.price || 0).toLocaleString("en-IN")}</div>
+            <div style="display:flex; gap:6px; margin-top:auto;">
+              <button class="quiz-item-btn" onclick="addQuizItemToCart('${p.id}')">🛒 Add to Cart</button>
+              <button class="quiz-item-btn" style="background:#25D366; width:auto; padding:8px 10px;" onclick="sendQuizWhatsAppInquiry('${p.id}')" title="Ask on WhatsApp">💬</button>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+
+      <div style="display:flex; justify-content:center; gap:12px; margin-top:8px;">
+        <button onclick="quizStep=1; renderQuizStep();" style="background:none; border:none; font-size:12px; font-weight:600; color:var(--text-light); cursor:pointer; text-decoration:underline;">
+          🔄 Retake Gift Quiz
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function addQuizItemToCart(id) {
+  addToCart(id, 1);
+  showToast("🎁 Gift item added to cart with luxury packaging!", "success");
+  closeGiftQuizModal();
+  openCart();
+}
+
+function sendQuizWhatsAppInquiry(id) {
+  const p = (Array.isArray(allProducts) && allProducts.length > 0) ? allProducts.find(x => String(x.id) === String(id)) : DEFAULT_PRODUCTS.find(x => String(x.id) === String(id));
+  if (!p) return;
+  const wrapText = quizAnswers.giftWrap ? " (Include Luxury Gift Wrap & Greeting Card)" : "";
+  const msg = encodeURIComponent(
+    `Hi Rajendra Showroom! ✨\n\nI found this through your *Smart Gift Finder*:\n• *${p.name}* (₹${p.price.toLocaleString("en-IN")})${wrapText}\n\nPlease let me know if this is available for fast delivery or store pickup.\n\nThank you!`
+  );
+  window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, "_blank");
+}
+
+/* ============================================================
+   📍 LIVE PINCODE DELIVERY ESTIMATOR ENGINE
+   ============================================================ */
+function checkPincodeDelivery(pincode) {
+  if (!pincode || !/^\d{6}$/.test(pincode)) {
+    return {
+      valid: false,
+      pillClass: "invalid",
+      message: "⚠️ Please enter a valid 6-digit Indian pincode."
+    };
+  }
+
+  const pinNum = parseInt(pincode, 10);
+  // Remember valid pincode in localStorage
+  try { localStorage.setItem("rs_pincode", pincode); } catch(e) {}
+
+  // Chennai local city pincodes: 600001 - 600100
+  if (pinNum >= 600001 && pinNum <= 600100) {
+    return {
+      valid: true,
+      pillClass: "chennai",
+      message: "⚡ Same-Day Delivery available for Chennai! Free store pickup at NSC Bose Road."
+    };
+  }
+
+  // Tamil Nadu & Puducherry: 600000 - 643999
+  if (pinNum >= 600000 && pinNum <= 643999) {
+    return {
+      valid: true,
+      pillClass: "express",
+      message: "🚀 Express Delivery: 24–48 Hours to your doorstep in Tamil Nadu."
+    };
+  }
+
+  // Pan-India National Shipping
+  return {
+    valid: true,
+    pillClass: "national",
+    message: "📦 Safe Transit Guarantee: Delivery in 3–5 Days with 100% Breakage-Proof Packing."
+  };
+}
+
+function onCartPincodeChange(val) {
+  if (val.length === 6) {
+    checkCartPincode();
+  }
+}
+
+function checkCartPincode() {
+  const input = document.getElementById("cartPincodeInput");
+  const statusEl = document.getElementById("cartPincodeStatus");
+  if (!input || !statusEl) return;
+
+  const res = checkPincodeDelivery(input.value.trim());
+  statusEl.className = `pincode-status-pill ${res.pillClass}`;
+  statusEl.innerHTML = res.message;
+}
+
+function onModalPincodeChange(val) {
+  if (val.length === 6) {
+    checkModalPincode();
+  }
+}
+
+function checkModalPincode() {
+  const input = document.getElementById("modalPincodeInput");
+  const statusEl = document.getElementById("modalPincodeStatus");
+  if (!input || !statusEl) return;
+
+  const res = checkPincodeDelivery(input.value.trim());
+  statusEl.className = `pincode-status-pill ${res.pillClass}`;
+  statusEl.innerHTML = res.message;
+}
+
+// Hydrate saved pincode on drawer/modal open
+function hydrateSavedPincode() {
+  try {
+    const savedPin = localStorage.getItem("rs_pincode");
+    if (savedPin) {
+      const cartInput = document.getElementById("cartPincodeInput");
+      if (cartInput && !cartInput.value) {
+        cartInput.value = savedPin;
+        checkCartPincode();
+      }
+      const modalInput = document.getElementById("modalPincodeInput");
+      if (modalInput && !modalInput.value) {
+        modalInput.value = savedPin;
+        checkModalPincode();
+      }
+    }
+  } catch(e) {}
+}
+
+/* ============================================================
+   💬 SMART WHATSAPP CHECKOUT BUILDER
+   ============================================================ */
+let currentDeliveryMethod = "delivery";
+
+function selectDeliveryMethod(method) {
+  currentDeliveryMethod = method;
+  const chipDoorstep = document.getElementById("chipDoorstep");
+  const chipPickup = document.getElementById("chipPickup");
+  if (chipDoorstep && chipPickup) {
+    chipDoorstep.classList.toggle("active", method === "delivery");
+    chipPickup.classList.toggle("active", method === "pickup");
+  }
+}
+
+function submitSmartWhatsAppCheckout() {
+  if (cart.length === 0) {
+    showToast("Your cart is empty! Add products first.", "info");
+    return;
+  }
+
+  const name = document.getElementById("waCustName") ? document.getElementById("waCustName").value.trim() : "";
+  const phone = document.getElementById("waCustPhone") ? document.getElementById("waCustPhone").value.trim() : "";
+  const address = document.getElementById("waCustAddress") ? document.getElementById("waCustAddress").value.trim() : "";
+  const pincode = document.getElementById("cartPincodeInput") ? document.getElementById("cartPincodeInput").value.trim() : "";
+  const note = document.getElementById("waCustNote") ? document.getElementById("waCustNote").value.trim() : "";
+
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const deliveryCharge = (currentDeliveryMethod === "pickup" || subtotal > 1999) ? 0 : 99;
+  const grandTotal = subtotal + deliveryCharge;
+
+  const itemLines = cart.map(i => {
+    const sizeText = i.selectedSize ? ` (Size: ${i.selectedSize})` : "";
+    const colorText = i.selectedColor ? ` (Color: ${i.selectedColor})` : "";
+    return `🍽️ *${i.name}*${sizeText}${colorText}\n   ↳ Qty: ${i.qty} × ₹${i.price.toLocaleString("en-IN")} = *₹${(i.price * i.qty).toLocaleString("en-IN")}*`;
+  }).join("\n\n");
+
+  const deliveryMethodText = currentDeliveryMethod === "pickup"
+    ? "🏬 *Store Pickup* (Patni Plaza, NSC Bose Rd, Chennai)"
+    : "🚚 *Doorstep Delivery*";
+
+  let customerDetailsBlock = "";
+  if (name || phone || address || pincode) {
+    customerDetailsBlock = `\n👤 *Customer Details:*` +
+      (name ? `\n• Name: ${name}` : "") +
+      (phone ? `\n• Phone: ${phone}` : "") +
+      (pincode ? `\n• Pincode: ${pincode}` : "") +
+      (address ? `\n• Address: ${address}` : "") + "\n";
+  }
+
+  const noteBlock = note ? `\n📝 *Special / Gift Note:* ${note}\n` : "";
+
+  const message = 
+`✨ *NEW ORDER REQUEST — RAJENDRA SHOWROOM* ✨
+──────────────────────────
+${itemLines}
+──────────────────────────
+💰 *Subtotal:* ₹${subtotal.toLocaleString("en-IN")}
+📦 *Shipping:* ${deliveryCharge === 0 ? "FREE" : "₹" + deliveryCharge}
+💎 *Grand Total:* *₹${grandTotal.toLocaleString("en-IN")}*
+
+🛵 *Delivery Method:* ${deliveryMethodText}
+${customerDetailsBlock}${noteBlock}
+Please confirm availability and dispatch timeline. Thank you!`;
+
+  window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`, "_blank");
+}
+
+/* ============================================================
+   📱 MOBILE BOTTOM DOCK & NAVIGATION
+   ============================================================ */
+function openMobileCategories() {
+  const prodGrid = document.querySelector(".vigneto-products-grid") || document.getElementById("products") || document.querySelector(".lineart-category-strip");
+  if (prodGrid) {
+    prodGrid.scrollIntoView({ behavior: "smooth" });
+  }
+}
+
+// Hook into openCart & openModal to auto-hydrate saved pincode
+const _origOpenCart = window.openCart;
+window.openCart = function() {
+  if (typeof _origOpenCart === "function") _origOpenCart();
+  setTimeout(hydrateSavedPincode, 100);
+};
+
+const _origOpenModal = window.openModal;
+window.openModal = function(id) {
+  if (typeof _origOpenModal === "function") _origOpenModal(id);
+  setTimeout(hydrateSavedPincode, 100);
+};
+
+// Initial run
+document.addEventListener("DOMContentLoaded", () => {
+  hydrateSavedPincode();
+  updateCartUI();
+});

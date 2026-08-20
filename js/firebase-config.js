@@ -19,6 +19,7 @@ const FIREBASE_CONFIG = {
 // ============================================================
 
 const CLOUDINARY_CONFIG = {
-  cloudName: "YOUR_CLOUD_NAME",       // e.g. "rajendra-showroom"
-  uploadPreset: "YOUR_UPLOAD_PRESET"  // e.g. "product_images"
+  cloudName: "djgn6xdqi",
+  uploadPreset: "product_images"
 };
+

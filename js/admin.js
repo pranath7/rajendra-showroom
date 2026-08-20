@@ -752,6 +752,17 @@ async function previewBulkImages(input) {
 }
 
 async function uploadImageToStorage(file) {
+  const cloudName = CLOUDINARY_CONFIG.cloudName;
+  const uploadPreset = CLOUDINARY_CONFIG.uploadPreset;
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", uploadPreset);
+
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+    method: "POST",
+    body: formData
+  });
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
@@ -2311,3 +2322,53 @@ async function triggerSimulatedPayment() {
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(loadAdminUpiConfig, 1000);
 });
+
+/* ─── Cloud & Default Reset Functions ─────────────────────── */
+async function pushAllProductsToFirestore() {
+  if (!db.isFirebaseActive()) {
+    showAdminToast("⚠️ Firebase Cloud is not active or connected.", "error");
+    return;
+  }
+  showAdminToast("☁️ Pushing all 22 products to Firebase Firestore...", "info");
+  try {
+    const list = DEFAULT_PRODUCTS.map(p => ({ ...p }));
+    const res = await db.syncDefaultProductsToFirestore(list);
+    if (res && res.success) {
+      showAdminToast(`✅ Successfully uploaded ${res.count} products to Firebase Firestore!`, "success");
+      await loadProducts();
+      renderProductsTable();
+      renderDashboard();
+    } else {
+      showAdminToast("⚠️ Firebase sync warning: " + (res.error || "Unknown error"), "error");
+    }
+  } catch(e) {
+    showAdminToast("❌ Firebase error: " + e.message, "error");
+  }
+}
+
+async function resetProductsToDefault() {
+  if (!confirm("Are you sure you want to reset the catalog? This will restore all 22 default products (Flagship Crockery + Decor Cam Luxury Sets) and sync them across the store.")) return;
+
+  showAdminToast("Restoring default catalog...", "info");
+  
+  const defaults = DEFAULT_PRODUCTS.map(p => ({ ...p }));
+  localStorage.setItem(STORE_KEY, JSON.stringify(defaults));
+  localStorage.setItem("rs_catalog_version", "v4.10_decor_cam");
+  
+  if (db.isFirebaseActive()) {
+    try {
+      showAdminToast("Syncing all 22 products to Firebase Firestore...", "info");
+      await db.syncDefaultProductsToFirestore(defaults);
+      showAdminToast("✅ All 22 products synced to Cloud Firebase!", "success");
+    } catch(err) {
+      console.error("Firestore sync error:", err);
+      showAdminToast("⚠️ Saved locally, cloud sync: " + err.message, "info");
+    }
+  } else {
+    showAdminToast("✅ Default catalog restored locally!", "success");
+  }
+
+  await loadProducts();
+  renderProductsTable();
+  renderDashboard();
+}

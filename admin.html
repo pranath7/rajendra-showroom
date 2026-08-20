@@ -1680,23 +1680,27 @@
             <div id="firebaseConfigStatus" style="margin: 15px 0; font-weight: 600;">
               <!-- Populated by JS -->
             </div>
-            <button class="btn-settings btn-settings-outline" id="btnRunDiagnostics" onclick="runDbDiagnostics()" style="margin-top: 10px; width: 100%;">
-              🔍 Run Database Diagnostics
-            </button>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+              <button class="btn-settings" onclick="pushAllProductsToFirestore()" style="background:#27AE60; color:#fff; flex:1; min-width:200px;">
+                ☁️ Push All 22 Products to Firebase Cloud
+              </button>
+              <button class="btn-settings btn-settings-outline" id="btnRunDiagnostics" onclick="runDbDiagnostics()" style="flex:1; min-width:180px;">
+                🔍 Run Diagnostics
+              </button>
+            </div>
             <div id="diagnosticsResult" style="margin-top: 12px; font-size: 12.5px; display: none; padding: 12px; border-radius: 8px; background: var(--bg-warm); border: 1px solid var(--border-dark); text-align: left;"></div>
-            <p style="font-size: 12px; color: var(--text-muted); line-height: 1.45; margin-top: 12px;">
-              To change credentials, edit <code style="font-family: monospace; background: var(--bg-warm); padding: 2px 5px; border-radius: 4px; font-size: 11px;">js/firebase-config.js</code> and refresh the page.
-            </p>
           </div>
 
-          <!-- Database Optimization -->
-          <div class="settings-card">
-            <h4>⚡ Database Speed Optimizer</h4>
-            <p>Scan all products in your Cloud Database and compress any large, uncompressed images. This will reduce your database size and make your storefront load up to 20x faster!</p>
-            <button class="btn-settings btn-settings-outline" id="btnOptimizeImages" onclick="optimizeDatabaseImages()" style="width: 100%; margin-top: 10px;">
-              ⚡ Compress & Optimize Cloud Images
-            </button>
-            <div id="optimizationResult" style="margin-top: 12px; font-size: 12.5px; display: none; padding: 12px; border-radius: 8px; background: var(--bg-warm); border: 1px solid var(--border-dark); text-align: left; line-height: 1.4;"></div>
+          <!-- Cloudinary CDN Image Storage -->
+          <div class="settings-card" style="border: 1.5px solid #27AE60; background: rgba(39, 174, 96, 0.04);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+              <h4 style="margin:0; color:#1a7a4a;">☁️ Cloudinary Image CDN</h4>
+              <span style="background:rgba(39,174,96,0.15); color:#27AE60; font-size:11px; padding:3px 8px; border-radius:10px; font-weight:700;">ACTIVE</span>
+            </div>
+            <p style="font-size:13px; margin-bottom:12px;">Cloud Name: <code style="font-family:monospace; background:#e8f5e9; padding:2px 6px; border-radius:4px; font-weight:bold; color:#1a7a4a;">djgn6xdqi</code> · Upload Preset: <code style="font-family:monospace; background:#e8f5e9; padding:2px 6px; border-radius:4px; font-weight:bold; color:#1a7a4a;">product_images</code></p>
+            <div style="font-size:12px; color:var(--text-light); line-height:1.4;">
+              All product photos uploaded via Add Product or Edit Product are stored on high-speed CDN and optimized automatically.
+            </div>
           </div>
 
           <!-- Store Information -->

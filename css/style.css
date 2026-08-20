@@ -5155,4 +5155,1026 @@ html, body {
   }
 }
 
+/* ============================================================
+   🌟 LIQUID GLASS DESIGN SYSTEM (iOS-Inspired Glassmorphism)
+   ============================================================ */
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-bg-subtle: rgba(255, 255, 255, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-border-subtle: rgba(0, 0, 0, 0.07);
+  --glass-shadow: 0 20px 50px -12px rgba(28, 28, 26, 0.12), inset 0 1px 1px 0 rgba(255, 255, 255, 0.85);
+  --glass-blur: blur(24px) saturate(190%);
+  --gold-glow: 0 0 25px rgba(217, 163, 62, 0.28);
+  --gold-gradient: linear-gradient(135deg, #d4a34b 0%, #b88628 100%);
+  --gold-soft-bg: rgba(212, 163, 75, 0.08);
+}
 
+[data-theme="dark"] {
+  --glass-bg: rgba(26, 26, 24, 0.8);
+  --glass-bg-subtle: rgba(36, 36, 33, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-border-subtle: rgba(255, 255, 255, 0.06);
+  --glass-shadow: 0 24px 60px -15px rgba(0, 0, 0, 0.55), inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);
+  --gold-soft-bg: rgba(212, 163, 75, 0.14);
+}
+
+.liquid-glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.liquid-glass-pill {
+  background: var(--glass-bg-subtle);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.liquid-glass-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border-color: rgba(212, 163, 75, 0.45);
+}
+
+/* Header Quick Launcher for Gift Finder */
+.gift-finder-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: linear-gradient(135deg, rgba(212, 163, 75, 0.15) 0%, rgba(212, 163, 75, 0.05) 100%);
+  border: 1px solid rgba(212, 163, 75, 0.4);
+  color: #a37318;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .gift-finder-btn {
+  color: #e5b967;
+  border-color: rgba(229, 185, 103, 0.4);
+}
+
+.gift-finder-btn:hover {
+  background: var(--gold-gradient);
+  color: #fff;
+  border-color: transparent;
+  transform: translateY(-1.5px);
+  box-shadow: var(--gold-glow);
+}
+
+.gift-finder-btn .sparkle-icon {
+  animation: sparkleRotate 3s infinite linear;
+}
+
+@keyframes sparkleRotate {
+  0% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.15) rotate(180deg); }
+  100% { transform: scale(1) rotate(360deg); }
+}
+
+/* ============================================================
+   🎁 SMART GIFT FINDER QUIZ MODAL
+   ============================================================ */
+.gift-quiz-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 15, 14, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 16px;
+}
+
+.gift-quiz-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gift-quiz-modal {
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 28px;
+  box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  overflow-y: auto;
+  transform: scale(0.94) translateY(20px);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.gift-quiz-overlay.open .gift-quiz-modal {
+  transform: scale(1) translateY(0);
+}
+
+.quiz-header {
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid var(--glass-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: inherit;
+  z-index: 2;
+}
+
+.quiz-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quiz-badge {
+  background: var(--gold-gradient);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.quiz-title {
+  font-family: var(--font-serif, 'Cormorant Garamond', serif);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text, #1c1c1a);
+  margin: 0;
+}
+
+.quiz-close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-subtle);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quiz-close-btn:hover {
+  background: rgba(217, 83, 79, 0.15);
+  color: #d9534f;
+  transform: rotate(90deg);
+}
+
+/* Quiz Progress */
+.quiz-progress-track {
+  height: 4px;
+  background: rgba(0, 0, 0, 0.06);
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .quiz-progress-track {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.quiz-progress-bar {
+  height: 100%;
+  background: var(--gold-gradient);
+  transition: width 0.35s ease;
+}
+
+/* Quiz Step Container */
+.quiz-body {
+  padding: 28px;
+  flex: 1;
+}
+
+.quiz-step-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.quiz-step-subtitle {
+  font-size: 13.5px;
+  color: var(--text-light, #777);
+  margin-bottom: 22px;
+}
+
+.quiz-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: 14px;
+}
+
+.quiz-option-card {
+  background: var(--glass-bg-subtle);
+  border: 1.5px solid var(--glass-border-subtle);
+  border-radius: 18px;
+  padding: 16px 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+
+.quiz-option-card:hover {
+  border-color: rgba(212, 163, 75, 0.6);
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 24px rgba(212, 163, 75, 0.12);
+}
+
+[data-theme="dark"] .quiz-option-card:hover {
+  background: rgba(45, 45, 40, 0.9);
+}
+
+.quiz-option-card.selected {
+  border-color: #b88628;
+  background: linear-gradient(135deg, rgba(212, 163, 75, 0.16) 0%, rgba(212, 163, 75, 0.05) 100%);
+  box-shadow: 0 0 0 2px #d4a34b, var(--gold-glow);
+  transform: translateY(-2px);
+}
+
+.quiz-option-emoji {
+  font-size: 28px;
+  transition: transform 0.2s ease;
+}
+
+.quiz-option-card:hover .quiz-option-emoji {
+  transform: scale(1.18);
+}
+
+.quiz-option-label {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.quiz-option-desc {
+  font-size: 11px;
+  color: var(--text-light, #888);
+  line-height: 1.3;
+}
+
+/* Quiz Controls Footer */
+.quiz-footer {
+  padding: 18px 28px 24px;
+  border-top: 1px solid var(--glass-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: inherit;
+  border-radius: 0 0 28px 28px;
+}
+
+.quiz-btn-prev {
+  background: var(--glass-bg-subtle);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quiz-btn-prev:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.quiz-btn-next {
+  background: var(--gold-gradient);
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 11px 24px;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(184, 134, 40, 0.35);
+  transition: all 0.2s ease;
+}
+
+.quiz-btn-next:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(184, 134, 40, 0.5);
+}
+
+/* Quiz Results View */
+.quiz-results-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.quiz-match-banner {
+  background: linear-gradient(135deg, rgba(212, 163, 75, 0.18) 0%, rgba(37, 211, 102, 0.08) 100%);
+  border: 1px solid rgba(212, 163, 75, 0.3);
+  border-radius: 18px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.quiz-match-text {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.quiz-giftwrap-box {
+  background: var(--glass-bg-subtle);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.quiz-giftwrap-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quiz-giftwrap-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.quiz-giftwrap-sub {
+  font-size: 11.5px;
+  color: var(--text-light);
+}
+
+.quiz-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.quiz-item-card {
+  background: var(--glass-bg-subtle);
+  border: 1px solid var(--glass-border-subtle);
+  border-radius: 16px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 0.2s ease;
+}
+
+.quiz-item-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(212, 163, 75, 0.5);
+}
+
+.quiz-item-img {
+  width: 100%;
+  height: 120px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.quiz-item-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quiz-item-price {
+  font-size: 14px;
+  font-weight: 800;
+  color: #b88628;
+}
+
+.quiz-item-btn {
+  width: 100%;
+  background: var(--gold-gradient);
+  border: none;
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.quiz-item-btn:hover {
+  opacity: 0.9;
+}
+
+/* ============================================================
+   📍 LIVE PINCODE DELIVERY CHECKER
+   ============================================================ */
+.pincode-checker-wrap {
+  background: var(--glass-bg-subtle);
+  border: 1px solid var(--glass-border-subtle);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pincode-checker-title {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pincode-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.pincode-input-field {
+  flex: 1;
+  background: var(--bg-card, #fff);
+  border: 1.5px solid var(--glass-border-subtle);
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.pincode-input-field:focus {
+  border-color: #b88628;
+}
+
+.pincode-check-btn {
+  background: var(--text, #1c1c1a);
+  color: var(--bg-primary, #fff);
+  border: none;
+  border-radius: 12px;
+  padding: 8px 18px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.pincode-check-btn:hover {
+  opacity: 0.85;
+}
+
+.pincode-status-pill {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 8px 12px;
+  border-radius: 10px;
+  display: none;
+}
+
+.pincode-status-pill.chennai {
+  display: flex;
+  background: rgba(37, 211, 102, 0.12);
+  color: #0b8043;
+  border: 1px solid rgba(37, 211, 102, 0.3);
+}
+
+.pincode-status-pill.express {
+  display: flex;
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.pincode-status-pill.national {
+  display: flex;
+  background: rgba(212, 163, 75, 0.14);
+  color: #8c5b05;
+  border: 1px solid rgba(212, 163, 75, 0.3);
+}
+
+.pincode-status-pill.invalid {
+  display: flex;
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ============================================================
+   🏷️ DYNAMIC BUNDLE / COMBO DEAL ENGINE
+   ============================================================ */
+.dynamic-bundle-section {
+  background: linear-gradient(135deg, rgba(212, 163, 75, 0.08) 0%, rgba(255, 255, 255, 0.6) 100%);
+  border: 1.5px solid rgba(212, 163, 75, 0.35);
+  border-radius: 20px;
+  padding: 18px 20px;
+  margin: 22px 0 16px;
+  position: relative;
+}
+
+[data-theme="dark"] .dynamic-bundle-section {
+  background: linear-gradient(135deg, rgba(212, 163, 75, 0.12) 0%, rgba(35, 35, 30, 0.7) 100%);
+}
+
+.bundle-badge {
+  position: absolute;
+  top: -11px;
+  left: 20px;
+  background: var(--gold-gradient);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 3px 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(184, 134, 40, 0.4);
+}
+
+.bundle-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+
+.bundle-items-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.bundle-thumb {
+  width: 68px;
+  height: 68px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid var(--glass-border);
+  background: #fff;
+}
+
+.bundle-plus {
+  font-size: 18px;
+  font-weight: 800;
+  color: #b88628;
+}
+
+.bundle-pricing-col {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bundle-orig-price {
+  font-size: 12.5px;
+  color: var(--text-light);
+  text-decoration: line-through;
+}
+
+.bundle-deal-price {
+  font-size: 18px;
+  font-weight: 800;
+  color: #b88628;
+}
+
+.bundle-savings-tag {
+  font-size: 11px;
+  font-weight: 800;
+  color: #0b8043;
+  background: rgba(37, 211, 102, 0.15);
+  padding: 2px 6px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.btn-add-bundle-instant {
+  width: 100%;
+  margin-top: 14px;
+  background: var(--gold-gradient);
+  border: none;
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(184, 134, 40, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-add-bundle-instant:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(184, 134, 40, 0.45);
+}
+
+/* ============================================================
+   💬 SMART WHATSAPP CHECKOUT BUILDER
+   ============================================================ */
+.smart-checkout-card {
+  background: var(--glass-bg-subtle);
+  border: 1px solid var(--glass-border-subtle);
+  border-radius: 18px;
+  padding: 16px;
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.smart-checkout-heading {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.smart-checkout-input {
+  width: 100%;
+  background: var(--bg-card, #fff);
+  border: 1.5px solid var(--glass-border-subtle);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.smart-checkout-input:focus {
+  border-color: #b88628;
+}
+
+.delivery-method-chips {
+  display: flex;
+  gap: 8px;
+}
+
+.delivery-chip {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 10px;
+  border: 1.5px solid var(--glass-border-subtle);
+  background: var(--bg-card, #fff);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delivery-chip.active {
+  border-color: #25d366;
+  background: rgba(37, 211, 102, 0.12);
+  color: #0b8043;
+}
+
+.btn-smart-wa-checkout {
+  width: 100%;
+  background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+  color: #fff;
+  border: none;
+  font-size: 14.5px;
+  font-weight: 800;
+  padding: 14px 20px;
+  border-radius: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-smart-wa-checkout:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(37, 211, 102, 0.5);
+}
+
+/* ============================================================
+   📱 APP-LIKE FLOATING BOTTOM DOCK FOR MOBILE
+   ============================================================ */
+.mobile-bottom-dock {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 74px; /* prevent content overlap */
+  }
+
+  .mobile-bottom-dock {
+    display: flex;
+    position: fixed;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    height: 60px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.85);
+    z-index: 9999;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 8px;
+    margin: 0 auto;
+    max-width: 500px;
+  }
+
+  .dock-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    color: var(--text-light, #777);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    padding: 6px 0;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .dock-tab.active,
+  .dock-tab:hover {
+    color: #b88628;
+    transform: translateY(-2px);
+  }
+
+  .dock-tab svg {
+    transition: transform 0.2s ease;
+  }
+
+  .dock-tab:hover svg {
+    transform: scale(1.12);
+  }
+
+  .dock-badge {
+    position: absolute;
+    top: 2px;
+    right: 50%;
+    transform: translateX(14px);
+    background: #d9534f;
+    color: #fff;
+    font-size: 9.5px;
+    font-weight: 800;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    box-shadow: 0 2px 6px rgba(217, 83, 79, 0.4);
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   💎 DEFINITIVE IOS LIQUID GLASS (GLASSMORPHISM) SUITE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+body {
+  background: radial-gradient(circle at 10% 10%, rgba(212, 163, 75, 0.08) 0%, transparent 45%),
+              radial-gradient(circle at 90% 40%, rgba(37, 211, 102, 0.06) 0%, transparent 50%),
+              radial-gradient(circle at 50% 90%, rgba(212, 163, 75, 0.07) 0%, transparent 40%),
+              #FCFBF7 !important;
+  min-height: 100vh;
+}
+
+[data-theme="dark"] body {
+  background: radial-gradient(circle at 10% 10%, rgba(212, 163, 75, 0.12) 0%, transparent 45%),
+              radial-gradient(circle at 90% 40%, rgba(37, 211, 102, 0.08) 0%, transparent 50%),
+              radial-gradient(circle at 50% 90%, rgba(212, 163, 75, 0.1) 0%, transparent 40%),
+              #121210 !important;
+  color: #F5F5F0 !important;
+}
+
+/* 1. Header & Navigation Liquid Glass */
+.site-header {
+  background: rgba(255, 255, 255, 0.78) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.65) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+[data-theme="dark"] .site-header {
+  background: rgba(22, 22, 20, 0.82) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+.site-nav {
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="dark"] .site-nav {
+  background: rgba(28, 28, 24, 0.75) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 2. Search Glass Pill */
+.search-wrap input {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1.5px solid rgba(212, 163, 75, 0.35) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04), inset 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+  border-radius: 999px !important;
+  transition: all 0.25s ease !important;
+}
+
+.search-wrap input:focus {
+  background: #ffffff !important;
+  border-color: #b88628 !important;
+  box-shadow: 0 0 0 4px rgba(212, 163, 75, 0.18), 0 8px 25px rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="dark"] .search-wrap input {
+  background: rgba(35, 35, 30, 0.85) !important;
+  color: #fff !important;
+  border-color: rgba(229, 185, 103, 0.3) !important;
+}
+
+/* 3. Product Cards & Grid Items Liquid Glass */
+.vigneto-card, .product-card {
+  background: rgba(255, 255, 255, 0.76) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.75) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 14px 35px -10px rgba(28, 28, 26, 0.08), inset 0 1px 1px 0 rgba(255, 255, 255, 0.95) !important;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.vigneto-card:hover, .product-card:hover {
+  transform: translateY(-8px) scale(1.015) !important;
+  border-color: rgba(212, 163, 75, 0.6) !important;
+  box-shadow: 0 24px 50px -12px rgba(184, 134, 40, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 1) !important;
+}
+
+[data-theme="dark"] .vigneto-card, [data-theme="dark"] .product-card {
+  background: rgba(28, 28, 26, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 18px 45px -10px rgba(0, 0, 0, 0.6), inset 0 1px 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .vigneto-card:hover, [data-theme="dark"] .product-card:hover {
+  border-color: rgba(229, 185, 103, 0.6) !important;
+  box-shadow: 0 28px 60px -12px rgba(0, 0, 0, 0.8), 0 0 25px rgba(212, 163, 75, 0.25) !important;
+}
+
+/* 4. Trust Badges & Categories Liquid Glass */
+.vigneto-trust-strip {
+  background: rgba(247, 243, 235, 0.6) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.6) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6) !important;
+}
+
+.vigneto-trust-card {
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  border-radius: 16px !important;
+  padding: 12px 16px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03) !important;
+}
+
+[data-theme="dark"] .vigneto-trust-card {
+  background: rgba(35, 35, 30, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.vigneto-cat-card .vigneto-cat-circle {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 2px solid rgba(212, 163, 75, 0.35) !important;
+  box-shadow: 0 8px 24px rgba(212, 163, 75, 0.15), inset 0 1px 1px #fff !important;
+}
+
+/* 5. Modals & Drawers Liquid Glass */
+.cart-drawer, .wishlist-drawer {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(32px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.7) !important;
+  box-shadow: -15px 0 50px rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-theme="dark"] .cart-drawer, [data-theme="dark"] .wishlist-drawer {
+  background: rgba(22, 22, 20, 0.92) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.product-modal {
+  background: rgba(255, 255, 255, 0.86) !important;
+  backdrop-filter: blur(30px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  border-radius: 28px !important;
+  box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.95) !important;
+}
+
+[data-theme="dark"] .product-modal {
+  background: rgba(26, 26, 24, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Dark mode text colors */
+[data-theme="dark"] .vigneto-card-title,
+[data-theme="dark"] .vigneto-price-current,
+[data-theme="dark"] .brand-name,
+[data-theme="dark"] .vigneto-cat-title,
+[data-theme="dark"] .vigneto-cat-heading,
+[data-theme="dark"] .stl-heading,
+[data-theme="dark"] .stl-title,
+[data-theme="dark"] .stl-price-curr,
+[data-theme="dark"] .rv-heading,
+[data-theme="dark"] .rv-title,
+[data-theme="dark"] .rv-author,
+[data-theme="dark"] .modal-name,
+[data-theme="dark"] .cart-head h3,
+[data-theme="dark"] .wishlist-head h3,
+[data-theme="dark"] .action-text {
+  color: #f5f5f0 !important;
+}
+
+[data-theme="dark"] .vigneto-cat-sub,
+[data-theme="dark"] .vigneto-trust-sub,
+[data-theme="dark"] .rv-body,
+[data-theme="dark"] .modal-desc-para,
+[data-theme="dark"] .cart-item-name {
+  color: #b8b5ab !important;
+}
