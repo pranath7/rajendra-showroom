@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadWishlist();
   
   // Stale-While-Revalidate caching with versioning
-  const CATALOG_VERSION = "v4.10_decor_cam";
+  const CATALOG_VERSION = "v5.00_decor_cam_exclusive";
   const cachedVersion = localStorage.getItem("rs_catalog_version");
   const cachedProducts = localStorage.getItem(STORE_KEY);
   

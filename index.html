@@ -246,18 +246,12 @@
     <!-- Nav (Vigneto Links) -->
     <nav class="site-nav">
       <div class="nav-inner" id="topNavInner">
-        <a href="#products" style="font-family:'Brush Script MT', cursive, sans-serif; color:#D9534F; font-size:15px; font-weight:bold;">Palace Collection</a>
-        <a href="#products" onclick="setCategory('all')">Best Sellers</a>
-        <a href="#products" onclick="setCategory('Gift Sets')">Gifting ▾</a>
-        <a href="#products" onclick="setCategory('all')">Collections ▾</a>
-        <a href="#products" onclick="setCategory('Dinner Sets')">Dinnerware ▾</a>
-        <a href="#products" onclick="setCategory('Cookware')">Cutlery</a>
-        <a href="#products" onclick="setCategory('Tea Sets')">Teaware ▾</a>
-        <a href="#products" onclick="setCategory('Tea Sets')">Mugs ▾</a>
-        <a href="#products" onclick="setCategory('Serving')">Dessertware ▾</a>
-        <a href="#products" onclick="setCategory('Serving')">Snack Platters ▾</a>
-        <a href="#products" onclick="setCategory('Cookware')">Canisters</a>
-        <a href="#products" onclick="setCategory('Glassware')">Glassware</a>
+        <a href="#products" onclick="setCategory('all')" style="font-family:'Brush Script MT', cursive, sans-serif; color:#D9534F; font-size:15px; font-weight:bold;">Decor Cam Luxury</a>
+        <a href="#products" onclick="setCategory('all')">All Products</a>
+        <a href="#products" onclick="setCategory('Dinner Sets')">27-Pc Dinner Sets</a>
+        <a href="#products" onclick="setCategory('Bowls')">Dessert Bowls & Sets</a>
+        <a href="#products" onclick="setCategory('Serving')">3-Tier Cake Stands</a>
+        <a href="#products" onclick="openGiftQuizModal()">✨ Smart Gift Finder</a>
       </div>
     </nav>
   </header>
@@ -270,40 +264,24 @@
   </section>
 
   <!-- ═══ "Shop by Category" Line Art Icons Strip (Top Placement) ═══ -->
-  <section class="lineart-category-strip" style="border-bottom:1px solid var(--border); border-top:1px solid var(--border); padding:36px 24px; background:#fff;">
-    <h2 class="lineart-title" style="font-family:var(--font-serif); font-size:32px; font-weight:500; text-align:center; margin-bottom:28px;">Shop by Category</h2>
-    <div class="lineart-icons-row" style="max-width:1100px; margin:0 auto; display:flex; justify-content:space-around; align-items:center; flex-wrap:wrap; gap:20px;">
+  <section class="lineart-category-strip" style="border-bottom:1px solid var(--border); border-top:1px solid var(--border); padding:32px 24px; background:#fff;">
+    <h2 class="lineart-title" style="font-family:var(--font-serif); font-size:30px; font-weight:500; text-align:center; margin-bottom:24px;">Explore Collections</h2>
+    <div class="lineart-icons-row" style="max-width:900px; margin:0 auto; display:flex; justify-content:space-around; align-items:center; flex-wrap:wrap; gap:20px;">
+      <div class="lineart-item" onclick="setCategory('all')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
+        <div style="font-size:36px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">👑</div>
+        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">All Luxury Items</span>
+      </div>
       <div class="lineart-item" onclick="setCategory('Dinner Sets')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
-        <div style="font-size:38px; filter: grayscale(100%) opacity(0.85);">🍽️</div>
-        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Dinnerware</span>
+        <div style="font-size:36px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">🍽️</div>
+        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">27-Pc Dinner Sets</span>
       </div>
-      <div class="lineart-item" onclick="setCategory('Tea Sets')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
-        <div style="font-size:38px; filter: grayscale(100%) opacity(0.85);">🫖</div>
-        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Teaware</span>
-      </div>
-      <div class="lineart-item" onclick="setCategory('Tea Sets')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
-        <div style="font-size:38px; filter: grayscale(100%) opacity(0.85);">☕</div>
-        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Mugs</span>
-      </div>
-      <div class="lineart-item" onclick="setCategory('Glassware')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
-        <div style="font-size:38px; filter: grayscale(100%) opacity(0.85);">🥂</div>
-        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Glassware</span>
+      <div class="lineart-item" onclick="setCategory('Bowls')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
+        <div style="font-size:36px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">🍨</div>
+        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Bowls & Desserts</span>
       </div>
       <div class="lineart-item" onclick="setCategory('Serving')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
-        <div style="font-size:38px; filter: grayscale(100%) opacity(0.85);">🧁</div>
-        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Dessertware</span>
-      </div>
-      <div class="lineart-item" onclick="setCategory('Cookware')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
-        <div style="font-size:38px; filter: grayscale(100%) opacity(0.85);">🍲</div>
-        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Cookware</span>
-      </div>
-      <div class="lineart-item" onclick="setCategory('Cookware')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
-        <div style="font-size:38px; filter: grayscale(100%) opacity(0.85);">🍴</div>
-        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Cutlery</span>
-      </div>
-      <div class="lineart-item" onclick="setCategory('Gift Sets')" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; gap:8px;">
-        <div style="font-size:38px; filter: grayscale(100%) opacity(0.85);">🏺</div>
-        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">Vases & Decor</span>
+        <div style="font-size:36px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">🧁</div>
+        <span style="font-size:13px; font-weight:600; color:var(--text); letter-spacing:0.5px;">3-Tier Cake Stands</span>
       </div>
     </div>
   </section>
@@ -328,8 +306,8 @@
     <div class="stl-grid">
       <!-- Reel 1 -->
       <div class="stl-card" onclick="openReelModal(1)" style="cursor: pointer;">
-        <div class="stl-card-img-wrap">
-          <img src="images/cat_dinner.jpg" alt="Royal 24K Gold Rim 59 Pcs Dinner Set">
+        <div class="stl-card-img-wrap" style="background:#fff;">
+          <img src="images/decor_cam/DC216-champagne.png" alt="Decor Cam DC216 27-Pc Dinner Set" style="object-fit:contain; padding:10px;">
           <span class="stl-view-badge">👁 14.2K views</span>
           <div class="reel-play-overlay">
             <div class="reel-play-btn">▶</div>
@@ -337,15 +315,15 @@
           <div class="reel-handle-tag">@rajendra_show_room</div>
         </div>
         <div class="stl-info">
-          <div class="stl-title">Royal 24K Gold Rim 59 Pcs Dinner Set</div>
-          <div class="stl-price-row"><span class="stl-price-curr">₹24,500</span> <span class="stl-price-old">₹28,000</span></div>
+          <div class="stl-title">Decor Cam DC216 27-Pc Dinner Set</div>
+          <div class="stl-price-row"><span class="stl-price-curr">₹13,499</span> <span class="stl-price-old">₹16,874</span></div>
         </div>
       </div>
 
       <!-- Reel 2 -->
       <div class="stl-card" onclick="openReelModal(2)" style="cursor: pointer;">
-        <div class="stl-card-img-wrap">
-          <img src="images/cat_tea.jpg" alt="Victorian Emerald 15 Pcs Tea Set">
+        <div class="stl-card-img-wrap" style="background:#fff;">
+          <img src="images/decor_cam/DC216-pearl-white.png" alt="Decor Cam DC216 Pearl White Dinner Set" style="object-fit:contain; padding:10px;">
           <span class="stl-view-badge">👁 18.5K views</span>
           <div class="reel-play-overlay">
             <div class="reel-play-btn">▶</div>
@@ -353,15 +331,15 @@
           <div class="reel-handle-tag">@rajendra_show_room</div>
         </div>
         <div class="stl-info">
-          <div class="stl-title">Victorian Emerald 15 Pcs Tea Set</div>
-          <div class="stl-price-row"><span class="stl-price-curr">₹8,499</span> <span class="stl-price-old">₹9,999</span></div>
+          <div class="stl-title">Decor Cam DC216 Pearl White 27-Pc Set</div>
+          <div class="stl-price-row"><span class="stl-price-curr">₹13,499</span> <span class="stl-price-old">₹16,874</span></div>
         </div>
       </div>
 
       <!-- Reel 3 -->
       <div class="stl-card" onclick="openReelModal(3)" style="cursor: pointer;">
-        <div class="stl-card-img-wrap">
-          <img src="images/cat_glassware.jpg" alt="Imperial Cut Crystal Glassware Set">
+        <div class="stl-card-img-wrap" style="background:#fff;">
+          <img src="images/decor_cam/DC221-amber-gold.png" alt="Decor Cam DC221 Pedestal Dessert Bowls" style="object-fit:contain; padding:10px;">
           <span class="stl-view-badge">👁 11.3K views</span>
           <div class="reel-play-overlay">
             <div class="reel-play-btn">▶</div>
@@ -369,15 +347,15 @@
           <div class="reel-handle-tag">@rajendra_show_room</div>
         </div>
         <div class="stl-info">
-          <div class="stl-title">Imperial Cut Crystal Glassware (Set of 6)</div>
-          <div class="stl-price-row"><span class="stl-price-curr">₹4,999</span> <span class="stl-price-old">₹6,200</span></div>
+          <div class="stl-title">Decor Cam DC221 Dessert Bowls (Set of 6)</div>
+          <div class="stl-price-row"><span class="stl-price-curr">₹4,250</span> <span class="stl-price-old">₹5,313</span></div>
         </div>
       </div>
 
       <!-- Reel 4 -->
       <div class="stl-card" onclick="openReelModal(4)" style="cursor: pointer;">
-        <div class="stl-card-img-wrap">
-          <img src="images/cat_serveware.jpg" alt="Palace Gold Double-Walled Serveware">
+        <div class="stl-card-img-wrap" style="background:#fff;">
+          <img src="images/decor_cam/DC224-champagne.png" alt="Decor Cam DC224 3-Tier Cake Stand" style="object-fit:contain; padding:10px;">
           <span class="stl-view-badge">👁 12.8K views</span>
           <div class="reel-play-overlay">
             <div class="reel-play-btn">▶</div>
@@ -385,15 +363,15 @@
           <div class="reel-handle-tag">@rajendra_show_room</div>
         </div>
         <div class="stl-info">
-          <div class="stl-title">Palace Gold Double-Walled Serveware</div>
-          <div class="stl-price-row"><span class="stl-price-curr">₹12,500</span> <span class="stl-price-old">₹14,800</span></div>
+          <div class="stl-title">Decor Cam DC224 3-Tier Luxury Cake Stand</div>
+          <div class="stl-price-row"><span class="stl-price-curr">₹2,125</span> <span class="stl-price-old">₹2,656</span></div>
         </div>
       </div>
 
       <!-- Reel 5 -->
       <div class="stl-card" onclick="openReelModal(5)" style="cursor: pointer;">
-        <div class="stl-card-img-wrap">
-          <img src="images/cat_gifting.jpg" alt="Artisanal Porcelain Luxury Gift Set">
+        <div class="stl-card-img-wrap" style="background:#fff;">
+          <img src="images/decor_cam/DC220-turquoise.png" alt="Decor Cam DC220 6-Pc Dessert Bowls" style="object-fit:contain; padding:10px;">
           <span class="stl-view-badge">👁 9.4K views</span>
           <div class="reel-play-overlay">
             <div class="reel-play-btn">▶</div>
@@ -401,8 +379,8 @@
           <div class="reel-handle-tag">@rajendra_show_room</div>
         </div>
         <div class="stl-info">
-          <div class="stl-title">Artisanal Porcelain Luxury Gift Box</div>
-          <div class="stl-price-row"><span class="stl-price-curr">₹6,999</span> <span class="stl-price-old">₹7,999</span></div>
+          <div class="stl-title">Decor Cam DC220 6-Pc Bowls with Spoons</div>
+          <div class="stl-price-row"><span class="stl-price-curr">₹2,750</span> <span class="stl-price-old">₹3,438</span></div>
         </div>
       </div>
     </div>
@@ -446,30 +424,22 @@
   <section class="vigneto-category-section">
     <h2 class="vigneto-cat-heading">Curated Luxury Collections</h2>
     <p class="vigneto-cat-sub">Handpicked porcelain, fine bone china, and artisanal glassware for elevated dining</p>
-    <div class="vigneto-category-grid">
+    <div class="vigneto-category-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); max-width: 900px; margin: 0 auto;">
       <div class="vigneto-cat-card" onclick="setCategory('Dinner Sets')">
-        <div class="vigneto-cat-circle"><img src="images/cat_dinner.jpg" alt="Dinner Sets"></div>
-        <span class="vigneto-cat-title">Dinner Sets</span>
+        <div class="vigneto-cat-circle"><img src="images/decor_cam/DC216-champagne.png" alt="27-Piece Dinner Sets" style="object-fit:contain; padding:6px;"></div>
+        <span class="vigneto-cat-title">27-Pc Dinner Sets</span>
       </div>
-      <div class="vigneto-cat-card" onclick="setCategory('Tea Sets')">
-        <div class="vigneto-cat-circle"><img src="images/cat_tea.jpg" alt="Tea Sets"></div>
-        <span class="vigneto-cat-title">Tea Sets</span>
+      <div class="vigneto-cat-card" onclick="setCategory('Bowls')">
+        <div class="vigneto-cat-circle"><img src="images/decor_cam/DC220-pearl-white.png" alt="Dessert Bowls" style="object-fit:contain; padding:6px;"></div>
+        <span class="vigneto-cat-title">Dessert Bowls</span>
       </div>
-      <div class="vigneto-cat-card" onclick="setCategory('Glassware')">
-        <div class="vigneto-cat-circle"><img src="images/cat_glassware.jpg" alt="Glassware"></div>
-        <span class="vigneto-cat-title">Glassware</span>
+      <div class="vigneto-cat-card" onclick="setCategory('Bowls')">
+        <div class="vigneto-cat-circle"><img src="images/decor_cam/DC221-amber-gold.png" alt="Ice Cream Bowls with Metal Base" style="object-fit:contain; padding:6px;"></div>
+        <span class="vigneto-cat-title">Pedestal Bowls</span>
       </div>
       <div class="vigneto-cat-card" onclick="setCategory('Serving')">
-        <div class="vigneto-cat-circle"><img src="images/cat_serveware.jpg" alt="Serveware"></div>
-        <span class="vigneto-cat-title">Serveware</span>
-      </div>
-      <div class="vigneto-cat-card" onclick="setCategory('Cookware')">
-        <div class="vigneto-cat-circle"><img src="images/cat_cookware.jpg" alt="Cookware"></div>
-        <span class="vigneto-cat-title">Cookware</span>
-      </div>
-      <div class="vigneto-cat-card" onclick="setCategory('Gift Sets')">
-        <div class="vigneto-cat-circle"><img src="images/cat_gifting.jpg" alt="Gift Sets"></div>
-        <span class="vigneto-cat-title">Gift Sets</span>
+        <div class="vigneto-cat-circle"><img src="images/decor_cam/DC224-champagne.png" alt="3-Tier Cake Stands" style="object-fit:contain; padding:6px;"></div>
+        <span class="vigneto-cat-title">3-Tier Cake Stands</span>
       </div>
     </div>
   </section>
@@ -519,13 +489,8 @@
       <div class="vigneto-pills">
         <button class="vigneto-pill active" onclick="setCategory('all')">All Products</button>
         <button class="vigneto-pill" onclick="setCategory('Dinner Sets')">Dinner Sets</button>
-        <button class="vigneto-pill" onclick="setCategory('Glassware')">Glassware</button>
-        <button class="vigneto-pill" onclick="setCategory('Bowls')">Bowls</button>
-        <button class="vigneto-pill" onclick="setCategory('Serving')">Serving</button>
-        <button class="vigneto-pill" onclick="setCategory('Tea Sets')">Tea Sets</button>
-        <button class="vigneto-pill" onclick="setCategory('Cookware')">Cookware</button>
-        <button class="vigneto-pill" onclick="setCategory('Cutlery')">Cutlery</button>
-        <button class="vigneto-pill" onclick="setCategory('Gift Sets')">Gift Sets</button>
+        <button class="vigneto-pill" onclick="setCategory('Bowls')">Bowls & Desserts</button>
+        <button class="vigneto-pill" onclick="setCategory('Serving')">Serving & Stands</button>
       </div>
 
       <div style="display:flex; align-items:center; gap:12px;">
