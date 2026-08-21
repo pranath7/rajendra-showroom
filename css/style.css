@@ -1043,6 +1043,264 @@ input, select, textarea { font-family: inherit; }
 .cart-item-remove { margin-left: auto; color: var(--text-muted); font-size: 18px; transition: var(--transition); }
 .cart-item-remove:hover { color: var(--red); }
 
+.cart-item-variant-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(184, 134, 11, 0.08);
+  color: var(--gold-dark);
+  border: 1px solid rgba(184, 134, 11, 0.2);
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* ─── Suggested Add-ons Shelf (#8) ─── */
+.cart-addons-section {
+  margin-top: 18px;
+  padding: 14px;
+  background: #fdfaf4;
+  border: 1px solid #f0e6d2;
+  border-radius: 14px;
+}
+.cart-addons-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cart-addons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cart-addon-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+.cart-addon-card:hover {
+  border-color: var(--gold);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.cart-addon-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: var(--bg-warm);
+  object-fit: contain;
+  padding: 3px;
+  flex-shrink: 0;
+}
+.cart-addon-details {
+  flex: 1;
+  min-width: 0;
+}
+.cart-addon-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cart-addon-price {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold-dark);
+}
+.cart-addon-add-btn {
+  padding: 5px 12px;
+  background: rgba(184, 134, 11, 0.12);
+  color: var(--gold-dark);
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.cart-addon-add-btn:hover {
+  background: var(--gold-dark);
+  color: #fff;
+}
+
+/* ─── Promo / Discount Code (#4) ─── */
+.cart-promo-section {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.cart-promo-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.cart-promo-row {
+  display: flex;
+  gap: 8px;
+}
+.cart-promo-input {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: #fff;
+  color: var(--text);
+  outline: none;
+}
+.cart-promo-input:focus {
+  border-color: var(--gold);
+}
+.cart-promo-btn {
+  padding: 9px 16px;
+  background: var(--bg-dark);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.cart-promo-btn:hover {
+  background: var(--gold-dark);
+}
+.cart-promo-status {
+  font-size: 11.5px;
+  margin-top: 6px;
+  line-height: 1.4;
+  display: none;
+}
+.cart-promo-status.success {
+  display: block;
+  color: #27ae60;
+  font-weight: 600;
+}
+.cart-promo-status.error {
+  display: block;
+  color: #c0392b;
+  font-weight: 600;
+}
+
+/* ─── Support Concierge Card (#6) ─── */
+.cart-support-card {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: rgba(37, 211, 102, 0.06);
+  border: 1px dashed rgba(37, 211, 102, 0.4);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cart-support-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.cart-support-text {
+  flex: 1;
+  font-size: 11.5px;
+  color: var(--text-light);
+  line-height: 1.35;
+}
+.cart-support-text strong {
+  display: block;
+  color: var(--text);
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+.cart-support-btn {
+  padding: 6px 12px;
+  background: #25D366;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+.cart-support-btn:hover {
+  background: #1eb956;
+}
+
+/* ─── Accepted Payment Methods Badges (#5) ─── */
+.cart-payment-methods {
+  margin-bottom: 12px;
+  text-align: center;
+}
+.cart-payment-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  display: block;
+}
+.cart-payment-badges {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pay-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid var(--border);
+  color: var(--text-light);
+}
+.pay-badge.upi {
+  border-color: #5f259f;
+  color: #5f259f;
+  background: rgba(95, 37, 159, 0.05);
+}
+.pay-badge.phonepe {
+  border-color: #6739b7;
+  color: #6739b7;
+  background: rgba(103, 57, 183, 0.05);
+}
+.pay-badge.paytm {
+  border-color: #00b9f1;
+  color: #0087b0;
+  background: rgba(0, 185, 241, 0.05);
+}
+.pay-badge.cards {
+  border-color: #1a1f71;
+  color: #1a1f71;
+  background: rgba(26, 31, 113, 0.05);
+}
+.pay-badge.pickup {
+  border-color: var(--gold-dark);
+  color: var(--gold-dark);
+  background: rgba(184, 134, 11, 0.05);
+}
+
 .cart-foot {
   padding: 20px 22px;
   border-top: 1px solid var(--border);

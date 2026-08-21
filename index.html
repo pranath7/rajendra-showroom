@@ -671,8 +671,40 @@
       <!-- Active Cart Items List -->
       <div id="cartItemsList" class="cart-items-wrap"></div>
 
+      <!-- Suggested Add-ons Shelf (Checklist #8) -->
+      <div class="cart-addons-section" id="cartAddonsSection" style="display:none;">
+        <div class="cart-addons-title">
+          <span>✨ Complete Your Set (Suggested Add-Ons)</span>
+        </div>
+        <div class="cart-addons-list" id="cartAddonsList">
+          <!-- Dynamically populated based on cart items -->
+        </div>
+      </div>
+
+      <!-- Promo / Voucher Code Section (Checklist #4) -->
+      <div class="cart-promo-section" id="cartPromoSection" style="display:none;">
+        <div class="cart-promo-title">
+          <span>🏷️ Have a Promo Code or Gift Card?</span>
+        </div>
+        <div class="cart-promo-row">
+          <input type="text" id="cartCouponInput" class="cart-promo-input" placeholder="e.g. WELCOME10, ROYAL500, GC-..." autocomplete="off">
+          <button type="button" class="cart-promo-btn" id="cartCouponBtn" onclick="applyCartCoupon()">Apply</button>
+        </div>
+        <div id="cartCouponStatus" class="cart-promo-status"></div>
+      </div>
+
+      <!-- Link to Support / Concierge (Checklist #6) -->
+      <div class="cart-support-card" id="cartSupportCard" style="display:none;">
+        <div class="cart-support-icon">💬</div>
+        <div class="cart-support-text">
+          <strong>Need help or custom arrangements?</strong>
+          <span>Chat with our Showroom Concierge for live photos, packaging or bulk inquiries.</span>
+        </div>
+        <button type="button" class="cart-support-btn" onclick="contactCartSupport()">Chat Now</button>
+      </div>
+
       <!-- Delivery Estimator & Delivery Details in Scrollable Body -->
-      <div id="cartExtraSections" style="display:none; margin-top:20px;">
+      <div id="cartExtraSections" style="display:none; margin-top:16px;">
         <!-- Live Pincode Delivery Estimator in Cart -->
         <div class="pincode-checker-wrap" style="margin: 0 0 14px; padding: 14px; border-radius:14px;">
           <div class="pincode-checker-title">
@@ -686,7 +718,7 @@
         </div>
 
         <!-- Customer Details for WhatsApp Order -->
-        <div class="smart-checkout-card" id="cartQuickCustomerCard" style="border-radius:14px; margin-bottom: 20px;">
+        <div class="smart-checkout-card" id="cartQuickCustomerCard" style="border-radius:14px; margin-bottom: 16px;">
           <div class="smart-checkout-heading">
             <span>📝 Quick Delivery Details</span>
           </div>
@@ -704,12 +736,28 @@
       </div>
     </div>
 
-    <!-- Compact Sticky Footer -->
+    <!-- Compact Sticky Footer with Accepted Payments (Checklist #5 & #7) -->
     <div class="cart-foot" id="cartFoot" style="display:none;">
+      <!-- Accepted Payment Methods Badges (Checklist #5) -->
+      <div class="cart-payment-methods">
+        <div class="cart-payment-label">🔒 Guaranteed Safe & Secure Checkout</div>
+        <div class="cart-payment-badges">
+          <span class="pay-badge upi">⚡ UPI / GPay</span>
+          <span class="pay-badge phonepe">PhonePe</span>
+          <span class="pay-badge paytm">Paytm</span>
+          <span class="pay-badge cards">💳 Cards</span>
+          <span class="pay-badge pickup">🏬 Store Pickup</span>
+        </div>
+      </div>
+
       <div class="cart-totals">
         <div class="cart-total-row">
           <span>Subtotal</span>
           <span id="cartSubtotal">₹0</span>
+        </div>
+        <div class="cart-total-row" id="cartDiscountRow" style="display:none; color:#27AE60;">
+          <span id="cartDiscountLabel">Coupon Discount</span>
+          <span id="cartDiscountAmount">−₹0</span>
         </div>
         <div class="cart-total-row">
           <span>Delivery</span>
@@ -720,13 +768,17 @@
           <span id="cartGrandTotal">₹0</span>
         </div>
       </div>
+
       <div style="display: flex; flex-direction: column; gap: 8px;">
-        <button class="btn-smart-wa-checkout" onclick="submitSmartWhatsAppCheckout()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.99 2C6.477 2 2 6.477 2 11.99c0 1.72.454 3.33 1.24 4.73L2 22l5.47-1.22A9.957 9.957 0 0011.99 22C17.51 22 22 17.52 22 11.99 22 6.477 17.51 2 11.99 2zm0 18.18c-1.65 0-3.19-.44-4.52-1.21l-.32-.19-3.37.75.8-3.28-.21-.34A8.17 8.17 0 013.82 12c0-4.51 3.67-8.18 8.17-8.18 4.51 0 8.18 3.67 8.18 8.18 0 4.51-3.67 8.18-8.18 8.18z"/></svg>
-          Order Instantly on WhatsApp
+        <!-- Prominent Checkout Buttons (Checklist #7) -->
+        <button class="btn-checkout-primary" onclick="closeCart(); openCheckoutModal();" style="width: 100%; padding: 13px; background: var(--gold-dark); color: #fff; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(184,134,11,0.35); transition: all 0.2s ease;">
+          <span>⚡ Proceed to Checkout</span>
+          <span style="opacity:0.85; font-weight:400;">•</span>
+          <span id="cartBtnGrandTotal">₹0</span>
         </button>
-        <button class="btn-checkout-primary" onclick="closeCart(); openCheckoutModal();" style="width: 100%; padding: 10px; background: rgba(13,40,24,0.06); color: var(--text); border: 1.5px solid var(--border-dark); border-radius: 12px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-          💳 Or Pay Online via UPI
+        <button class="btn-smart-wa-checkout" onclick="submitSmartWhatsAppCheckout()" style="width: 100%; padding: 11px; font-size: 13px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.99 2C6.477 2 2 6.477 2 11.99c0 1.72.454 3.33 1.24 4.73L2 22l5.47-1.22A9.957 9.957 0 0011.99 22C17.51 22 22 17.52 22 11.99 22 6.477 17.51 2 11.99 2zm0 18.18c-1.65 0-3.19-.44-4.52-1.21l-.32-.19-3.37.75.8-3.28-.21-.34A8.17 8.17 0 013.82 12c0-4.51 3.67-8.18 8.17-8.18 4.51 0 8.18 3.67 8.18 8.18 0 4.51-3.67 8.18-8.18 8.18z"/></svg>
+          Instant WhatsApp Order
         </button>
       </div>
     </div>

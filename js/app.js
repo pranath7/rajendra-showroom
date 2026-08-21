@@ -896,9 +896,150 @@ function updateWishlistUI() {
   }
 }
 
+let appliedCartCoupon = null;
+
+function applyCartCoupon() {
+  const input = document.getElementById("cartCouponInput");
+  const status = document.getElementById("cartCouponStatus");
+  const btn = document.getElementById("cartCouponBtn");
+  if (!input || !status) return;
+
+  const code = input.value.trim().toUpperCase();
+  if (!code) {
+    status.className = "cart-promo-status error";
+    status.textContent = "Please enter a promo or voucher code.";
+    return;
+  }
+
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  let discount = 0;
+  let label = "";
+
+  if (code === "WELCOME10") {
+    discount = Math.round(subtotal * 0.10);
+    label = "10% Welcome Discount";
+  } else if (code === "ROYAL500") {
+    if (subtotal < 2500) {
+      status.className = "cart-promo-status error";
+      status.textContent = "Coupon 'ROYAL500' requires a minimum order of ₹2,500.";
+      return;
+    }
+    discount = 500;
+    label = "₹500 Royal Showroom Discount";
+  } else if (code === "FESTIVE15") {
+    if (subtotal < 5000) {
+      status.className = "cart-promo-status error";
+      status.textContent = "Coupon 'FESTIVE15' requires a minimum order of ₹5,000.";
+      return;
+    }
+    discount = Math.round(subtotal * 0.15);
+    label = "15% Festive Savings";
+  } else if (code.startsWith("GC-")) {
+    // Check Gift Cards / Vouchers in db
+    if (typeof vouchers !== "undefined" && Array.isArray(vouchers)) {
+      const v = vouchers.find(x => x.code === code);
+      if (v && v.balance > 0) {
+        discount = Math.min(v.balance, subtotal);
+        label = `Gift Card (${code}) Applied`;
+      }
+    }
+    if (discount === 0) {
+      status.className = "cart-promo-status error";
+      status.textContent = "Invalid or depleted gift card voucher.";
+      return;
+    }
+  } else {
+    status.className = "cart-promo-status error";
+    status.textContent = `Coupon code "${code}" is invalid or expired.`;
+    return;
+  }
+
+  appliedCartCoupon = { code, discount, label };
+  status.className = "cart-promo-status success";
+  status.innerHTML = `✅ <strong>${label}</strong> applied! You save ₹${discount.toLocaleString("en-IN")}. <a href="#" onclick="removeCartCoupon(); return false;" style="color:#c0392b; margin-left:6px; font-weight:normal; text-decoration:underline;">Remove</a>`;
+  
+  if (btn) btn.textContent = "Applied";
+  renderCartItems();
+  showToast(`Promo "${code}" applied: Saved ₹${discount}!`, "success");
+}
+
+function removeCartCoupon() {
+  appliedCartCoupon = null;
+  const input = document.getElementById("cartCouponInput");
+  const status = document.getElementById("cartCouponStatus");
+  const btn = document.getElementById("cartCouponBtn");
+  if (input) input.value = "";
+  if (status) { status.textContent = ""; status.className = "cart-promo-status"; }
+  if (btn) btn.textContent = "Apply";
+  renderCartItems();
+  showToast("Coupon removed", "info");
+}
+
+function contactCartSupport() {
+  if (cart.length === 0) {
+    window.open(`https://wa.me/${WA_NUMBER}?text=Hi%2C%20I%20have%20a%20question%20about%20Rajendra%20Showroom%20products`, "_blank");
+    return;
+  }
+  const itemSummary = cart.map(i => `• ${i.name} (Qty: ${i.qty})`).join("\n");
+  const msg = encodeURIComponent(
+    `Hi Rajendra Showroom Concierge! 💬\n\nI am currently looking at my cart items:\n${itemSummary}\n\nCould you please help me with custom combinations, live photo previews, or express delivery questions?\n\nThank you!`
+  );
+  window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, "_blank");
+}
+
+function renderCartAddons() {
+  const addonsSection = document.getElementById("cartAddonsSection");
+  const addonsList = document.getElementById("cartAddonsList");
+  if (!addonsSection || !addonsList) return;
+
+  if (cart.length === 0) {
+    addonsSection.style.display = "none";
+    return;
+  }
+
+  // Filter out products already in cart
+  const cartIds = cart.map(i => String(i.id));
+  const candidateAddons = allProducts.filter(p => !cartIds.includes(String(p.id)));
+
+  if (candidateAddons.length === 0) {
+    addonsSection.style.display = "none";
+    return;
+  }
+
+  // Pick top 2 complementary add-ons (e.g. cake stands, dessert bowls, or dinnerware)
+  const selectedAddons = candidateAddons.slice(0, 2);
+
+  addonsList.innerHTML = selectedAddons.map(p => {
+    const safeName = p.name.replace(/'/g, "\\'");
+    return `
+      <div class="cart-addon-card">
+        <img src="${getOptimizedImageUrl(p.image, 90)}" alt="${p.name}" class="cart-addon-img">
+        <div class="cart-addon-details">
+          <div class="cart-addon-name">${p.name}</div>
+          <div class="cart-addon-price">₹${p.price.toLocaleString("en-IN")}</div>
+        </div>
+        <button type="button" class="cart-addon-add-btn" onclick="addCartAddon('${p.id}')">+ Add</button>
+      </div>
+    `;
+  }).join("");
+
+  addonsSection.style.display = "block";
+}
+
+function addCartAddon(id) {
+  const p = allProducts.find(x => String(x.id) === String(id));
+  if (!p) return;
+
+  const color = (p.colors && p.colors.length > 0) ? p.colors[0] : (p.colour || null);
+  addToCart(p.id, 1, color, null);
+  showToast(`Added "${p.name}" to cart!`, "success");
+}
+
 function renderCartItems() {
   const emptyEl = document.getElementById("cartEmptyState");
   const listEl = document.getElementById("cartItemsList");
+  const promoEl = document.getElementById("cartPromoSection");
+  const supportEl = document.getElementById("cartSupportCard");
   const extraEl = document.getElementById("cartExtraSections");
   const footEl = document.getElementById("cartFoot");
   const countHeader = document.getElementById("cartHeaderCount");
@@ -909,35 +1050,51 @@ function renderCartItems() {
   if (cart.length === 0) {
     if (emptyEl) emptyEl.style.display = "block";
     if (listEl) { listEl.innerHTML = ""; listEl.style.display = "none"; }
+    if (promoEl) promoEl.style.display = "none";
+    if (supportEl) supportEl.style.display = "none";
     if (extraEl) extraEl.style.display = "none";
     if (footEl) footEl.style.display = "none";
     const grandEl = document.getElementById("cartGrandTotal");
     if (grandEl) grandEl.textContent = "₹0";
+    renderCartAddons();
     return;
   }
 
   if (emptyEl) emptyEl.style.display = "none";
+  if (promoEl) promoEl.style.display = "block";
+  if (supportEl) supportEl.style.display = "flex";
+
   if (listEl) {
     listEl.style.display = "block";
-    listEl.innerHTML = cart.map(item => `
-      <div class="cart-item">
-        <div class="cart-item-img" style="display:flex;align-items:center;justify-content:center;background:var(--bg-warm);">
-          ${item.image ? `<img src="${getOptimizedImageUrl(item.image, 140)}" alt="${item.name}">` : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted);"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle></svg>`}
-        </div>
-        <div class="cart-item-info">
-          <div class="cart-item-name">${item.name}</div>
-          ${item.selectedSize ? `<div class="cart-item-variant" style="font-size:11.5px; color:var(--text-light); margin-top:2px;">Size: ${item.selectedSize}</div>` : ""}
-          ${item.selectedColor ? `<div class="cart-item-variant" style="font-size:11.5px; color:var(--text-light); margin-top:2px;">Color: ${item.selectedColor}</div>` : ""}
-          <div class="cart-item-price">${item.price > 0 ? '₹' + item.price.toLocaleString("en-IN") : 'Price on Request'}</div>
-          <div class="cart-item-controls">
-            <button class="qty-btn" onclick="changeQty('${item.id}', ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'}, -1)">−</button>
-            <span class="qty-val">${item.qty}</span>
-            <button class="qty-btn" onclick="changeQty('${item.id}', ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'}, 1)">+</button>
+    listEl.innerHTML = cart.map(item => {
+      const colorTag = item.selectedColor ? `<div class="cart-item-variant-tag">🎨 ${item.selectedColor}</div>` : "";
+      const sizeTag = item.selectedSize ? `<div class="cart-item-variant-tag">📏 ${item.selectedSize}</div>` : "";
+      return `
+        <div class="cart-item">
+          <div class="cart-item-img" style="display:flex;align-items:center;justify-content:center;background:var(--bg-warm);">
+            ${item.image ? `<img src="${getOptimizedImageUrl(item.image, 140)}" alt="${item.name}">` : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted);"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle></svg>`}
           </div>
-        </div>
-        <button class="cart-item-remove" onclick="removeFromCart('${item.id}', ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'})">×</button>
-      </div>`).join("");
+          <div class="cart-item-info">
+            <div class="cart-item-name">${item.name}</div>
+            <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:4px;">
+              ${colorTag}
+              ${sizeTag}
+            </div>
+            <div class="cart-item-price">${item.price > 0 ? '₹' + item.price.toLocaleString("en-IN") : 'Price on Request'}</div>
+            <div class="cart-item-controls">
+              <button class="qty-btn" onclick="changeQty('${item.id}', ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'}, -1)" title="Decrease Quantity">−</button>
+              <span class="qty-val">${item.qty}</span>
+              <button class="qty-btn" onclick="changeQty('${item.id}', ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'}, 1)" title="Increase Quantity">+</button>
+            </div>
+          </div>
+          <button class="cart-item-remove" onclick="removeFromCart('${item.id}', ${item.selectedColor ? `'${item.selectedColor}'` : 'null'}, ${item.selectedSize ? `'${item.selectedSize}'` : 'null'})" title="Remove Item">×</button>
+        </div>`;
+    }).join("");
   }
+
+  // Render Suggested Add-ons (Checklist #8)
+  renderCartAddons();
+
   if (extraEl) extraEl.style.display = "block";
   if (footEl) footEl.style.display = "block";
 
@@ -945,14 +1102,43 @@ function renderCartItems() {
   const state = document.getElementById("custState") ? document.getElementById("custState").value : "Tamil Nadu";
   const pincode = document.getElementById("custPincode") ? document.getElementById("custPincode").value.trim() : "";
   const delivery = getDynamicShippingRate(subtotal, state, pincode);
-  const grand    = subtotal + delivery;
+  
+  // Apply coupon discount if active
+  let discount = 0;
+  if (appliedCartCoupon) {
+    if (appliedCartCoupon.code === "WELCOME10") {
+      appliedCartCoupon.discount = Math.round(subtotal * 0.10);
+    } else if (appliedCartCoupon.code === "FESTIVE15") {
+      appliedCartCoupon.discount = Math.round(subtotal * 0.15);
+    }
+    discount = appliedCartCoupon.discount;
+  }
+
+  const grand = Math.max(0, subtotal + delivery - discount);
 
   const subEl = document.getElementById("cartSubtotal");
+  const discountRow = document.getElementById("cartDiscountRow");
+  const discountLabel = document.getElementById("cartDiscountLabel");
+  const discountAmount = document.getElementById("cartDiscountAmount");
   const delEl = document.getElementById("cartDelivery");
   const grandEl = document.getElementById("cartGrandTotal");
+  const btnGrandEl = document.getElementById("cartBtnGrandTotal");
+
   if (subEl) subEl.textContent = `₹${subtotal.toLocaleString("en-IN")}`;
+  
+  if (discountRow && discountAmount) {
+    if (discount > 0) {
+      discountRow.style.display = "flex";
+      if (discountLabel) discountLabel.textContent = appliedCartCoupon.label || "Coupon Discount";
+      discountAmount.textContent = `−₹${discount.toLocaleString("en-IN")}`;
+    } else {
+      discountRow.style.display = "none";
+    }
+  }
+
   if (delEl) delEl.textContent = delivery === 0 ? "FREE" : `₹${delivery}`;
   if (grandEl) grandEl.textContent = `₹${grand.toLocaleString("en-IN")}`;
+  if (btnGrandEl) btnGrandEl.textContent = `₹${grand.toLocaleString("en-IN")}`;
 }
 
 function openCart() {
@@ -3988,7 +4174,8 @@ function submitSmartWhatsAppCheckout() {
 
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const deliveryCharge = (currentDeliveryMethod === "pickup" || subtotal > 1999) ? 0 : 99;
-  const grandTotal = subtotal + deliveryCharge;
+  const discount = appliedCartCoupon ? (appliedCartCoupon.discount || 0) : 0;
+  const grandTotal = Math.max(0, subtotal + deliveryCharge - discount);
 
   const itemLines = cart.map(i => {
     const sizeText = i.selectedSize ? ` (Size: ${i.selectedSize})` : "";
@@ -4009,6 +4196,7 @@ function submitSmartWhatsAppCheckout() {
       (address ? `\n• Address: ${address}` : "") + "\n";
   }
 
+  const couponBlock = appliedCartCoupon ? `\n🏷️ *Coupon Applied:* ${appliedCartCoupon.code} (−₹${discount.toLocaleString("en-IN")})` : "";
   const noteBlock = note ? `\n📝 *Special / Gift Note:* ${note}\n` : "";
 
   const message = 
@@ -4017,7 +4205,7 @@ function submitSmartWhatsAppCheckout() {
 ${itemLines}
 ──────────────────────────
 💰 *Subtotal:* ₹${subtotal.toLocaleString("en-IN")}
-📦 *Shipping:* ${deliveryCharge === 0 ? "FREE" : "₹" + deliveryCharge}
+📦 *Shipping:* ${deliveryCharge === 0 ? "FREE" : "₹" + deliveryCharge}${couponBlock}
 💎 *Grand Total:* *₹${grandTotal.toLocaleString("en-IN")}*
 
 🛵 *Delivery Method:* ${deliveryMethodText}
