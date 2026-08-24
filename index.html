@@ -140,7 +140,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="css/style.css?v=4.00">
+  <link rel="stylesheet" href="css/style.css?v=4.30">
   <link rel="preload" href="images/hero.jpg" as="image" fetchpriority="high">
 
   <!-- Google tag (gtag.js) -->
@@ -234,12 +234,13 @@
           <span class="action-text">Wishlist</span>
           <span class="cart-count-badge" id="wishlistCountBadge" style="display:none; margin-left: 3px; position:static;">0</span>
         </button>
-        <button class="cart-trigger" id="cartTrigger" style="display:flex; align-items:center; gap:6px;">
+        <button class="cart-trigger" id="cartTrigger" onclick="openCart()" aria-label="Open Shopping Cart" style="display:flex; align-items:center; gap:6px;">
           <span class="cart-icon" style="display:flex;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
           </span>
           <span class="action-text">Cart</span>
-          <span class="cart-count-badge" style="display:none;">0</span>
+          <span class="cart-count-badge" id="navCartCount" style="display:none;">0</span>
+          <span class="nav-cart-total" id="navCartTotal" style="display:none;"></span>
         </button>
       </div>
     </div>
@@ -609,6 +610,7 @@
             <a href="#" onclick="openInfoModal('delivery'); return false;">Delivery Policy</a>
             <a href="#" onclick="openInfoModal('return'); return false;">Return Policy</a>
             <a href="#" onclick="openInfoModal('privacy'); return false;">Privacy Policy</a>
+            <a href="#" onclick="openDesignSystemModal(); return false;" style="color: var(--gold); font-weight: 700;">🎨 Design System</a>
           </div>
         </div>
 
@@ -646,15 +648,15 @@
     </div>
   </footer>
 
-  <!-- ═══ Cart Drawer ════════════════════════════════════════ -->
+  <!-- ═══ Cart Drawer (8/8 Checklist Standards) ═══════════════ -->
   <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
-  <div class="cart-drawer" id="cartDrawer">
+  <div class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-labelledby="cartDrawerTitle">
     <div class="cart-head">
-      <h3 style="display:flex; align-items:center; gap:8px;">
+      <h3 id="cartDrawerTitle" style="display:flex; align-items:center; gap:8px;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
         Your Cart (<span id="cartHeaderCount">0</span>)
       </h3>
-      <button class="cart-close-btn" id="cartClose" onclick="closeCart()">✕</button>
+      <button class="cart-close-btn" id="cartClose" onclick="closeCart()" aria-label="Close Cart">✕</button>
     </div>
 
     <!-- Main Scrollable Cart Body -->
@@ -664,11 +666,11 @@
         <div class="empty-icon" style="margin-bottom:12px;color:var(--text-muted);display:flex;justify-content:center;">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
         </div>
-        <p style="font-size:15px;line-height:1.5;font-weight:500;">Your cart is empty.<br><span style="font-size:13px;color:var(--text-muted);">Add some luxury tableware to get started!</span></p>
-        <button class="btn-primary" onclick="closeCart()" style="margin-top:16px;padding:10px 24px;border-radius:50px;font-size:13px;">Explore Collections</button>
+        <p style="font-size:15px;line-height:1.5;font-weight:500;">Your cart is empty.<br><span style="font-size:13px;color:var(--text-muted);">Explore our exclusive Decor Cam luxury collection to get started!</span></p>
+        <button class="btn-primary" onclick="closeCart(); document.getElementById('products').scrollIntoView({behavior:'smooth'});" style="margin-top:16px;padding:10px 24px;border-radius:50px;font-size:13px;">Explore Collections</button>
       </div>
 
-      <!-- Active Cart Items List -->
+      <!-- Active Cart Items List (Checklist #1, #2, #3) -->
       <div id="cartItemsList" class="cart-items-wrap"></div>
 
       <!-- Suggested Add-ons Shelf (Checklist #8) -->
@@ -681,26 +683,35 @@
         </div>
       </div>
 
-      <!-- Promo / Voucher Code Section (Checklist #4) -->
+      <!-- Promo / Voucher Code Section with 1-Click Chips (Checklist #4) -->
       <div class="cart-promo-section" id="cartPromoSection" style="display:none;">
         <div class="cart-promo-title">
-          <span>🏷️ Have a Promo Code or Gift Card?</span>
+          <span>🏷️ Have a Promo Code or Gift Voucher?</span>
         </div>
         <div class="cart-promo-row">
-          <input type="text" id="cartCouponInput" class="cart-promo-input" placeholder="e.g. WELCOME10, ROYAL500, GC-..." autocomplete="off">
+          <input type="text" id="cartCouponInput" class="cart-promo-input" placeholder="Enter coupon (e.g. WELCOME10)" autocomplete="off" onkeydown="if(event.key==='Enter') applyCartCoupon()">
           <button type="button" class="cart-promo-btn" id="cartCouponBtn" onclick="applyCartCoupon()">Apply</button>
+        </div>
+        <!-- 1-Click Popular Promo Chips -->
+        <div class="cart-promo-chips">
+          <button type="button" class="coupon-chip" onclick="quickApplyCoupon('WELCOME10')">🎉 WELCOME10 (10% Off)</button>
+          <button type="button" class="coupon-chip" onclick="quickApplyCoupon('ROYAL500')">👑 ROYAL500 (₹500 Off)</button>
+          <button type="button" class="coupon-chip" onclick="quickApplyCoupon('FESTIVE15')">✨ FESTIVE15 (15% Off)</button>
         </div>
         <div id="cartCouponStatus" class="cart-promo-status"></div>
       </div>
 
-      <!-- Link to Support / Concierge (Checklist #6) -->
+      <!-- Link to Support / Showroom Concierge (Checklist #6) -->
       <div class="cart-support-card" id="cartSupportCard" style="display:none;">
         <div class="cart-support-icon">💬</div>
         <div class="cart-support-text">
           <strong>Need help or custom arrangements?</strong>
           <span>Chat with our Showroom Concierge for live photos, packaging or bulk inquiries.</span>
         </div>
-        <button type="button" class="cart-support-btn" onclick="contactCartSupport()">Chat Now</button>
+        <div class="cart-support-actions">
+          <button type="button" class="cart-support-btn wa-btn" onclick="contactCartSupport()" title="Chat on WhatsApp">WhatsApp</button>
+          <a href="tel:+916369142027" class="cart-support-btn call-btn" title="Call Showroom">Call Us</a>
+        </div>
       </div>
 
       <!-- Delivery Estimator & Delivery Details in Scrollable Body -->
@@ -740,13 +751,18 @@
     <div class="cart-foot" id="cartFoot" style="display:none;">
       <!-- Accepted Payment Methods Badges (Checklist #5) -->
       <div class="cart-payment-methods">
-        <div class="cart-payment-label">🔒 Guaranteed Safe & Secure Checkout</div>
+        <div class="cart-payment-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          Accepted Payment Methods • 256-Bit SSL Encrypted
+        </div>
         <div class="cart-payment-badges">
-          <span class="pay-badge upi">⚡ UPI / GPay</span>
-          <span class="pay-badge phonepe">PhonePe</span>
-          <span class="pay-badge paytm">Paytm</span>
-          <span class="pay-badge cards">💳 Cards</span>
-          <span class="pay-badge pickup">🏬 Store Pickup</span>
+          <span class="pay-badge upi" title="UPI - Google Pay, PhonePe, Paytm, BHIM">⚡ UPI / GPay</span>
+          <span class="pay-badge phonepe" title="PhonePe">PhonePe</span>
+          <span class="pay-badge paytm" title="Paytm">Paytm</span>
+          <span class="pay-badge cards" title="Credit / Debit Cards">💳 Cards</span>
+          <span class="pay-badge applepay" title="Apple Pay / Google Wallet">🍏 Apple Pay</span>
+          <span class="pay-badge netbanking" title="Net Banking">🏦 Net Banking</span>
+          <span class="pay-badge pickup" title="NSC Bose Road Store Pickup / COD">🏬 Store Pickup</span>
         </div>
       </div>
 
@@ -771,8 +787,9 @@
 
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <!-- Prominent Checkout Buttons (Checklist #7) -->
-        <button class="btn-checkout-primary" onclick="closeCart(); openCheckoutModal();" style="width: 100%; padding: 13px; background: var(--gold-dark); color: #fff; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(184,134,11,0.35); transition: all 0.2s ease;">
-          <span>⚡ Proceed to Checkout</span>
+        <button class="btn-checkout-primary" id="btnCartMainCheckout" onclick="closeCart(); openCheckoutModal();" style="width: 100%; padding: 13px; background: linear-gradient(135deg, #b8860b 0%, #d4af37 50%, #aa771c 100%); color: #fff; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(184,134,11,0.4); transition: all 0.25s ease;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <span>Proceed to Checkout</span>
           <span style="opacity:0.85; font-weight:400;">•</span>
           <span id="cartBtnGrandTotal">₹0</span>
         </button>
@@ -832,125 +849,332 @@
   </div>
 
   <!-- ═══ Checkout Modal ══════════════════════════════════════ -->
+  <!-- ═══ Checkout Web App (7/7 Checklist Standards) ════════ -->
   <div class="modal-overlay" id="checkoutOverlay" onclick="closeCheckoutModal()"></div>
-  <div class="checkout-modal-card" id="checkoutModal">
-    <div class="modal-info" style="padding: 34px 28px;">
-      <button class="modal-close" style="position:absolute; top:14px; right:14px;" onclick="closeCheckoutModal()">✕</button>
-      
-      <!-- Checkout Form -->
-      <form id="checkoutForm" onsubmit="event.preventDefault(); submitOrderOnSite();">
-        <h2 style="font-family: var(--font-serif); font-size: 24px; margin-bottom: 6px;">Complete Your Order</h2>
-        <p style="font-size: 13px; color: var(--text-light); margin-bottom: 24px;">Fill your details and proceed to pay via UPI.</p>
-        
-        <div style="display: flex; flex-direction: column; gap: 14px;">
-          <div style="display: flex; flex-direction: column; gap: 5px;">
-            <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Your Name *</label>
-            <input type="text" id="custName" required placeholder="e.g. Pradeep Kumar" 
-                   style="padding: 10px 14px; border: 1.5px solid var(--border-dark); border-radius: 8px; font-size: 14px; outline: none; transition: var(--transition);">
+  <div class="checkout-modal-card" id="checkoutModal" role="dialog" aria-modal="true" aria-labelledby="checkoutModalTitle">
+    <div class="checkout-app-container">
+      <button class="modal-close" style="position:absolute; top:14px; right:14px; z-index:20;" onclick="closeCheckoutModal()" aria-label="Close Checkout">✕</button>
+
+      <!-- Step 1 & 2 Container -->
+      <div id="checkoutMainFlow">
+        <div class="checkout-header-bar">
+          <div class="checkout-brand-title">
+            <h2 id="checkoutModalTitle" style="font-family: var(--font-serif); font-size: 22px; margin: 0; color:var(--text);">Rajendra Showroom Checkout</h2>
+            <span class="checkout-secure-pill">🔒 Secure 256-Bit SSL Checkout</span>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 5px;">
-            <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Phone Number *</label>
-            <input type="tel" id="custPhone" required placeholder="e.g. 6369142027" pattern="[0-9]{10}" title="Please enter a 10 digit mobile number"
-                   style="padding: 10px 14px; border: 1.5px solid var(--border-dark); border-radius: 8px; font-size: 14px; outline: none; transition: var(--transition);">
+          <!-- Step Progress Indicator -->
+          <div class="checkout-step-indicator">
+            <span class="step-badge active" id="stepIndicator1">1. Details & Payment</span>
+            <span class="step-arrow">→</span>
+            <span class="step-badge" id="stepIndicator2">2. Final Review</span>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 5px;">
-            <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Delivery Address *</label>
-            <textarea id="custAddress" required placeholder="Street Address, Area, Landmark" rows="2"
-                      style="padding: 10px 14px; border: 1.5px solid var(--border-dark); border-radius: 8px; font-size: 14px; outline: none; resize: none; font-family: var(--font-sans); transition: var(--transition);"></textarea>
-          </div>
+        </div>
+
+        <!-- 2-Column Split Layout (Checklist #1 & #2) -->
+        <div class="checkout-split-grid">
           
-          <div style="display: flex; gap: 12px;">
-            <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
-              <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">State *</label>
-              <select id="custState" required onchange="calculateDynamicShipping()"
-                      style="padding: 10px 14px; border: 1.5px solid var(--border-dark); border-radius: 8px; font-size: 14px; outline: none; transition: var(--transition); background: #fff; color: var(--text);">
-                <option value="Tamil Nadu" selected>Tamil Nadu</option>
-                <option value="Andhra Pradesh">Andhra Pradesh</option>
-                <option value="Karnataka">Karnataka</option>
-                <option value="Kerala">Kerala</option>
-                <option value="Telangana">Telangana</option>
-                <option value="Maharashtra">Maharashtra</option>
-                <option value="Delhi">Delhi</option>
-                <option value="Gujarat">Gujarat</option>
-                <option value="Uttar Pradesh">Uttar Pradesh</option>
-                <option value="West Bengal">West Bengal</option>
-                <option value="Other">Other State</option>
-              </select>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
-              <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Pincode *</label>
-              <input type="text" id="custPincode" required placeholder="e.g. 600001" pattern="[0-9]{6}" title="Please enter a 6-digit Pincode" oninput="calculateDynamicShipping()"
-                     style="padding: 10px 14px; border: 1.5px solid var(--border-dark); border-radius: 8px; font-size: 14px; outline: none; transition: var(--transition);">
-            </div>
+          <!-- LEFT COLUMN: Forms, Express Pay, Address & Payment (Checklist #3, #4, #6) -->
+          <div class="checkout-left-col" id="checkoutFormStep">
+            <form id="checkoutForm" onsubmit="event.preventDefault(); goToCheckoutReview();">
+              
+              <!-- Express Checkout Bar (Checklist #3) -->
+              <div class="express-checkout-box">
+                <div class="express-title">⚡ Express UPI Checkout</div>
+                <div class="express-buttons">
+                  <button type="button" class="btn-express gpay" onclick="selectExpressPayment('gpay')">
+                    <span>GPay</span>
+                  </button>
+                  <button type="button" class="btn-express phonepe" onclick="selectExpressPayment('phonepe')">
+                    <span>PhonePe</span>
+                  </button>
+                  <button type="button" class="btn-express paytm" onclick="selectExpressPayment('paytm')">
+                    <span>Paytm</span>
+                  </button>
+                </div>
+                <div class="express-divider"><span>OR CONTINUE BELOW</span></div>
+              </div>
+
+              <!-- Shipping & Delivery Address (Checklist #4) -->
+              <div class="checkout-section-box">
+                <div class="checkout-box-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  <span>1. Delivery Details</span>
+                </div>
+
+                <div class="checkout-fields-grid">
+                  <div class="field-group full">
+                    <label>Full Name *</label>
+                    <input type="text" id="custName" required placeholder="e.g. Rahul Sharma" autocomplete="name">
+                  </div>
+                  <div class="field-group half">
+                    <label>WhatsApp Phone Number *</label>
+                    <input type="tel" id="custPhone" required placeholder="10-digit mobile number" pattern="[0-9]{10}" inputmode="numeric" maxlength="10" autocomplete="tel">
+                  </div>
+                  <div class="field-group half">
+                    <label>Email Address (Optional)</label>
+                    <input type="email" id="custEmail" placeholder="For e-receipt & tracking" autocomplete="email">
+                  </div>
+                  <div class="field-group full">
+                    <label>Delivery Street Address & Landmark *</label>
+                    <textarea id="custAddress" required placeholder="Flat / House No., Street, Area, Landmark" rows="2" autocomplete="street-address"></textarea>
+                  </div>
+                  <div class="field-group half">
+                    <label>State *</label>
+                    <select id="custState" required onchange="calculateDynamicShipping()">
+                      <option value="Tamil Nadu" selected>Tamil Nadu</option>
+                      <option value="Andhra Pradesh">Andhra Pradesh</option>
+                      <option value="Karnataka">Karnataka</option>
+                      <option value="Kerala">Kerala</option>
+                      <option value="Telangana">Telangana</option>
+                      <option value="Maharashtra">Maharashtra</option>
+                      <option value="Delhi">Delhi</option>
+                      <option value="Gujarat">Gujarat</option>
+                      <option value="Uttar Pradesh">Uttar Pradesh</option>
+                      <option value="West Bengal">West Bengal</option>
+                      <option value="Other">Other State</option>
+                    </select>
+                  </div>
+                  <div class="field-group half">
+                    <label>Pincode *</label>
+                    <input type="text" id="custPincode" required placeholder="6-digit Pincode" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" oninput="calculateDynamicShipping()" autocomplete="postal-code">
+                  </div>
+                </div>
+
+                <!-- Billing Address Toggle (Checklist #4) -->
+                <div class="billing-toggle-wrap">
+                  <label class="billing-checkbox-label">
+                    <input type="checkbox" id="sameAsShippingCheckbox" checked onchange="toggleBillingAddress(this)">
+                    <span>Billing address is same as delivery address</span>
+                  </label>
+                  
+                  <!-- Expandable Billing Form when unchecked -->
+                  <div id="billingAddressFields" style="display: none; margin-top: 12px;" class="billing-expandable-box">
+                    <div class="billing-box-subheading">Billing Address Details</div>
+                    <div class="checkout-fields-grid">
+                      <div class="field-group full">
+                        <label>Billing Name *</label>
+                        <input type="text" id="billingCustName" placeholder="Billing Name / Entity Name">
+                      </div>
+                      <div class="field-group full">
+                        <label>Billing Address *</label>
+                        <input type="text" id="billingCustAddress" placeholder="Billing Street Address">
+                      </div>
+                      <div class="field-group half">
+                        <label>Billing City / District</label>
+                        <input type="text" id="billingCustCity" placeholder="City">
+                      </div>
+                      <div class="field-group half">
+                        <label>Billing Pincode</label>
+                        <input type="text" id="billingCustPincode" placeholder="Pincode" maxlength="6" inputmode="numeric">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Gifting Option -->
+                <div class="checkout-gifting-option">
+                  <label class="gifting-label">
+                    <input type="checkbox" id="giftCheckbox" onchange="toggleGiftingSection(this)">
+                    <span>🎁 Send as a Luxury Gift (+₹150 for Royal Wrapping & Personalized Card)</span>
+                  </label>
+                  <div id="giftMessageWrap" style="display: none; margin-top: 8px;">
+                    <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Personalized Message</label>
+                    <textarea id="giftMessageInput" placeholder="Write your heartfelt message here..." rows="2"></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payment Method Selection (Checklist #3) -->
+              <div class="checkout-section-box">
+                <div class="checkout-box-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                  <span>2. Payment Method</span>
+                </div>
+
+                <div class="payment-method-selector">
+                  <label class="payment-tab active" id="tabPayUPI" onclick="selectPaymentMethod('upi')">
+                    <input type="radio" name="paymentMethod" value="upi" checked>
+                    <div class="payment-tab-content">
+                      <div class="tab-title">⚡ UPI / QR Code & Apps</div>
+                      <div class="tab-subtitle">Google Pay, PhonePe, Paytm, BHIM, Cred</div>
+                    </div>
+                  </label>
+                  <label class="payment-tab" id="tabPayCard" onclick="selectPaymentMethod('cards')">
+                    <input type="radio" name="paymentMethod" value="cards">
+                    <div class="payment-tab-content">
+                      <div class="tab-title">💳 Credit / Debit Card</div>
+                      <div class="tab-subtitle">Visa, Mastercard, RuPay, Amex</div>
+                    </div>
+                  </label>
+                  <label class="payment-tab" id="tabPayNetbanking" onclick="selectPaymentMethod('netbanking')">
+                    <input type="radio" name="paymentMethod" value="netbanking">
+                    <div class="payment-tab-content">
+                      <div class="tab-title">🏦 Net Banking</div>
+                      <div class="tab-subtitle">All Major Indian Banks</div>
+                    </div>
+                  </label>
+                  <label class="payment-tab" id="tabPayPickup" onclick="selectPaymentMethod('pickup')">
+                    <input type="radio" name="paymentMethod" value="pickup">
+                    <div class="payment-tab-content">
+                      <div class="tab-title">🏬 Store Pickup / Cash on Delivery</div>
+                      <div class="tab-subtitle">NSC Bose Road Showroom, Chennai</div>
+                    </div>
+                  </label>
+                </div>
+
+                <!-- Security Trust Indicators (Checklist #6) -->
+                <div class="checkout-security-strip">
+                  <div class="security-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    <span>256-Bit SSL Encrypted</span>
+                  </div>
+                  <div class="security-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b8860b" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <span>100% Authentic Crockery</span>
+                  </div>
+                  <div class="security-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2980b9" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                    <span>Safe Transit Guarantee</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Proceed to Review Button (Checklist #7) -->
+              <button type="submit" class="btn-checkout-review-cta" id="btnGoToReview">
+                <span>Proceed to Order Review</span>
+                <span class="cta-arrow">→</span>
+              </button>
+            </form>
           </div>
-          
-          <!-- Gifting Wrap Option -->
-          <div class="checkout-gifting-wrap" style="margin-top: 10px; border-top: 1.5px dashed var(--border-dark); padding-top: 12px;">
-            <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">
-              <input type="checkbox" id="giftCheckbox" onchange="toggleGiftingSection(this)" style="width: 16px; height: 16px; accent-color: var(--gold-dark);">
-              Send as a Gift (+₹150 for Premium Wrapping & Greeting Card)
-            </label>
-            <div id="giftMessageWrap" style="display: none; margin-top: 10px;">
-              <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Greeting Card Message</label>
-              <textarea id="giftMessageInput" placeholder="Write your personalized message here..." rows="2"
-                        style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1.5px solid var(--border-dark); border-radius: 8px; font-size: 13.5px; outline: none; resize: none; font-family: var(--font-sans); transition: var(--transition);"></textarea>
+
+          <!-- RIGHT COLUMN: Sticky Order Summary & Promo Code (Checklist #1, #2, #5) -->
+          <div class="checkout-right-col">
+            <div class="checkout-summary-card">
+              <div class="summary-header">
+                <h3>Order Summary</h3>
+                <span class="summary-count-badge" id="checkoutItemsCount">0 items</span>
+              </div>
+
+              <!-- Scrollable Item List (Checklist #1) -->
+              <div class="checkout-items-list" id="checkoutItemsList">
+                <!-- Dynamically populated from cart -->
+              </div>
+
+              <!-- Promo Code in Order Summary (Checklist #5) -->
+              <div class="checkout-coupon-box">
+                <div class="coupon-box-title">🏷️ Promo / Gift Card Code</div>
+                <div class="checkout-coupon-row">
+                  <input type="text" id="couponInput" placeholder="e.g. WELCOME10, GC-..." autocomplete="off" onkeydown="if(event.key==='Enter'){ event.preventDefault(); applyCouponCode(); }">
+                  <button type="button" id="btnApplyCheckoutCoupon" onclick="applyCouponCode()">Apply</button>
+                </div>
+                <div class="checkout-coupon-chips">
+                  <button type="button" class="coupon-chip" onclick="quickApplyCheckoutCoupon('WELCOME10')">🎉 WELCOME10 (10% Off)</button>
+                  <button type="button" class="coupon-chip" onclick="quickApplyCheckoutCoupon('ROYAL500')">👑 ROYAL500 (₹500 Off)</button>
+                  <button type="button" class="coupon-chip" onclick="quickApplyCheckoutCoupon('FESTIVE15')">✨ FESTIVE15 (15% Off)</button>
+                </div>
+                <div id="couponStatusMessage" class="coupon-status-msg"></div>
+              </div>
+
+              <!-- Transparent Total Cost Breakdown (Checklist #2) -->
+              <div class="checkout-cost-breakdown">
+                <div class="cost-row">
+                  <span>Subtotal</span>
+                  <span id="checkoutSubtotal">₹0</span>
+                </div>
+                <div class="cost-row">
+                  <span>Courier & Shipping <span id="shippingZoneText" class="zone-text">(Tamil Nadu)</span></span>
+                  <span id="checkoutShipping" class="free-highlight">FREE</span>
+                </div>
+                <div class="cost-row" id="checkoutGiftRow" style="display:none;">
+                  <span>🎁 Luxury Gift Wrapping</span>
+                  <span>₹150</span>
+                </div>
+                <div class="cost-row discount" id="checkoutDiscountRow" style="display:none;">
+                  <span id="checkoutDiscountLabel">Coupon Savings</span>
+                  <span id="checkoutDiscountText">−₹0</span>
+                </div>
+                <div class="cost-divider"></div>
+                <div class="cost-row grand-total">
+                  <div>
+                    <span class="grand-label">Grand Total</span>
+                    <span class="tax-note">(Inclusive of all taxes)</span>
+                  </div>
+                  <span id="checkoutGrandTotal" class="grand-amount">₹0</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Coupon / Gift Card Code Entry -->
-          <div class="checkout-coupon-wrap" style="margin-top: 10px; border-top: 1.5px dashed var(--border-dark); padding-top: 12px;">
-            <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Apply Gift Card or Promo Code</label>
-            <div style="display: flex; gap: 8px;">
-              <input type="text" id="couponInput" placeholder="e.g. GC-ABCD-1234" 
-                     style="flex: 1; padding: 10px 14px; border: 1.5px solid var(--border-dark); border-radius: 8px; font-size: 13.5px; outline: none; transition: var(--transition); text-transform: uppercase;">
-              <button type="button" onclick="applyCouponCode()" style="padding: 10px 16px; background: var(--text); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13.5px; transition: var(--transition);">Apply</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Final Confirmation Review Screen (Checklist #7) -->
+      <div id="checkoutReviewStep" style="display: none;" class="checkout-review-container">
+        <div class="review-head">
+          <button type="button" class="btn-review-back" onclick="backToCheckoutEdit()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span>Back to Edit</span>
+          </button>
+          <h2 style="font-family:var(--font-serif); font-size:22px; margin:0;">Confirm Your Order</h2>
+          <span style="font-size:12px; color:var(--text-light);">Please review details before placing order</span>
+        </div>
+
+        <div class="review-grid">
+          <!-- Shipping Snapshot -->
+          <div class="review-card">
+            <div class="review-card-title">
+              <span>🚚 Delivery Details</span>
+              <button type="button" class="edit-link" onclick="backToCheckoutEdit()">Edit</button>
             </div>
-            <div id="couponStatusMessage" style="font-size: 12px; margin-top: 5px; font-weight: 600;"></div>
-          </div>
-          
-          <div style="background: var(--bg-warm); padding: 14px; border-radius: 10px; margin-top: 12px; font-size: 13.5px;">
-            <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 6px;">
-              <span>Subtotal</span>
-              <span id="checkoutSubtotal">₹0</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 6px; color: var(--text-light);">
-              <span>Courier Charges <span id="shippingZoneText" style="font-size:10px; font-weight:normal; color:#888;">(Tamil Nadu)</span></span>
-              <span id="checkoutShipping">₹0</span>
-            </div>
-            <div id="checkoutGiftRow" style="display: none; justify-content: space-between; font-weight: 600; margin-bottom: 6px; color: var(--text-light);">
-              <span>🎁 Gift Wrapping Fee</span>
-              <span>₹150</span>
-            </div>
-            <div id="checkoutDiscountRow" style="display: none; justify-content: space-between; font-weight: 600; margin-bottom: 6px; color: #27AE60;">
-              <span>🎫 Voucher / Promo Discount</span>
-              <span id="checkoutDiscountText">-₹0</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 6px;">
-              <span>Total Items</span>
-              <span id="checkoutItemsCount">0</span>
-            </div>
-            <hr style="border: 0; border-top: 1.5px solid var(--border-dark); margin: 8px 0;">
-            <div style="display: flex; justify-content: space-between; font-weight: 700; color: var(--gold-dark); font-size: 16px;">
-              <span>Grand Total</span>
-              <span id="checkoutGrandTotal">₹0</span>
+            <div class="review-details-content" id="reviewShippingDetails">
+              <!-- Populated dynamically -->
             </div>
           </div>
-          
-          <button type="submit" class="btn-wa-lg" style="margin-top: 10px; width: 100%; border: none; cursor: pointer; background: #5f259f;">
-            🔒 &nbsp; Proceed to UPI Payment
+
+          <!-- Payment Snapshot -->
+          <div class="review-card">
+            <div class="review-card-title">
+              <span>💳 Payment Choice</span>
+              <button type="button" class="edit-link" onclick="backToCheckoutEdit()">Edit</button>
+            </div>
+            <div class="review-details-content" id="reviewPaymentDetails">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Items Summary in Review Step -->
+        <div class="review-items-box">
+          <div class="review-card-title">
+            <span>🛍️ Order Items (<span id="reviewItemsCount">0</span>)</span>
+          </div>
+          <div id="reviewItemsList" class="review-items-list">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Final Payable Bar & Confirm Button (Checklist #7) -->
+        <div class="review-footer-bar">
+          <div class="review-total-box">
+            <span class="review-total-label">Total Payable Amount:</span>
+            <span class="review-total-value" id="reviewGrandTotal">₹0</span>
+          </div>
+          <button type="button" class="btn-final-confirm-pay" onclick="submitFinalCheckoutOrder()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>Confirm & Place Order</span>
           </button>
         </div>
-      </form>
+      </div>
 
       <!-- Checkout Success Screen -->
-      <div id="checkoutSuccess" style="display: none; padding: 10px 0; text-align: center;">
-        <div style="font-size: 54px; margin-bottom: 16px;">🎉</div>
+      <div id="checkoutSuccess" style="display: none; padding: 24px 10px; text-align: center;">
+        <div style="font-size: 54px; margin-bottom: 14px;">🎉</div>
         <h2 style="font-family: var(--font-serif); font-size: 26px; margin-bottom: 8px;">Order Confirmed!</h2>
         <p style="font-size: 13.5px; color: var(--text-light); line-height: 1.6; margin-bottom: 24px;">
-          Your payment was successful and order <strong id="successOrderId">#123</strong> has been placed.
-          We will contact you shortly to confirm dispatch.
+          Your payment was successful and order <strong id="successOrderId">#123</strong> has been placed.<br>
+          We will contact you shortly on WhatsApp to confirm delivery & tracking.
         </p>
-        <div style="display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; flex-direction:column; gap:10px; max-width:400px; margin:0 auto;">
           <button class="btn-wa-lg" id="successWaBtn" style="width: 100%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; background: #25D366; color: white;">
             💬 &nbsp; Send WhatsApp Confirmation
           </button>
@@ -958,10 +1182,11 @@
             📄 &nbsp; Download Invoice (PDF)
           </button>
           <button class="btn-add-cart-lg" onclick="closeCheckoutSuccess()" style="width: 100%; border: none; cursor: pointer; background: var(--bg-warm); color: var(--text); font-weight: 600;">
-            Close
+            Close & Continue Shopping
           </button>
         </div>
       </div>
+
     </div>
   </div>
 
@@ -1397,13 +1622,253 @@
     </button>
   </div>
 
+  <!-- ═══ Toast Notification Container ════════════════════════ -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- ═══ Floating Cart Added Confirmation Banner (Checklist #3 Feedback Option 2) ═══ -->
+  <div id="cartAddedBanner" class="cart-added-banner" role="status" aria-live="polite">
+    <div class="cab-inner">
+      <div class="cab-left">
+        <div class="cab-thumb-wrap">
+          <img id="cabThumb" src="images/logo.png" alt="Added Product">
+          <span class="cab-check-badge">✓</span>
+        </div>
+        <div class="cab-details">
+          <div class="cab-headline">Added to your shopping bag!</div>
+          <div class="cab-product-name" id="cabProductName">Decor Cam Luxury Set</div>
+          <div class="cab-variant-line" id="cabVariantLine">Color: Champagne Gold • Qty: 1</div>
+        </div>
+      </div>
+      <div class="cab-actions">
+        <button type="button" class="cab-btn cab-btn-cart" onclick="closeCartAddedBanner(); openCart();">
+          View Bag (<span id="cabTotalItems">1</span>)
+        </button>
+        <button type="button" class="cab-btn cab-btn-checkout" onclick="closeCartAddedBanner(); openCheckoutModal();">
+          Checkout Now →
+        </button>
+        <button type="button" class="cab-close-btn" onclick="closeCartAddedBanner()" aria-label="Close notification">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Living Design System Showcase Modal (Checklist 5/5 & 4/4) ═══ -->
+  <div id="designSystemOverlay" class="ds-modal-overlay" onclick="closeDesignSystemModal()"></div>
+  <div id="designSystemModal" class="ds-modal-card" role="dialog" aria-modal="true" aria-labelledby="dsModalTitle">
+    <div class="ds-header">
+      <div class="ds-header-title">
+        <span style="font-size: 24px;">🎨</span>
+        <div>
+          <h2 id="dsModalTitle" style="font-size: 20px; font-weight: 700; color: var(--text);">Rajendra Design System</h2>
+          <span style="font-size: 12px; color: var(--text-light);">Living Component Library & Interaction Guidelines</span>
+        </div>
+        <span class="ds-badge">v4.2 Production</span>
+      </div>
+      <button type="button" class="btn btn-sm btn-ghost btn-circle" onclick="closeDesignSystemModal()" aria-label="Close Design System modal" style="font-size: 16px;">✕</button>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="ds-tabs-nav" role="tablist">
+      <button type="button" class="ds-tab-btn active" onclick="switchDesignSystemTab('buttons', this)" role="tab" aria-selected="true">🔘 Button Design System (5/5)</button>
+      <button type="button" class="ds-tab-btn" onclick="switchDesignSystemTab('icons', this)" role="tab" aria-selected="false">🔣 Icon Design System (4/4)</button>
+      <button type="button" class="ds-tab-btn" onclick="switchDesignSystemTab('copy', this)" role="tab" aria-selected="false">✍️ Copy Guidelines</button>
+      <button type="button" class="ds-tab-btn" onclick="switchDesignSystemTab('colors', this)" role="tab" aria-selected="false">✨ Brand & Elevation Tokens</button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="ds-body">
+      
+      <!-- Section 1: Button Design System (Checklist 5/5 Items) -->
+      <div id="dsSection-buttons" class="ds-section active" role="tabpanel">
+        <div class="ds-interactive-bar">
+          <span style="font-weight: 700; font-size: 13px;">Interactive Sandbox:</span>
+          <button type="button" class="btn btn-xs btn-outline" onclick="toggleDsSandboxState('disabled', this)">Toggle Disabled State</button>
+          <button type="button" class="btn btn-xs btn-outline" onclick="toggleDsSandboxState('loading', this)">Toggle Loading Spinner</button>
+          <button type="button" class="btn btn-xs btn-outline" onclick="testDsSuccessAnimation()">Trigger Success Feedback</button>
+        </div>
+
+        <div class="ds-grid">
+          <!-- 1. Primary Luxury Gold Fill -->
+          <div class="ds-card">
+            <div class="ds-card-title">1. Primary Fill (Gold Gradient)</div>
+            <p style="font-size: 12px; color: var(--text-light); margin:0;">Dominant high-conversion CTA with metallic shimmer.</p>
+            <button type="button" class="btn btn-primary ds-demo-btn" onclick="testDsButtonClick(this)">
+              <span>🛍️</span> Add to Bag • ₹4,850
+            </button>
+            <button type="button" class="btn btn-primary btn-pill ds-demo-btn" onclick="testDsButtonClick(this)">
+              Proceed to Checkout →
+            </button>
+          </div>
+
+          <!-- 2. Dark Obsidian Fill -->
+          <div class="ds-card">
+            <div class="ds-card-title">2. Dark Obsidian Fill</div>
+            <p style="font-size: 12px; color: var(--text-light); margin:0;">High-contrast solid action for luxury secondary flows.</p>
+            <button type="button" class="btn btn-dark ds-demo-btn" onclick="testDsButtonClick(this)">
+              View Shopping Bag
+            </button>
+            <button type="button" class="btn btn-dark btn-pill ds-demo-btn" onclick="testDsButtonClick(this)">
+              Track Order Status
+            </button>
+          </div>
+
+          <!-- 3. Secondary Outline -->
+          <div class="ds-card">
+            <div class="ds-card-title">3. Secondary Outline</div>
+            <p style="font-size: 12px; color: var(--text-light); margin:0;">Clean 1.5px border with gold hover background tint.</p>
+            <button type="button" class="btn btn-secondary ds-demo-btn" onclick="testDsButtonClick(this)">
+              🍽️ Preview on Table
+            </button>
+            <button type="button" class="btn btn-outline btn-pill ds-demo-btn" onclick="testDsButtonClick(this)">
+              Explore Collection
+            </button>
+          </div>
+
+          <!-- 4. WhatsApp Direct Action -->
+          <div class="ds-card">
+            <div class="ds-card-title">4. Brand WhatsApp CTA</div>
+            <p style="font-size: 12px; color: var(--text-light); margin:0;">Brand-authentic green for instant concierge routing.</p>
+            <button type="button" class="btn btn-whatsapp ds-demo-btn" onclick="testDsButtonClick(this)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.99 2C6.477 2 2 6.477 2 11.99c0 1.72.454 3.33 1.24 4.73L2 22l5.47-1.22A9.957 9.957 0 0011.99 22C17.51 22 22 17.52 22 11.99 22 6.477 17.51 2 11.99 2zm0 18.18c-1.65 0-3.19-.44-4.52-1.21l-.32-.19-3.37.75.8-3.28-.21-.34A8.17 8.17 0 013.82 12c0-4.51 3.67-8.18 8.17-8.18 4.51 0 8.18 3.67 8.18 8.18 0 4.51-3.67 8.18-8.18 8.18z"/></svg>
+              Enquire on WhatsApp
+            </button>
+            <button type="button" class="btn btn-whatsapp btn-pill ds-demo-btn" onclick="testDsButtonClick(this)">
+              Direct Showroom Chat
+            </button>
+          </div>
+
+          <!-- 5. Destructive / Danger -->
+          <div class="ds-card">
+            <div class="ds-card-title">5. Destructive / Danger</div>
+            <p style="font-size: 12px; color: var(--text-light); margin:0;">Subtle crimson tint for clear / delete / remove actions.</p>
+            <button type="button" class="btn btn-destructive ds-demo-btn" onclick="testDsButtonClick(this)">
+              Remove Item from Cart
+            </button>
+            <button type="button" class="btn btn-destructive btn-pill ds-demo-btn" onclick="testDsButtonClick(this)">
+              Clear All Filters
+            </button>
+          </div>
+
+          <!-- 6. Sizes & Shapes Scale -->
+          <div class="ds-card">
+            <div class="ds-card-title">6. Standardized Size Scale</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+              <button type="button" class="btn btn-xs btn-primary">XS (28px)</button>
+              <button type="button" class="btn btn-sm btn-primary">SM (36px)</button>
+              <button type="button" class="btn btn-md btn-primary">MD (44px)</button>
+              <button type="button" class="btn btn-lg btn-primary">LG (50px)</button>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; margin-top: 6px;">
+              <button type="button" class="btn btn-md btn-circle btn-primary" title="Circle Icon Button">♥</button>
+              <button type="button" class="btn btn-md btn-square btn-secondary" title="Square Icon Button">🔍</button>
+              <button type="button" class="btn btn-md btn-pill btn-dark">Pill Shape</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Icon Design System (Checklist 4/4 Items) -->
+      <div id="dsSection-icons" class="ds-section" role="tabpanel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <p style="font-size: 13px; color: var(--text-light); margin: 0;">
+            Click any icon card to copy its production SVG code. All icons adhere to uniform 24×24 geometry, 1.75px stroke, and literal object naming.
+          </p>
+          <span id="dsCopyNotification" style="font-size: 12px; font-weight: 700; color: #27ae60; display: none;">✓ SVG Code Copied!</span>
+        </div>
+
+        <div id="dsIconLibraryGrid" class="ds-icon-grid">
+          <!-- Rendered dynamically via js/icons.js -->
+        </div>
+      </div>
+
+      <!-- Section 3: Copy Guidelines (Checklist #4 Copy) -->
+      <div id="dsSection-copy" class="ds-section" role="tabpanel">
+        <div class="ds-card" style="margin-bottom: 14px;">
+          <div class="ds-card-title">Instructional & Contextual Copy Rules</div>
+          <p style="font-size: 13.5px; line-height: 1.6; color: var(--text); margin-top: 6px;">
+            Buttons must communicate what will happen before the user clicks. Avoid vague action verbs without context.
+          </p>
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px;">
+            <thead>
+              <tr style="border-bottom: 2px solid var(--border); text-align: left;">
+                <th style="padding: 8px;">❌ Poor Copy</th>
+                <th style="padding: 8px;">✅ Recommended Copy</th>
+                <th style="padding: 8px;">Rationale</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 8px; color: #c0392b;">Submit / Buy</td>
+                <td style="padding: 8px; font-weight: 700; color: #27ae60;">Add to Bag • ₹4,850</td>
+                <td style="padding: 8px;">Specifies action and displays immediate transaction cost.</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 8px; color: #c0392b;">Next</td>
+                <td style="padding: 8px; font-weight: 700; color: #27ae60;">Review & Confirm Order →</td>
+                <td style="padding: 8px;">Informs customer they are entering a review step rather than paying immediately.</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 8px; color: #c0392b;">Pay</td>
+                <td style="padding: 8px; font-weight: 700; color: #27ae60;">Confirm & Pay ₹7,200</td>
+                <td style="padding: 8px;">Confirms final commitment with exact amount.</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; color: #c0392b;">Download</td>
+                <td style="padding: 8px; font-weight: 700; color: #27ae60;">Download Tax Invoice (PDF)</td>
+                <td style="padding: 8px;">Specifies document type and format.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 4: Brand & Elevation Tokens -->
+      <div id="dsSection-colors" class="ds-section" role="tabpanel">
+        <div class="ds-grid">
+          <div class="ds-card">
+            <div class="ds-card-title">Brand Color Tokens</div>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #b8860b, #d4af37);"></span>
+                <strong>Luxury Gold:</strong> <code>#b8860b / #d4af37</code>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="width: 24px; height: 24px; border-radius: 6px; background: #1c1c1a;"></span>
+                <strong>Obsidian Charcoal:</strong> <code>#1c1c1a</code>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="width: 24px; height: 24px; border-radius: 6px; background: #25D366;"></span>
+                <strong>WhatsApp Concierge:</strong> <code>#25D366</code>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="width: 24px; height: 24px; border-radius: 6px; background: #27ae60;"></span>
+                <strong>Success Emerald:</strong> <code>#27ae60</code>
+              </div>
+            </div>
+          </div>
+
+          <div class="ds-card">
+            <div class="ds-card-title">Elevation & Shadow Tokens</div>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+              <div><code>--shadow-btn-base</code>: 0 4px 14px rgba(0,0,0,0.08)</div>
+              <div><code>--shadow-btn-hover</code>: 0 6px 20px rgba(0,0,0,0.14)</div>
+              <div><code>--shadow-btn-gold</code>: 0 6px 22px rgba(184,134,11,0.38)</div>
+              <div><code>--shadow-btn-glow</code>: 0 0 24px rgba(212,175,55,0.45)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Firebase Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
-  <script src="js/firebase-config.js?v=4.00" defer></script>
-  <script src="js/db.js?v=4.00" defer></script>
-  <script src="js/data.js?v=4.00" defer></script>
-  <script src="js/app.js?v=4.00" defer></script>
+  <script src="js/firebase-config.js?v=4.30" defer></script>
+  <script src="js/db.js?v=4.30" defer></script>
+  <script src="js/data.js?v=4.30" defer></script>
+  <script src="js/icons.js?v=4.30" defer></script>
+  <script src="js/app.js?v=4.30" defer></script>
   <script>
     // View toggle
     function setView(v) {
@@ -1413,11 +1878,14 @@
       renderProducts();
     }
 
-    // Register Service Worker for PWA
+    // Register Service Worker for PWA with automatic cache update
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('[PWA] Service Worker registered with scope:', reg.scope))
+        navigator.serviceWorker.register('./sw.js?v=4.30')
+          .then(reg => {
+            console.log('[PWA] Service Worker registered with scope:', reg.scope);
+            reg.update();
+          })
           .catch(err => console.error('[PWA] Service Worker registration failed:', err));
       });
     }

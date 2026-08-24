@@ -25,6 +25,9 @@ const MIME = {
 
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   const parsed = new URL(req.url, `http://localhost:${PORT}`);
   let pathname = decodeURIComponent(parsed.pathname);
 
